@@ -28,6 +28,11 @@ class bt_geoip {
 
 	private static function load_dbinfo() {
 		if (is_null(self::$dbinfo)) {
+			if (!extension_loaded('geoip')) {
+				self::$dbinfo = false;
+				return false;
+			}
+
 			bt_memcache::connect();
 			$key = 'geoip_db_info';
 			$geodb = bt_memcache::get($key);
@@ -42,6 +47,8 @@ class bt_geoip {
 
 	public static function lookup_ip($ip) {
 		bt_ip::type($ip, $type);
+
+		// No IPv6 support yet
 		if ($type !== bt_ip::IP4)
 			return false;
 
@@ -66,6 +73,8 @@ class bt_geoip {
 
 	private static function geodb_lookup($ip) {
 		self::load_dbinfo();
+		if (!self::$dbinfo)
+			return array();
 
 		$continent_code = $country_code = $country_code3 = $country_code3 = $country_name = $region = $city = $isp = $organization = 
 			$postal_code = $latitude = $longitude = $dma_code = $area_code = $netspeed = $asn = NULL;
