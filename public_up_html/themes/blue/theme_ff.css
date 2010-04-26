@@ -1,0 +1,19 @@
+div.g_fadetitle_bottom
+{
+	background: url({THEME_PIC_DIR}browse_catbox_bottom.png) no-repeat;
+	float: left;
+	height: 44px;
+	margin: 0;
+	padding: 10px 0px 0px 0px;
+	text-align: center;
+	width: 776px;
+}
+
+div.inbox_top_checkbox
+{
+	float: left;
+	position: relative;
+	right: 10px;
+	bottom: 3px;
+	width: 13px;
+}

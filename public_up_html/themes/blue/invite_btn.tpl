@@ -1,0 +1,1 @@
+<img src="{THEME_PIC_DIR}nav-seperator.png" alt="sep" /><a href="/invite.php"><img alt="invites" src="{THEME_PIC_DIR}nav-invites.png" /></a>

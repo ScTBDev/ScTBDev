@@ -1,0 +1,1 @@
+<img src="{THEME_PIC_DIR}nav-seperator.png" alt="sep" /><a href="/upload.php"><img alt="upload" src="{THEME_PIC_DIR}nav-upload.png" /></a>
