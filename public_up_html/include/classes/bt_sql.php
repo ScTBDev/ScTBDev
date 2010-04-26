@@ -93,6 +93,10 @@ class bt_sql {
 		return self::$DB->escape_string($string);
 	}
 
+	public static function wildcardesc($wildcard) {
+		return str_replace(array('%', '_'), array('\%','\_'), self::$DB->escape_string($wildcard));
+	}
+
 	public static function err($file = '', $line = 0) {
 		$line = (int)$line;
 		echo '<table border="0" bgcolor="blue" align="left" cellspacing="0" cellpadding="10" style="background: blue">
