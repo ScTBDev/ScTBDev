@@ -32,7 +32,7 @@ class bt_sql {
 	public static $error				= '';
 	public static $character_set_name	= '';
 
-	public static function connect(&$errno = 0, &$error = '', $utf8 = false) {
+	public static function connect(&$errno = 0, &$error = '', $utf8 = true) {
 		global $SECRETS;
 		if (self::$connected)
 			return true;
