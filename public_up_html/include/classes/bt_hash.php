@@ -34,7 +34,7 @@ class bt_hash {
 
 	const MIN_SALT_LEN = 8;
 	const MAX_SALT_LEN = 36;
-	const DEF_SALT_LEN = 15;
+	const DEF_SALT_LEN = 20;
 	const BEGND = '$';
 	const SEP = '#';
 	const HSEP = '@';
