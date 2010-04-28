@@ -66,30 +66,35 @@ class bt_hash {
 		$data1 = hash($hash1, $hidden_salt1.hash($hash2, $string, true).$salt, true);
 		$data2 = hash($hash2, $salt.hash($hash1, $string, true).$hidden_salt2, true);
 
-		return self::BEGND.base64_encode($salt).self::SEP.$hash1.self::HSEP.base64_encode($data1).self::SEP.$hash2.self::HSEP.base64_encode($data2).self::BEGND;
+		return self::BEGND.bt_string::b64_encode($salt).self::SEP.$hash1.self::HSEP.bt_string::b64_encode($data1).
+			self::SEP.$hash2.self::HSEP.bt_string::b64_encode($data2).self::BEGND;
 	}
 
 	private static function read_hash($hash) {
 		if (self::$_last_hash !== $hash) {
 			$split = explode(self::BEGND, $hash);
-			if (count($split) !== 3 || !empty($split[0]) || !empty($split[2]))
+			if (count($split) !== 3 || !empty($split[0]) || !empty($split[2]) || empty($split[1]))
 				return false;
 
 			$split = explode(self::SEP, $split[1]);
-			if (count($split) !== 3)
+			if (count($split) !== 3 || empty($split[0]) || empty($split[1]) || empty($split[2]))
 				return false;
 
-			$salt = base64_decode($split[0]);
+			$salt = bt_string::b64_decode($split[0]);
+			if ($salt === false)
+				return false;
 
 			$hash1 = explode(self::HSEP, $split[1]);
 			$hash2 = explode(self::HSEP, $split[2]);
 
-			if (count($hash1) !== 2 || count($hash2) !== 2)
+			if (count($hash1) !== 2 || count($hash2) !== 2 || empty($hash1[0]) || empty($hash1[1]) || empty($hash2[0]) || empty($hash2[1]))
 				return false;
 
 			// Use the $all_algos array here for comparison in case an insecure algorithum is added to the ignore list later, still must be able to verify it
 			$hashes = array(strtolower($hash1[0]), strtolower($hash2[0]));
 			$hashes = array_unique(array_intersect($hashes, self::$all_algos));
+			if (count($hashes) !== 2)
+				return false;
 
 			self::$_last_hash = $hash;
 			self::$_last_read_hash = array($salt, $hashes[0], $hashes[1]);

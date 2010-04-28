@@ -134,6 +134,17 @@ class bt_string {
 		return ctype_xdigit($str);
 	}
 
+	public static function b64_decode($data) {
+		if (strpos($data, "\x00") !== false)
+			return false;
+
+		return base64_decode($data, true);
+	}
+
+	public static function b64_encode($data) {
+		return base64_encode($data);
+	}
+
 	public static function random($length = 50) {
 		$rand = '';
 		for ($i = 0; $i < $length; $i++)
