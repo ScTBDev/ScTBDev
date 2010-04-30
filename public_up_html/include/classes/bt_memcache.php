@@ -63,13 +63,14 @@ class bt_memcache {
 
 		self::$link->setOption(Memcached::OPT_HASH, Memcached::HASH_MD5);
 		self::$link->setOption(Memcached::OPT_DISTRIBUTION, Memcached::DISTRIBUTION_MODULA);
-		self::$link->setOption(Memcached::OPT_NO_BLOCK, true);									/* non-blocking I/O */
-		self::$link->setOption(Memcached::OPT_CONNECT_TIMEOUT, 50);							/* 50ms connect timeout */
-		self::$link->setOption(Memcached::OPT_PREFIX_KEY, bt_config::$conf['memcache_prefix']);						/* set the key prefix */
+		self::$link->setOption(Memcached::OPT_NO_BLOCK, true);										/* non-blocking I/O */
+		self::$link->setOption(Memcached::OPT_CONNECT_TIMEOUT, 50);									/* 50ms connect timeout */
+		if (isset(bt_config::$conf['memcache_prefix']))
+			self::$link->setOption(Memcached::OPT_PREFIX_KEY, bt_config::$conf['memcache_prefix']);	/* set the key prefix */
 
 		$status = count(self::$link->getServerList());
 		if (!$status) {
-			if (!self::set_servers(bt_config::$conf['memcache_servers'])) {
+			if (!isset(bt_config::$conf['memcache_servers']) || !self::set_servers(bt_config::$conf['memcache_servers'])) {
 				trigger_error('Unable to set Memcache server(s) in '.__METHOD__, E_USER_WARNING);
 				return false;
 			}

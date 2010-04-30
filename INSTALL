@@ -12,6 +12,7 @@ zlib
 mbstring
 hash
 exif
+igbinary
 
 Supported DB Drivers:
 mysql
@@ -21,4 +22,3 @@ Optional PHP Modules:
 apc - Highly recommended
 geoip - Highly recommended
 bz2
-igbinary

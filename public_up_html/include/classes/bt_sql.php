@@ -21,6 +21,7 @@
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'class_config.php');
 require_once(CLASS_PATH.'bt_string.php');
+require_once(CLASS_PATH.'bt_security.php');
 
 class bt_sql {
 	private static $connected = false;
@@ -91,6 +92,10 @@ class bt_sql {
 		}
 
 		return self::$DB->escape_string($string);
+	}
+
+	public static function binary_esc($string) {
+		return '0x'.bt_string::str2hex($string);
 	}
 
 	public static function wildcardesc($wildcard) {
