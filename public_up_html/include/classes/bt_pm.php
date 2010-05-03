@@ -20,13 +20,14 @@
  */
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'class_config.php');
+require_once(INCL_PATH.'define_bits.php');
 require_once(CLASS_PATH.'bt_sql.php');
 require_once(CLASS_PATH.'bt_vars.php');
 
 class bt_pm {
-	const OPT_LOC_INBOX		= 0x1;
-	const OPT_LOC_SENTBOX	= 0x2;
-	const OPT_UNREAD		= 0x4;
+	const OPT_LOC_INBOX		= BIT_1;
+	const OPT_LOC_SENTBOX	= BIT_2;
+	const OPT_UNREAD		= BIT_3;
 
 	const PM_INBOX = 1;
 	const PM_SENTBOX = 2;

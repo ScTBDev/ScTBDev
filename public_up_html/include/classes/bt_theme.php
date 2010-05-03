@@ -20,6 +20,7 @@
  */
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'class_config.php');
+require_once(INCL_PATH.'define_bits.php');
 require_once(CLASS_PATH.'bt_theme_engine.php');
 require_once(CLASS_PATH.'bt_user.php');
 require_once(CLASS_PATH.'bt_security.php');
@@ -30,11 +31,11 @@ class bt_theme {
 	const BROWSER_OPERA = 2;
 	const BROWSER_IE = 3;
 
-	const PAGER_SHOW_PAGES			= 0x1;
-	const PAGER_NO_SEPARATOR		= 0x2;
-	const PAGER_LAST_PAGE_DEFAULT	= 0x4;
-	const PAGER_NO_NAV				= 0x8;
-	const PAGER_ONLY_PAGES			= 0x10;
+	const PAGER_SHOW_PAGES			= BIT_1;
+	const PAGER_NO_SEPARATOR		= BIT_2;
+	const PAGER_LAST_PAGE_DEFAULT	= BIT_3;
+	const PAGER_NO_NAV				= BIT_4;
+	const PAGER_ONLY_PAGES			= BIT_5;
 
 	public static $settings = array();
 

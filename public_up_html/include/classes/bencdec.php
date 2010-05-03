@@ -225,11 +225,14 @@ this will log a php error when trying to encode something that is invalid.
 
 */
 
+require_once(__DIR__.DIRECTORY_SEPARATOR.'class_config.php');
+require_once(INCL_PATH.'define_bits.php');
+
 class bencdec {
 	const MAX_DEPTH = 16;						// To prevent deep recursion which could potentially cause a very high ammount of memory
 												// to be used
 
-	const OPTION_EXTENDED_VALIDATION = 0x1;		// Perform more validation. This will just make sure that all data being decoded
+	const OPTION_EXTENDED_VALIDATION = BIT_1;	// Perform more validation. This will just make sure that all data being decoded
 												// follows specifications. You won't get any invalid data when not using this option,
 												// so only specify it if you need to make sure the data is perfectly valid as it will
 												// slightly hurt decoding performance

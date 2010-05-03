@@ -32,7 +32,9 @@ if (get_magic_quotes_gpc() || get_magic_quotes_runtime() || get_cfg_var('magic_q
 
 if (get_cfg_var('register_long_arrays') || get_cfg_var('register_globals') || get_cfg_var('safe_mode'))
 	die('PHP is configured incorrectly. Turn off safe_mode, register_globals and register_long_arrays.');
-	
+
+if (!defined('PHP_INT_MIN'))
+	define('PHP_INT_MIN', ~PHP_INT_MAX);
 
 // Site Paths
 define('INCL_PATH', __DIR__.DIRECTORY_SEPARATOR);

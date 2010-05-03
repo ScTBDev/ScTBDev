@@ -20,18 +20,19 @@
  */
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'class_config.php');
+require_once(INCL_PATH.'define_bits.php');
 require_once(CLASS_PATH.'bt_sql.php');
 require_once(CLASS_PATH.'bt_string.php');
 require_once(CLASS_PATH.'bt_memcache.php');
 
 class bt_tracker {
-	const OPT_SEEDER		= 0x1;
-	const OPT_PROBED4		= 0x2;
-	const OPT_PROBED6		= 0x4;
-	const OPT_CONN4			= 0x8;
-	const OPT_CONN6			= 0x10;
-	const OPT_SUP_CRYPTO	= 0x20;
-	const OPT_REQ_CRYPTO	= 0x40;
+	const OPT_SEEDER		= BIT_1;
+	const OPT_PROBED4		= BIT_2;
+	const OPT_PROBED6		= BIT_3;
+	const OPT_CONN4			= BIT_4;
+	const OPT_CONN6			= BIT_5;
+	const OPT_SUP_CRYPTO	= BIT_6;
+	const OPT_REQ_CRYPTO	= BIT_7;
 
 	const CONN_NO			= 0;
 	const CONN_YES			= 1;

@@ -20,6 +20,7 @@
  */
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'class_config.php');
+require_once(INCL_PATH.'define_bits.php');
 require_once(CLASS_PATH.'bt_memcache.php');
 require_once(CLASS_PATH.'bt_security.php');
 
@@ -228,11 +229,11 @@ class bt_forums {
 	public static function settings_to_forum_theme($settings) {
 		$theme = 0;
 		if ($settings['forum_1'])
-			$theme |= 0x1;
+			$theme |= BIT_1;
 		if ($settings['forum_2'])
-			$theme |= 0x2;
+			$theme |= BIT_2;
 		if ($settings['forum_3'])
-			$theme |= 0x4;
+			$theme |= BIT_3;
 
 		return (int)$theme;
 	}
@@ -242,9 +243,9 @@ class bt_forums {
 			$theme = 0;
 
 		$settings = array(
-			'forum_1'	=> (bool)($theme & 0x1),
-			'forum_2'	=> (bool)($theme & 0x2),
-			'forum_3'	=> (bool)($theme & 0x4),
+			'forum_1'	=> (bool)($theme & BIT_1),
+			'forum_2'	=> (bool)($theme & BIT_2),
+			'forum_3'	=> (bool)($theme & BIT_3),
 		);
 		return $settings;
 	}

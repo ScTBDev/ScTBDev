@@ -181,7 +181,7 @@ function userlogin() {
 		die('Invalid Session');
 	}
 
-    $res = bt_sql::query('SELECT * FROM `users` WHERE `id` = '.$id.' AND `enabled` = "yes" AND (`flags` & '.bt_bitmask::search('status').')')
+    $res = bt_sql::query('SELECT *, CAST(flags AS SIGNED) AS flags_signed FROM users WHERE id = '.$id.' AND enabled = "yes" AND (flags & '.bt_options::FLAGS_CONFIRMED.')')
 		or bt_sql::err(__FILE__, __LINE__);
     $row = $res->fetch_assoc();
 	$res->free();
@@ -212,7 +212,7 @@ function userlogin() {
 	<title>IP Banned</title>
 </head>
 <body>
-Your IP address is currently banned for reason '.bt_security::html_safe($reason).'.'.
+Your IP address is currently banned for reason '.bt_security::html_safe($reason).'.'./*
 				(in_array($geoip['country_code'], array('RO')) ? ' If your ip '.
 				'is in Poland, Israel or Romania, this ban may be part of country wide bans. This is due to very high rate of cheating/hacking/invite '.
 				'trading/dupe accounts going on from these countries. This does not mean that we think you are doing any of those things, '.
@@ -224,7 +224,7 @@ Your IP address is currently banned for reason '.bt_security::html_safe($reason)
 				'around a minute if all is well) and if everything seems to be in good order, that staff member will enable your account to '.
 				'bypass these ip bans. It does not matter if you have a dynamic ip or not, the ban bypass is based on your account, not your '.
 				'ip. If you have been cheating on your account, we will be able to tell, so please don\'t waste our time if you have been.'.
-				'<br /><br />Thanks,<br />ScT Staff'. /*.($geoip['country_code'] == 'PL' ? '<br /><br />In Polish:<br />'.
+				'<br /><br />Thanks,<br />ScT Staff'.($geoip['country_code'] == 'PL' ? '<br /><br />In Polish:<br />'.
 				'Twój adres IP został zabanowany. Jeżeli łączysz się z Polski bądź Izraela, prawdopodobnie jest to '.
 				'spowodowane blokadą na te dwa kraje. Blokada ta podyktowana jest ogromną ilością cheaterów/hackerów/handlarzy '.
 				'zaproszeń/posiadaczy wielu kont łączących się z tych dwóch krajów. To oczywiście nie oznacza, że podejrzewamy Ciebie o '.
@@ -237,8 +237,8 @@ Your IP address is currently banned for reason '.bt_security::html_safe($reason)
 				'żadnych problemów z Twoim kontem). Jeżeli wszystko będzie w należytym porządku, Twoje konto zostanie odblokowane. Ponieważ '.
 				'usunięcie blokady dotyczy Twojego konta a nie adresu IP, nie ma znaczenia czy Twój adres IP jest stały czy zmienny. Jeżeli '.
 				'oszukiwałeś na swoim koncie, zauważymy to, więc prosimy, nie trać swojego i naszego czasu.<br /><br />Dziękujemy,<br />'.
-				'Załoga ScT.' : '')*/ ($geoip['country_code'] == 'RO' ? '<br /><br />In Romanian:<br />
-Daca IP-ul dumneavoastra este din Polonia, Israel sau Romania, acest ban face parte din categoria celor ce afecteaza tarile intregi. Aceasta se datoreaza numarului mare de cheateri/fakeri/hackeri/traderilor/conturilor duble venind din aceasta tara. Asta nu inseamna ca noi credem ca dumneavoastra chiar ati facut aceste lucruri, de aceea fiind relativ usor sa va obtineti conturile inapoi. Tot ce trebuie sa faceti este sa va conectati pe serverul nostru de IRC - irc.scenetorrents.org si sa intrati pe canalul #sct.support . Odata intrat pe acest canal, asteptati pana primiti abilitatea de a conversa; va rugam nu trimiteti mesaje private membrilor staffului, eventual veti primi +v (voice) sa va expuneti problema cat timp va verificam contul (de obicei dureaza un minut), iar daca totul este in ordine, membrul staffului va va reda accesul la contul dumneavoastra si va face bypass la banul ip-ului dumneavoastra. Nu conteaza daca aveti sau nu ip dinamic, bypassul este pe contul dumneavoastra, nu pe ip. Daca ati facut fake, vom putea face diferenta, asa ca nu ne irositi timpul degeaba.' : '') : '').'
+				'Załoga ScT.' : '') ($geoip['country_code'] == 'RO' ? '<br /><br />In Romanian:<br />
+Daca IP-ul dumneavoastra este din Polonia, Israel sau Romania, acest ban face parte din categoria celor ce afecteaza tarile intregi. Aceasta se datoreaza numarului mare de cheateri/fakeri/hackeri/traderilor/conturilor duble venind din aceasta tara. Asta nu inseamna ca noi credem ca dumneavoastra chiar ati facut aceste lucruri, de aceea fiind relativ usor sa va obtineti conturile inapoi. Tot ce trebuie sa faceti este sa va conectati pe serverul nostru de IRC - irc.scenetorrents.org si sa intrati pe canalul #sct.support . Odata intrat pe acest canal, asteptati pana primiti abilitatea de a conversa; va rugam nu trimiteti mesaje private membrilor staffului, eventual veti primi +v (voice) sa va expuneti problema cat timp va verificam contul (de obicei dureaza un minut), iar daca totul este in ordine, membrul staffului va va reda accesul la contul dumneavoastra si va face bypass la banul ip-ului dumneavoastra. Nu conteaza daca aveti sau nu ip dinamic, bypassul este pe contul dumneavoastra, nu pe ip. Daca ati facut fake, vom putea face diferenta, asa ca nu ne irositi timpul degeaba.' : '') : '').*/'
 </body>
 </html>';
 			die;
@@ -361,7 +361,7 @@ function tr($x,$y,$noesc=0,$centerhead=0) {
 }
 
 function validfilename($name) {
-    return preg_match('/^[^\0-\x1f:\\\\\/?*\xff#<>|]+$/si', $name);
+    return preg_match('%^[^\x00-\x1f:\\\\/?*\xff#<>|]+$%si', $name);
 }
 
 function validemail($email) {
@@ -373,7 +373,7 @@ function sqlesc($x) {
 }
 
 function sqlwildcardesc($x) {
-    return str_replace(array("%","_"), array("\\%","\\_"), bt_sql::$DB->escape_string($x));
+    return bt_sql::wildcard_escape($x);
 }
 
 function urlparse($m) {

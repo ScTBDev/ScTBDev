@@ -19,154 +19,151 @@
  *	along with ScTBDev.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+require_once(__DIR__.DIRECTORY_SEPARATOR.'class_config.php');
+require_once(INCL_PATH.'define_bits.php');
+
 class bt_bitmask {
-/*
- * Please note that on 32 bit systems, bit #32 will be allocated as a float
- * but since all functions in this class cast to int or bool when returning,
- * everything should still work just fine. The same applies for bit #64 on
- * 64 bit systems
- */
-	private static $settings = array(					// Bit		Coded	Description
-// ------------------------------------------------------------------------------------------------------------------
-		'status'			=> 0x1,						// 1		yes		confirmed account ?
-		'privacy'			=> 0x2,						// 2		yes		hide seeding/leeching torrents (anonymous)
-		'acceptpms'			=> 0x4,						// 3		yes		allow pms from everybody
-		'acceptfriendpms'	=> 0x8,						// 4		yes		allow pms from friends
-		'avatar_po'			=> 0x10,					// 5		yes		my avatar is potentially offensive
-		'dst'				=> 0x20,					// 6		yes		daylight savings
-		'pmnotif'			=> 0x40,					// 7		yes		email notification of pms
-		'enabled'			=> 0x80,					// 8				enabled account?
-		'avatars'			=> 0x100,					// 9		yes		show avatars
-		'avatars_po'		=> 0x200,					// 10		yes		show potentially offensive avatars
-		'donor'				=> 0x400,					// 11		yes		user has donated
-		'warned'			=> 0x800,					// 12		yes		user is warned
-		'deletepms'			=> 0x1000,					// 13		yes		default to deleting pms from inbox on reply
-		'savepms'			=> 0x2000,					// 14		yes		default to saving sent pms to sentbox
-		'ssl_site'			=> 0x4000,					// 15		yes		force use of ssl, redirect from http to https
-		'protect'			=> 0x8000,					// 16		yes		protect users ip, don't store it in the database
-		'hide_stats'		=> 0x10000,					// 17		yes		hide upload/download/class/ratio
-		'log'				=> 0x20000,					// 18		yes		log everything the user does (really messy atm)
-		'uploader'			=> 0x40000,					// 19		yes		user is an uploader on the upload list
-		'fls'				=> 0x80000,					// 20		yes		user is first line support
-		'statbar'			=> 0x100000,				// 21		yes		show statbar
-		'post_enable'		=> 0x200000,				// 22		yes		enable forum posting
-		'irc_enable'		=> 0x400000,				// 23		yes		allow in irc channels
-		'proxy'				=> 0x800000,				// 24		yes		enable proxy option for tracker
-		'ssl_tracker'		=> 0x1000000,				// 25		yes		enable ssl tracker
-		'bypass_ban'		=> 0x2000000,				// 26		yes		allows a user to bypass bans
-		'hide_last_seen'	=> 0x4000000,				// 27				hide last seen time from other users
-		'disable_invites'	=> 0x8000000,				// 28		yes		disable buying of invites
-//		'unallocated29'		=> 0x10000000,				// 29
-//		'unallocated30'		=> 0x20000000,				// 30
-//		'unallocated31'		=> 0x40000000,				// 31
-//		'unallocated32'		=> 0x80000000,				// 32		64bit
+	private static $settings = array(	// Coded	Description
+		// -------------------------------------------------------------------------------------------
+		'status'			=> BIT_1,	// yes		confirmed account ?
+		'privacy'			=> BIT_2,	// yes		hide seeding/leeching torrents (anonymous)
+		'acceptpms'			=> BIT_3,	// yes		allow pms from everybody
+		'acceptfriendpms'	=> BIT_4,	// yes		allow pms from friends
+		'avatar_po'			=> BIT_5,	// yes		my avatar is potentially offensive
+		'dst'				=> BIT_6,	// yes		daylight savings
+		'pmnotif'			=> BIT_7,	// yes		email notification of pms
+		'enabled'			=> BIT_8,	// 			enabled account?
+		'avatars'			=> BIT_9,	// yes		show avatars
+		'avatars_po'		=> BIT_10,	// yes		show potentially offensive avatars
+		'donor'				=> BIT_11,	// yes		user has donated
+		'warned'			=> BIT_12,	// yes		user is warned
+		'deletepms'			=> BIT_13,	// yes		default to deleting pms from inbox on reply
+		'savepms'			=> BIT_14,	// yes		default to saving sent pms to sentbox
+		'ssl_site'			=> BIT_15,	// yes		force use of ssl, redirect from http to https
+		'protect'			=> BIT_16,	// yes		protect users ip, don't store it in the database
+		'hide_stats'		=> BIT_17,	// yes		hide upload/download/class/ratio
+		'log'				=> BIT_18,	// yes		log everything the user does (really messy atm)
+		'uploader'			=> BIT_19,	// yes		user is an uploader on the upload list
+		'fls'				=> BIT_20,	// yes		user is first line support
+		'statbar'			=> BIT_21,	// yes		show statbar
+		'post_enable'		=> BIT_22,	// yes		enable forum posting
+		'irc_enable'		=> BIT_23,	// yes		allow in irc channels
+		'proxy'				=> BIT_24,	// yes		enable proxy option for tracker
+		'ssl_tracker'		=> BIT_25,	// yes		enable ssl tracker
+		'bypass_ban'		=> BIT_26,	// yes		allows a user to bypass bans
+		'hide_last_seen'	=> BIT_27,	// 			hide last seen time from other users
+		'disable_invites'	=> BIT_28,	// yes		disable buying of invites
+//		'unallocated29'		=> BIT_29,	//
+//		'unallocated30'		=> BIT_30,	//
+//		'unallocated31'		=> BIT_31,	//
+//		'unallocated32'		=> BIT_32,	//
 
 //////////////////////////////////////////////////////////////////////
 // DO NOT USE THE FOLLOWING SETTINGS UNLESS YOUR SERVERS ARE 64 BIT //
 //////////////////////////////////////////////////////////////////////
 
-														// Bit		Coded
-//		'unallocated64'		=> 0x100000000,				// 33	
-//		'unallocated64'		=> 0x200000000,				// 34
-//		'unallocated64'		=> 0x400000000,				// 35
-//		'unallocated64'		=> 0x800000000,				// 36
-//		'unallocated64'		=> 0x1000000000,			// 37
-//		'unallocated64'		=> 0x2000000000,			// 38
-//		'unallocated64'		=> 0x4000000000,			// 39
-//		'unallocated64'		=> 0x8000000000,			// 40
-//		'unallocated64'		=> 0x10000000000,			// 41
-//		'unallocated64'		=> 0x20000000000,			// 42
-//		'unallocated64'		=> 0x40000000000,			// 43
-//		'unallocated64'		=> 0x80000000000,			// 44
-//		'unallocated64'		=> 0x100000000000,			// 45
-//		'unallocated64'		=> 0x200000000000,			// 46
-//		'unallocated64'		=> 0x400000000000,			// 47
-//		'unallocated64'		=> 0x800000000000,			// 48
-//		'unallocated64'		=> 0x1000000000000,			// 49
-//		'unallocated64'		=> 0x2000000000000,			// 50
-//		'unallocated64'		=> 0x4000000000000,			// 51
-//		'unallocated64'		=> 0x8000000000000,			// 52
-		'forum_1'			=> 0x10000000000000,		// 53		yes		forum_1-4 used for button selection in forums
-		'forum_2'			=> 0x20000000000000,		// 54		yes		see bit 53
-		'forum_3'			=> 0x40000000000000,		// 55		yes		see bit 53
-//		'unallocated64'		=> 0x80000000000000,		// 56
-//		'unallocated64'		=> 0x100000000000000,		// 57
-//		'unallocated64'		=> 0x200000000000000,		// 58
-//		'unallocated64'		=> 0x400000000000000,		// 59
-//		'unallocated64'		=> 0x800000000000000,		// 60
-//		'unallocated64'		=> 0x1000000000000000,		// 61
-//		'unallocated64'		=> 0x2000000000000000,		// 62
-//		'unallocated64'		=> 0x4000000000000000,		// 63
-//		'unallocated64'		=> '-9223372036854775808',	// 64	do not use bit 64
+										// Coded	Description
+//		'unallocated64'		=> BIT_33,	//	
+//		'unallocated64'		=> BIT_34,	//
+//		'unallocated64'		=> BIT_35,	//
+//		'unallocated64'		=> BIT_36,	//
+//		'unallocated64'		=> BIT_37,	//
+//		'unallocated64'		=> BIT_38,	//
+//		'unallocated64'		=> BIT_39,	//
+//		'unallocated64'		=> BIT_40,	//
+//		'unallocated64'		=> BIT_41,	//
+//		'unallocated64'		=> BIT_42,	//
+//		'unallocated64'		=> BIT_43,	//
+//		'unallocated64'		=> BIT_44,	//
+//		'unallocated64'		=> BIT_45,	//
+//		'unallocated64'		=> BIT_46,	//
+//		'unallocated64'		=> BIT_47,	//
+//		'unallocated64'		=> BIT_48,	//
+//		'unallocated64'		=> BIT_49,	//
+//		'unallocated64'		=> BIT_50,	//
+//		'unallocated64'		=> BIT_51,	//
+//		'unallocated64'		=> BIT_52,	//
+		'forum_1'			=> BIT_53,	// yes		forum_1-4 used for button selection in forums
+		'forum_2'			=> BIT_54,	// yes		see bit 53
+		'forum_3'			=> BIT_55,	// yes		see bit 53
+//		'unallocated64'		=> BIT_56,	//
+//		'unallocated64'		=> BIT_57,	//
+//		'unallocated64'		=> BIT_58,	//
+//		'unallocated64'		=> BIT_59,	//
+//		'unallocated64'		=> BIT_60,	//
+//		'unallocated64'		=> BIT_61,	//
+//		'unallocated64'		=> BIT_62,	//
+//		'unallocated64'		=> BIT_63,	//
+//		'unallocated64'		=> BIT_64,	//
 	);
 
 	// up to 32 channels, first 32 bits = invite to channel, last 32 bits = allow invite
 	private static $chans = array(
-		'invite_main'			=> 0x1,					// 1	#SceneTorrents
-		'invite_pre'			=> 0x2,					// 2	#sct.pre
-		'invite_radio'			=> 0x4,					// 3	#sct.radio
-		'invite_support'		=> 0x8,					// 4	#sct.support
-		'invite_fls'			=> 0x10,				// 5	#sct.fls
-		'invite_spam'			=> 0x20,				// 6	#sct.spam
-		'invite_upload'			=> 0x40,				// 7	#sct.upload
-		'invite_upload_spam'	=> 0x80,				// 8	#sct.upload.spam
-		'invite_staff'			=> 0x100,				// 9	#sct.staff
-		'invite_log'			=> 0x200,				// 10	#sct.log
-        'invite_admins'			=> 0x400,				// 11	#sct.admins
-		'invite_hamachi'		=> 0x800,				// 12	#sct.hamachi
-		'invite_upload_auto'	=> 0x1000,				// 13	#sct.upload.auto
-		'invite_fi'				=> 0x2000,				// 14	#sct.fi
-		'invite_sitebots'		=> 0x4000,				// 15	#sct.sitebots
-		'invite_sitebots2'		=> 0x8000,				// 16	#sct.sitebots2
-		'invite_sitebots_spam'	=> 0x10000,				// 17	#sct.sitebots.spam
-		'invite_swe'			=> 0x20000,				// 18	#sct.swe
-		'invite_spy'			=> 0x40000,				// 19	#sct.spy
-		'invite_tracers'		=> 0x80000,				// 20	#sct.tracers
-		'invite_no'				=> 0x100000,			// 21	#sct.no
-		'invite_ee'				=> 0x200000,			// 22	#sct.ee
-		'invite_br'				=> 0x400000,			// 23	#sct.br
-//		'unallocated32'			=> 0x800000,			// 24
-//		'unallocated32'			=> 0x1000000,			// 25
-//		'unallocated32'			=> 0x2000000,			// 26
-//		'unallocated32'			=> 0x4000000,			// 27
-//		'unallocated32'			=> 0x8000000,			// 28
-//		'unallocated32'			=> 0x10000000,			// 29
-//		'unallocated32'			=> 0x20000000,			// 30
-//		'unallocated32'			=> 0x40000000,			// 31
-//		'unallocated32'			=> 0x80000000,			// 32
+		'invite_main'			=> BIT_1,	// 1	#SceneTorrents
+		'invite_pre'			=> BIT_2,	// 2	#sct.pre
+		'invite_radio'			=> BIT_3,	// 3	#sct.radio
+		'invite_support'		=> BIT_4,	// 4	#sct.support
+		'invite_fls'			=> BIT_5,	// 5	#sct.fls
+		'invite_spam'			=> BIT_6,	// 6	#sct.spam
+		'invite_upload'			=> BIT_7,	// 7	#sct.upload
+		'invite_upload_spam'	=> BIT_8,	// 8	#sct.upload.spam
+		'invite_staff'			=> BIT_9,	// 9	#sct.staff
+		'invite_log'			=> BIT_10,	// 10	#sct.log
+		'invite_admins'			=> BIT_11,	// 11	#sct.admins
+		'invite_hamachi'		=> BIT_12,	// 12	#sct.hamachi
+		'invite_upload_auto'	=> BIT_13,	// 13	#sct.upload.auto
+		'invite_fi'				=> BIT_14,	// 14	#sct.fi
+		'invite_sitebots'		=> BIT_15,	// 15	#sct.sitebots
+		'invite_sitebots2'		=> BIT_16,	// 16	#sct.sitebots2
+		'invite_sitebots_spam'	=> BIT_17,	// 17	#sct.sitebots.spam
+		'invite_swe'			=> BIT_18,	// 18	#sct.swe
+		'invite_spy'			=> BIT_19,	// 19	#sct.spy
+		'invite_tracers'		=> BIT_20,	// 20	#sct.tracers
+		'invite_no'				=> BIT_21,	// 21	#sct.no
+		'invite_ee'				=> BIT_22,	// 22	#sct.ee
+		'invite_br'				=> BIT_23,	// 23	#sct.br
+//		'unallocated32'			=> BIT_24,	// 24
+//		'unallocated32'			=> BIT_25,	// 25
+//		'unallocated32'			=> BIT_26,	// 26
+//		'unallocated32'			=> BIT_27,	// 27
+//		'unallocated32'			=> BIT_28,	// 28
+//		'unallocated32'			=> BIT_29,	// 29
+//		'unallocated32'			=> BIT_30,	// 30
+//		'unallocated32'			=> BIT_31,	// 31
+//		'unallocated32'			=> BIT_32,	// 32
 
-		'allow_main'			=> 0x100000000,			// 33	#SceneTorrents
-		'allow_pre'				=> 0x200000000,			// 34	#sct.pre
-		'allow_radio'			=> 0x400000000,			// 35	#sct.radio
-		'allow_support'			=> 0x800000000,			// 36	#sct.support
-		'allow_fls'				=> 0x1000000000,		// 37	#sct.fls
-		'allow_spam'			=> 0x2000000000,		// 38	#sct.spam
-		'allow_upload'			=> 0x4000000000,		// 39	#sct.upload
-		'allow_upload_spam'		=> 0x8000000000,		// 40	#sct.upload.spam
-		'allow_staff'			=> 0x10000000000,		// 41	#sct.staff
-		'allow_log'				=> 0x20000000000,		// 42	#sct.log
-		'allow_admins'			=> 0x40000000000,		// 43	#sct.admins
-		'allow_hamachi'			=> 0x80000000000,		// 44	#sct.hamachi
-		'allow_upload_auto'		=> 0x100000000000,		// 45	#sct.upload.auto
-		'allow_fi'				=> 0x200000000000,		// 46	#sct.fi
-		'allow_sitebots'		=> 0x400000000000,		// 47	#sct.sitebots
-		'allow_sitebots2'		=> 0x800000000000,		// 48	#sct.sitebots2
-		'allow_sitebots_spam'	=> 0x1000000000000,		// 49	#sct.sitebots.spam
-		'allow_swe'				=> 0x2000000000000,		// 50	#sct.swe
-		'allow_spy'				=> 0x4000000000000,		// 51	#sct.spy
-		'allow_tracers'			=> 0x8000000000000,		// 52	#sct.tracers
-		'allow_no'				=> 0x10000000000000,	// 53	#sct.no
-		'allow_ee'				=> 0x20000000000000,	// 54	#sct.ee
-		'allow_br'				=> 0x40000000000000,	// 55	#sct.br
-//		'unallocated64'			=> 0x80000000000000,	// 56
-//		'unallocated64'			=> 0x100000000000000,	// 57
-//		'unallocated64'			=> 0x200000000000000,	// 58
-//		'unallocated64'			=> 0x400000000000000,	// 59
-//		'unallocated64'			=> 0x800000000000000,	// 60
-//		'unallocated64'			=> 0x1000000000000000,	// 61
-//		'unallocated64'			=> 0x2000000000000000,	// 62
-//		'unallocated64'			=> 0x4000000000000000,	// 63
-//		'unallocated64'			=> 0x8000000000000000,	// 64
+		'allow_main'			=> BIT_33,	// 33	#SceneTorrents
+		'allow_pre'				=> BIT_34,	// 34	#sct.pre
+		'allow_radio'			=> BIT_35,	// 35	#sct.radio
+		'allow_support'			=> BIT_36,	// 36	#sct.support
+		'allow_fls'				=> BIT_37,	// 37	#sct.fls
+		'allow_spam'			=> BIT_38,	// 38	#sct.spam
+		'allow_upload'			=> BIT_39,	// 39	#sct.upload
+		'allow_upload_spam'		=> BIT_40,	// 40	#sct.upload.spam
+		'allow_staff'			=> BIT_41,	// 41	#sct.staff
+		'allow_log'				=> BIT_42,	// 42	#sct.log
+		'allow_admins'			=> BIT_43,	// 43	#sct.admins
+		'allow_hamachi'			=> BIT_44,	// 44	#sct.hamachi
+		'allow_upload_auto'		=> BIT_45,	// 45	#sct.upload.auto
+		'allow_fi'				=> BIT_46,	// 46	#sct.fi
+		'allow_sitebots'		=> BIT_47,	// 47	#sct.sitebots
+		'allow_sitebots2'		=> BIT_48,	// 48	#sct.sitebots2
+		'allow_sitebots_spam'	=> BIT_49,	// 49	#sct.sitebots.spam
+		'allow_swe'				=> BIT_50,	// 50	#sct.swe
+		'allow_spy'				=> BIT_51,	// 51	#sct.spy
+		'allow_tracers'			=> BIT_52,	// 52	#sct.tracers
+		'allow_no'				=> BIT_53,	// 53	#sct.no
+		'allow_ee'				=> BIT_54,	// 54	#sct.ee
+		'allow_br'				=> BIT_55,	// 55	#sct.br
+//		'unallocated64'			=> BIT_56,	// 56
+//		'unallocated64'			=> BIT_57,	// 57
+//		'unallocated64'			=> BIT_58,	// 58
+//		'unallocated64'			=> BIT_59,	// 59
+//		'unallocated64'			=> BIT_60,	// 60
+//		'unallocated64'			=> BIT_61,	// 61
+//		'unallocated64'			=> BIT_62,	// 62
+//		'unallocated64'			=> BIT_63,	// 63
+//		'unallocated64'			=> BIT_64,	// 64
 	);
 
 	public static function invert($store) {

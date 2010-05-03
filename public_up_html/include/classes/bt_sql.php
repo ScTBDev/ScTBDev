@@ -98,8 +98,12 @@ class bt_sql {
 		return '0x'.bt_string::str2hex($string);
 	}
 
-	public static function wildcardesc($wildcard) {
-		return str_replace(array('%', '_'), array('\%','\_'), self::$DB->escape_string($wildcard));
+	public static function wildcard_esc($string) {
+		return '"'.self::wildcard_escape($string).'"';
+	}
+
+	public static function wildcard_escape($string) {
+		return str_replace(array('%', '_'), array('\%','\_'), self::$DB->escape_string($string));
 	}
 
 	public static function err($file = '', $line = 0) {

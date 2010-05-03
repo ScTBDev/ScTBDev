@@ -99,7 +99,8 @@ class bt_user {
 		$user['last_forum_visit'] = 0 + $user['last_forum_visit'];
 		$user['invites'] = 0 + $user['invites'];
 		$user['invitedby'] = 0 + $user['invitedby'];
-		$user['flags'] = (int)$user['flags'];
+		$user['flags'] = (int)$user['flags_signed'];
+		unset($user['flags_signed']);
 		$user['donations'] = (float)$user['donations'];
 		$user['irc_time'] = 0 + $user['irc_time'];
 		$user['ip'] = (int)$user['ip'];
