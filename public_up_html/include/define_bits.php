@@ -51,6 +51,7 @@ const BIT_28	= 0x8000000;
 const BIT_29	= 0x10000000;
 const BIT_30	= 0x20000000;
 const BIT_31	= 0x40000000;
+// can only define BIT_32 like this if you have > 32 bit cpu/os/etc
 const BIT_32	= 0x80000000;
 
 const BIT_33	= 0x100000000;
