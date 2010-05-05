@@ -276,9 +276,6 @@ $smilies = array(
   ':nwpsign:' => 'sign-nwp1.gif',
 );
 
-// Set this to the line break character sequence of your system
-$linebreak = "\r\n";
-
 function get_row_count($table, $suffix = '') {
 	if ($suffix)
 		$suffix = ' '.$suffix;
@@ -289,19 +286,9 @@ function get_row_count($table, $suffix = '') {
 }
 
 
-
 function sqlerr($file = '', $line = '') {
 	bt_sql::$DB->set_error();
-
 	bt_sql::err($file, (int)$line);
-}
-
-// Returns the current time in GMT in MySQL compatible format.
-function get_date_time($timestamp = 0) {
-	if ($timestamp)
-		return $timestamp;
-	else
-	return bt_vars::$timestamp;
 }
 
 function format_time($timestamp = NULL) {
@@ -318,52 +305,12 @@ function format_date($timestamp = 0)
   return gmdate('Y-m-d', $timestamp);
 }
 
-function format_curtime()
-{
-  global $CURUSER;
-  $timestamp = time();
-  $timestamp += (($CURUSER['timezone'] * 3600) + ($CURUSER['settings']['dst'] ? 3600 : 0));
-  return gmdate('H:i', $timestamp);
-}
-
-
-function encodehtml($s, $linebreaks = true)
-{
-  $s = str_replace("<", "&lt;", str_replace("&", "&amp;", $s));
-  if ($linebreaks)
-    $s = nl2br($s);
-  return $s;
-}
-
-function get_dt_num()
-{
-  return time();
-}
-
 function format_urls($s) {
 	$link = bt_theme::$settings['bbcode']['link'];
 	return preg_replace(
 		'/(\A|\s)((?:http|ftp|https|ftps|irc):\/\/[^()<>\s]+)/i',
 		'$1<a href="/out.php?url=$2"'.$link.'>$2</a>', $s);
 }
-
-//Finds last occurrence of needle in haystack
-//in PHP5 use strripos() instead of this
-if (!function_exists('strripos'))
-  {
-   function strripos($haystack, $needle, $offset = 0)
-     {
-      $addLen = strlen ($needle);
-      $endPos = $offset - $addLen;
-      while (true)
-        {
-         if (($newPos = strpos ($haystack, $needle, $endPos + $addLen)) === false)
-           break;
-         $endPos = $newPos;
-        }
-      return ($endPos >= 0) ? $endPos : false;
-     }
-  }
 
 function format_quotes($s) {
 	$bbcode = bt_theme::$settings['bbcode'];
@@ -582,11 +529,6 @@ function insert_smilies_frame() {
 	}
 
 
-function sql_timestamp_to_unix_timestamp($s)
-{
-return $s;
-}
-
 function get_ratio_color($ratio) {
 	return bt_theme::ratio_color($ratio);
 }
@@ -631,23 +573,6 @@ function get_ratio_color($ratio) {
   }
 
 function get_elapsed_time($ts) {
-/*  $mins = floor((time() - $ts) / 60);
-  $hours = floor($mins / 60);
-  $mins -= $hours * 60;
-  $days = floor($hours / 24);
-  $hours -= $days * 24;
-  $weeks = floor($days / 7);
-  $days -= $weeks * 7;
-  $t = "";
-  if ($weeks > 0)
-    return "$weeks week" . ($weeks > 1 ? "s" : "");
-  if ($days > 0)
-    return "$days day" . ($days > 1 ? "s" : "");
-  if ($hours > 0)
-    return "$hours hour" . ($hours > 1 ? "s" : "");
-  if ($mins > 0)
-    return "$mins min" . ($mins > 1 ? "s" : "");
-  return "&lt; 1 min";*/
 	return bt_time::ago_time($ts);
 }
 function get_until_time($ts)
@@ -720,9 +645,6 @@ function get_class_color($class)
         break;
       case UC_USER:
         $colclass = "user";
-        break;
-      case UC_PEASANT:
-        $colclass = "peas";
         break;
       default:
         $colclass = "peas";

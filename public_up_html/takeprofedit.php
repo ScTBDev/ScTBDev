@@ -55,8 +55,8 @@ bt_user::init_mod_comment(bt_user::$current['id']);
 $setflags = 0;
 $clrflags = 0;
 
-$ip = getip();
-$rip = $_SERVER['REMOTE_ADDR'];
+$ip = bt_vars::$ip;
+$rip = bt_vars::$realip;
 debugc(1);
 
 if ($chpassword != '') {

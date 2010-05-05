@@ -75,6 +75,7 @@ if (!isset($_NO_REDIRECT) && $_SERVER['REQUEST_METHOD'] == 'GET' && substr($_SER
 }
 */
 
+// TODO: really need to do this a lot better
 if (preg_match('/(\< *(java|script)|script\:|\+document\.)/i', serialize($_SERVER)))
   httperr(403,'Forbidden');
 if (preg_match('/(\< *(java|script)|script\:|\+document\.)/i', serialize($_GET)))
@@ -83,10 +84,6 @@ if (preg_match('/(\< *(java|script)|script\:|\+document\.)/i', serialize($_POST)
   httperr(403, 'Forbidden');
 if (preg_match('/(\< *(java|script)|script\:|\+document\.)/i', serialize($_COOKIE)))
   httperr(403, 'Forbidden');
-
-function microtime_float() {
-	return microtime(true);
-}
 
 $TIMES['start'] = microtime(true);
 $MySQL_NUM_QUERIES = 0;
@@ -110,15 +107,9 @@ function mysql_counted_query($query) {
 }
 
 
-function validip($ip) {
-	return bt_ip::valid_ip($ip);
-}
-
 function getip() {
 	return bt_ip::get_ip();
 }
-
-
 
 
 function dbconn($login = true) {
@@ -336,6 +327,8 @@ function mkprettytime($s) {
 //    return $t["sec"] . " secs";
 }
 
+
+// TODO: this really must be removed ASAP
 function mkglobal($vars) {
     if (!is_array($vars))
         $vars = explode(":", $vars);
@@ -376,22 +369,6 @@ function sqlwildcardesc($x) {
     return bt_sql::wildcard_escape($x);
 }
 
-function urlparse($m) {
-    $t = $m[0];
-    if (preg_match(',^\w+://,', $t))
-        return "<a href=\"$t\">$t</a>";
-    return "<a href=\"http://$t\">$t</a>";
-}
-
-function parsedescr($d, $html) {
-    if (!$html)
-    {
-      $d = htmlspecialchars($d);
-      $d = str_replace("\n", "\n<br>", $d);
-    }
-    return $d;
-}
-
 function genbark($x,$y) {
     bt_theme::head($y);
     print("<h2>" . htmlspecialchars($y) . "</h2>\n");
@@ -401,10 +378,7 @@ function genbark($x,$y) {
 }
 
 function mksecret($len = 20) {
-    $ret = "";
-    for ($i = 0; $i < $len; $i++)
-        $ret .= chr(mt_rand(0, 255));
-    return $ret;
+	return bt_string::random($len);
 }
 
 function httperr($code = 404, $msg = 'Not Found') {
@@ -563,39 +537,6 @@ function pager($rpp, $count, $href, $opts = array()) {
     return array($pagertop, $pagerbottom, "LIMIT $start,$rpp");
 }
 
-function downloaderdata($res) {
-    $rows = array();
-    $ids = array();
-    $peerdata = array();
-    while ($row = mysql_fetch_assoc($res)) {
-        $rows[] = $row;
-        $id = $row["id"];
-        $ids[] = $id;
-        $peerdata[$id] = array(downloaders => 0, seeders => 0, comments => 0);
-    }
-
-    if (count($ids)) {
-        $allids = implode(",", $ids);
-        $res = bt_sql::query("SELECT COUNT(*) AS c, torrent, seeder FROM peers WHERE torrent IN ($allids) GROUP BY torrent, seeder")
-			or bt_sql::err(__FILE__, __LINE__);
-        while ($row = $res->fetch_assoc()) {
-            if ($row["seeder"] == "yes")
-                $key = "seeders";
-            else
-                $key = "downloaders";
-            $peerdata[$row["torrent"]][$key] = $row["c"];
-        }
-		$res->free();
-        $res = bt_sql::query("SELECT COUNT(*) AS c, torrent FROM comments WHERE torrent IN ($allids) GROUP BY torrent")
-			or bt_sql::err(__FILE__, __LINE__);
-        while ($row = $res->fetch_assoc())
-            $peerdata[$row["torrent"]]["comments"] = $row["c"];
-		$res->free();
-    }
-
-    return array($rows, $peerdata);
-}
-
 function searchfield($s) {
     return preg_replace(array('/[^a-z0-9]/si', '/^\s*/s', '/\s*$/s', '/\s+/s'), array(" ", "", "", " "), $s);
 }
@@ -610,23 +551,6 @@ function linkcolor($num) {
 //    if ($num == 1)
 //        return "yellow";
     return "green";
-}
-
-function ratingpic($num) {
-    global $pic_base_url;
-    $r = round($num * 2) / 2;
-    if ($r < 1 || $r > 5)
-        return;
-    return "<img src=\"$pic_base_url$r.gif\" border=\"0\" alt=\"rating: $num / 5\" />";
-}
-
-function hash_pad($hash) {
-    return str_pad($hash, 20);
-}
-
-function hash_where($name, $hash) {
-    $shhash = preg_replace('/ *$/s', "", $hash);
-    return "($name = " . bt_sql::esc($hash) . " OR $name = " . bt_sql::esc($shhash) . ")";
 }
 
 function get_user_icons($arr, $big = false) {
@@ -651,30 +575,6 @@ function get_user_icons($arr, $big = false) {
 
 	return $pics;
 }
-
-function err($msg)
-{
-        echo "d14:failure reason" . strlen($msg) . ":$msg" . "e";
-        exit();
-}
-
-function mkpasskey($len = 16) {
-    $ret = "";
-    for ($i = 0; $i < $len; $i++)
-        $ret .= chr(mt_rand(97, 122));
-    return $ret;
-}
-
-function pic_url($filename)
-  {
-   global $CONFIG;
-   return $CONFIG['pic_base_url'].$filename;
-  }
-
-function html_safe($text)
-  {
-   return htmlentities($text, ENT_COMPAT, 'UTF-8');
-  }
 
 require_once(INCL_PATH.'global.php');
 ?>
