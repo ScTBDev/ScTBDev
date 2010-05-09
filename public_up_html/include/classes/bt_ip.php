@@ -224,7 +224,7 @@ class bt_ip {
 
 				// reserved/unroutable IANA IPv4 addresses
 				// http://www.iana.org/assignments/ipv4-address-space
-				// As of 2010-04-09
+				// As of 2010-05-07
 
 				$reserved_ips = array (
 					array(0x0			, 0xffffff),	// 0.0.0.0		- 0.255.255.255		0 - IANA - Local Identification
@@ -252,10 +252,9 @@ class bt_ip {
 					array(0x19000000	, 0x1affffff),	// 25.0.0.0		- 26.255.255.255	25 - UK Ministry of Defence
 														//									26 - Defense Information Systems Agency
 
-					array(0x1c000000	, 0x1fffffff),	// 28.0.0.0		- 31.255.255.255	28 - DoD DSI-North
+					array(0x1c000000	, 0x1effffff),	// 28.0.0.0		- 30.255.255.255	28 - DoD DSI-North
 														//									29 - Defense Information Systems Agency
 														//									30 - Defense Information Systems Agency
-														//									31 - IANA
 
 					array(0x21000000	, 0x22ffffff),	// 33.0.0.0		- 34.255.255.255	33 - Defense Logistics Agency Systems Automation Center
 														//									34 - Halliburton Company
@@ -293,8 +292,7 @@ class bt_ip {
 					array(0xa9fe0000	, 0xa9feffff),	// 169.254.0.0	- 169.254.255.255	IANA - Link Local
 					array(0xac100000	, 0xac1fffff),	// 172.16.0.0	- 172.31.255.255	IANA - Private Use
 
-					array(0xb0000000	, 0xb1ffffff),	// 176.0.0.0	- 177.255.255.255	176 - IANA
-														//									177 - IANA
+					array(0xb1000000	, 0xb1ffffff),	// 177.0.0.0	- 177.255.255.255	177 - IANA
 
 					array(0xb3000000	, 0xb3ffffff),	// 179.0.0.0	- 179.255.255.255	179 - IANA
 
