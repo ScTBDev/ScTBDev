@@ -43,9 +43,9 @@ $user = bt_mem_caching::get_user_from_passkey($passkey);
 if (!$user)
 	die;
 
-header('Content-Type: application/xml');
+header('Content-Type: application/xml; charset=UTF-8');
 echo <<<HEAD
-<?xml version="1.0" encoding="iso-8859-1" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0">
 	<channel>
 		<title>ScT</title>

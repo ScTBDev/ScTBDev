@@ -21,12 +21,13 @@
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorrent.php');
 require_once(TROOT_PATH.'announce_settings.php');
+require_once(CLASS_PATH.'bt_mem_caching.php');
 
 bt_config::$conf['tracker_settings'] = $SETTINGS;
 dbconn();
 loggedinorreturn();
 
-$cats = genrelist();
+$cats = bt_mem_caching::get_cat_list();
 $searchstr = $_GET['search'];
 $sortby = 0 + $_GET['sort'];
 $genre = isset($_GET['genre']) ? trim($_GET['genre']) : false;
@@ -97,9 +98,9 @@ if (!$all)
         }
 
       if (!count($wherecatina))
-        foreach ($cats as $cat)
-          if (strpos($CURUSER['notifs'], '[cat' . $cat['id'].']') !== false)
-            $wherecatina[] = $cat['id'];
+        foreach ($cats as $catid => $cat)
+          if (strpos($CURUSER['notifs'], '[cat' . $catid.']') !== false)
+            $wherecatina[] = $catid;
      }
   }
 
@@ -222,9 +223,9 @@ $catsperrow = $catset['per_row'];
 $catrows = array();
 $ncats = count($cats);
 $i = 0;
-foreach ($cats as $cat) {
-	$catrows[] = $catset['cat_start'].'<input name="c[]" type="checkbox" value="'.$cat['id'].'"'.(in_array($cat['id'], $wherecatina) ?
-		' checked="checked"' : '').' /><a href="/browse.php?cat='.$cat['id'].'"'.$catset['link'].'>'.$cat['ename'].'</a>'.$catset['cat_end'];
+foreach ($cats as $catid => $cat) {
+	$catrows[] = $catset['cat_start'].'<input name="c[]" type="checkbox" value="'.$catid.'"'.(in_array($catid, $wherecatina) ?
+		' checked="checked"' : '').' /><a href="/browse.php?cat='.$catid.'"'.$catset['link'].'>'.$cat['ename'].'</a>'.$catset['cat_end'];
 	$i++;
 	$catsleft = $i % $catsperrow;
 	if ($catsleft == 0 || $i == $ncats) {

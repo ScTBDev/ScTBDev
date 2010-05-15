@@ -20,6 +20,7 @@
  */
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorrent.php');
+require_once(CLASS_PATH.'bt_mem_caching.php');
 
 dbconn();
 loggedinorreturn();
@@ -43,9 +44,9 @@ $num = count($urls);
 $tracker_url = $urls[mt_rand(0, ($num - 1))].'?passkey='.bt_user::$current['passkey'];
 
 $types = array();
-$cats = genrelist();
-foreach ($cats as $cat)
-	$types[] = bt_theme::$settings['upload']['list_prefix'].'<option value="'.$cat['id'].'">'.$cat['ename'].'</option>';
+$cats = bt_mem_caching::get_cat_list();
+foreach ($cats as $catid => $cat)
+	$types[] = bt_theme::$settings['upload']['list_prefix'].'<option value="'.$catid.'">'.$cat['ename'].'</option>';
 
 $type_list = implode("\n", $types);
 $checked = ' checked="checked"';

@@ -25,6 +25,7 @@ require_once(CLASS_PATH.'bt_session.php');
 require_once(CLASS_PATH.'bt_chans.php');
 require_once(CLASS_PATH.'bt_forums.php');
 require_once(CLASS_PATH.'bt_hash.php');
+require_once(CLASS_PATH.'bt_mem_caching.php');
 
 function bark($msg)
   {
@@ -94,7 +95,7 @@ $pmnotif = 0 + $_POST['pmnotif'];
 
 $ip_access = str_replace(array("\r\n","\n","\r"),';',trim($_POST['ip_access']));
 
-$cats = genrelist();
+$cats = bt_mem_caching::get_cat_list();
 $browsecats = array();
 if (is_array($_POST['c'])) {
 	foreach ($_POST['c'] as $c)
@@ -102,9 +103,9 @@ if (is_array($_POST['c'])) {
 }
 
 $notifs = '';
-foreach ($cats as $cat) {
-	if (in_array($cat['id'], $browsecats, true))
-		$notifs .= '[cat'.$cat['id'].']';
+foreach ($cats as $catid => $cat) {
+	if (in_array($catid, $browsecats, true))
+		$notifs .= '[cat'.$catid.']';
 }
 
 $avatar = trim($_POST['avatar']);

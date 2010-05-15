@@ -76,8 +76,7 @@ class bt_theme {
 		if (!bt_config::$conf['SITE_ONLINE'])
 			die('Site is down for maintenance, please check back again later... thanks');
 
-//		header('Content-Type: text/html; charset=iso-8859-1');
-		header('Content-Type: text/html; charset=utf-8');
+		header('Content-Type: text/html; charset=UTF-8');
 		$head_extra = '';
 		$title = bt_config::$conf['site_name'].($page_title ? ' :: '.bt_security::html_safe($page_title) : '');
 
