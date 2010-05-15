@@ -158,9 +158,9 @@ $catrows = $catentrys = array();
 $ncats = count($cats);
 $i = 0;
 
-foreach ($cats as $cat) {
-	$checked = strpos($user['notifs'], '[cat'.$cat['id'].']') !== false ? $check_c : '';
-    $catentrys[] = sprintf($tsettings['catlist']['entry'], $cat['id'], $checked,  $cat['ename']);
+foreach ($cats as $catid => $cat) {
+	$checked = strpos($user['notifs'], '[cat'.$catid.']') !== false ? $check_c : '';
+    $catentrys[] = sprintf($tsettings['catlist']['entry'], $catid, $checked,  $cat['ename']);
     $i++;
     $catsleft = $i % $tsettings['catlist']['per_row'];
     if ($catsleft == 0 || $i == $ncats) {

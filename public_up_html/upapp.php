@@ -43,8 +43,8 @@ $catrows = $catentrys = array();
 $ncats = count($cats);
 $i = 0;
 
-foreach ($cats as $cat) {
-	$catentrys[] = sprintf($tsettings['catlist']['entry'], $cat['id'], $cat['ename']);
+foreach ($cats as $catid => $cat) {
+	$catentrys[] = sprintf($tsettings['catlist']['entry'], $catid, $cat['ename']);
 	$i++;
 	$catsleft = $i % $tsettings['catlist']['per_row'];
 	if ($catsleft == 0 || $i == $ncats) {

@@ -47,8 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	}
 }
 else {
-	foreach ($cats as $cat) {
-		if (strpos(bt_user::$current['notifs'], '[cat'.$cat['id'].']') !== false)
+	foreach ($cats as $catid => $cat) {
+		if (strpos(bt_user::$current['notifs'], '[cat'.$catid.']') !== false)
 			$selcats[$cat['id']] = true;
 	}
 	reset($cats);
@@ -67,10 +67,10 @@ $catrows = $catentrys = array();
 $ncats = count($cats);
 $i = 0;
 
-foreach ($cats as $cat) {
-	if (isset($selcats[$cat['id']])) {
+foreach ($cats as $catid => $cat) {
+	if (isset($selcats[$catid])) {
 		$checked = $check_on;
-		$urls[] = 'c[]='.$cat['id'];
+		$urls[] = 'c[]='.$catid;
 	}
 	else
 		$checked = '';

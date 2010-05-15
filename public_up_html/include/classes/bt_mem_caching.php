@@ -292,12 +292,15 @@ class bt_mem_caching {
 			$cats = array();
 
 			bt_sql::connect();
-			$res = bt_sql::query('SELECT id, name FROM categories ORDER BY name ASC') or bt_sql::err(__FILE__, __LINE__);
+			$res = bt_sql::query('SELECT * FROM categories ORDER BY name ASC') or bt_sql::err(__FILE__, __LINE__);
 
-			while ($cat = $res->fetch_assoc()) {
-				$cat['id'] = 0 + $cat['id'];
+			while ($row = $res->fetch_assoc()) {
+				$catid = (int)$row['id'];
+				$cat = array();
+				$cat['name'] = trim($row['name']);
+				$cat['image'] = bt_security::html_safe(trim($row['image']));
 				$cat['ename'] = bt_security::html_safe($cat['name']);
-				$cats[$cat['id']] = $cat;
+				$cats[$catid] = $cat;
 			}
 			$res->free();
 
