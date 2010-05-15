@@ -45,20 +45,30 @@ if (!$user)
 	die;
 
 header('Content-Type: application/xml');
-echo '<?xml version="1.0" encoding="iso-8859-1" ?>'.
-	"\n".'<rss version="0.91">'."\n\t".'<channel>'."\n\t\t".'<title>ScT</title>'."\n\t\t".
-	'<description>ScT RSS DL Feed</description>'."\n\t\t".'<link>'.bt_vars::$base_url.'/</link>'."\n\t\t".'<language>en-US</language>'."\n";
+echo <<<HEAD
+<?xml version="1.0" encoding="iso-8859-1" ?>
+<rss version="2.0">
+	<channel>
+		<title>ScT</title>
+		<description>ScT RSS Feed</description>
+		<link>{bt_vars::$base_url}/</link>
+		<language>en-US</language>
+
+HEAD;
 
 bt_memcache::connect();
-$last_torrent = bt_memcache::get('last_torrent');
-if (!$last_torrent) {
+$last_torrents = bt_memcache::get('last_torrents');
+if (!$last_torrents) {
+	$last_torrents = array();
 	bt_sql::connect();
-	$ltorrentq = bt_sql::query('SELECT id FROM torrents ORDER BY id DESC LIMIT 1') or bt_sql::err(__FILE__, __LINE__);
-	$lt = $ltorrentq->fetch_row();
-	$ltorrentq->free();
-	$last_torrent = 0 + $lt[0];
-	bt_memcache::add('last_torrent', $last_torrent, 10800);
+	$ltorrentsq = bt_sql::query('SELECT category, MAX(id) AS id FROM torrents GROUP BY category ORDER BY category ASC') or bt_sql::err(__FILE__, __LINE__);
+	while ($lt = $ltorrentq->fetch_row())
+		$last_torrents[$lt[0]] = (int)$lt[1];
+
+	$ltorrentsq->free();
+	bt_memcache::add('last_torrents', $last_torrents, 10800);
 }
+$last_torrent = max($last_torrents);
 
 $whereq = array();
 if (isset($_GET['c']) && is_array($_GET['c'])) {

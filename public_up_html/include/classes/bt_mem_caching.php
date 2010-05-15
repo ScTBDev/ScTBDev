@@ -297,7 +297,7 @@ class bt_mem_caching {
 			while ($cat = $res->fetch_assoc()) {
 				$cat['id'] = 0 + $cat['id'];
 				$cat['ename'] = bt_security::html_safe($cat['name']);
-				$cats[] = $cat;
+				$cats[$cat['id']] = $cat;
 			}
 			$res->free();
 
