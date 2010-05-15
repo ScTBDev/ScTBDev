@@ -541,10 +541,6 @@ function searchfield($s) {
     return preg_replace(array('/[^a-z0-9]/si', '/^\s*/s', '/\s*$/s', '/\s+/s'), array(" ", "", "", " "), $s);
 }
 
-function genrelist() {
-	return bt_mem_caching::get_cat_list();
-}
-
 function linkcolor($num) {
     if (!$num)
         return "red";
