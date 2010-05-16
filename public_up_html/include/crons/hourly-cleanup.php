@@ -26,6 +26,8 @@ require_once(CLASS_PATH.'bt_vars.php');
 require_once(CLASS_PATH.'bt_sql.php');
 require_once(CLASS_PATH.'bt_user.php');
 require_once(CLASS_PATH.'bt_mem_caching.php');
+require_once(CLASS_PATH.'bt_options.php');
+
 
 define('START_TIME', microtime(true));
 
@@ -240,7 +242,7 @@ $delete_users = array();
 $secs = 42*86400;
 $dt = time() - $secs;
 $maxclass = UC_USER;
-$delusersql = 'SELECT `id`, `passkey` FROM `users` WHERE (`flags` & '.bt_bitmask::search('status').') AND `class` <= '.$maxclass.' '.'AND `last_access` < '.$dt;
+$delusersql = 'SELECT `id`, `passkey` FROM `users` WHERE (`flags` & '.bt_options::FLAGS_CONFIRMED.') AND `class` <= '.$maxclass.' '.'AND `last_access` < '.$dt;
 $deluserq = bt_sql::query($delusersql);
 while ($user = $deluserq->fetch_assoc())
 	$delete_users[$user['passkey']] = $user['id'];
@@ -249,7 +251,7 @@ while ($user = $deluserq->fetch_assoc())
 $secs2 = 16*86400;
 $dt2 = time() - $secs2;
 $maxclass2 = UC_POWER_USER;
-$delusersql = 'SELECT `id`, `passkey` FROM `users` WHERE (`flags` & '.bt_bitmask::search('status').') AND `enabled` = "no" AND `class` <= '.$maxclass2.' AND `last_access` < '.$dt;
+$delusersql = 'SELECT `id`, `passkey` FROM `users` WHERE (`flags` & '.bt_options::FLAGS_CONFIRMED.') AND `enabled` = "no" AND `class` <= '.$maxclass2.' AND `last_access` < '.$dt;
 $deluserq = bt_sql::query($delusersql);
 while ($user = $deluserq->fetch_assoc())
 	$delete_users[$user['passkey']] = $user['id'];
@@ -259,7 +261,7 @@ while ($user = $deluserq->fetch_assoc())
 $secs = 100*86400;
 $dt = time() - $secs;
 $maxclass = UC_LOVER;
-$delusersql = 'SELECT `id`, `passkey` FROM `users` WHERE (`flags` & '.bt_bitmask::search('status').') AND `class` <= '.$maxclass.' AND `last_access` < '.$dt;
+$delusersql = 'SELECT `id`, `passkey` FROM `users` WHERE (`flags` & '.bt_options::FLAGS_CONFIRMED.') AND `class` <= '.$maxclass.' AND `last_access` < '.$dt;
 $deluserq = bt_sql::query($delusersql);
 while ($user = $deluserq->fetch_assoc())
 	$delete_users[$user['passkey']] = $user['id'];
@@ -268,7 +270,7 @@ while ($user = $deluserq->fetch_assoc())
 $secs2 = 30*86400;
 $dt2 = time() - $secs2;
 $maxclass2 = UC_LOVER;
-$delusersql = 'SELECT `id`, `passkey` FROM `users` WHERE (`flags` & '.bt_bitmask::search('status').') AND `enabled` = "no" AND `class` <= '.$maxclass2.' AND last_access < '.$dt2;
+$delusersql = 'SELECT `id`, `passkey` FROM `users` WHERE (`flags` & '.bt_options::FLAGS_CONFIRMED.') AND `enabled` = "no" AND `class` <= '.$maxclass2.' AND last_access < '.$dt2;
 $deluserq = bt_sql::query($delusersql);
 while ($user = $deluserq->fetch_assoc())
 	$delete_users[$user['passkey']] = $user['id'];
@@ -278,7 +280,7 @@ while ($user = $deluserq->fetch_assoc())
 $secs = 180*86400;
 $dt = time() - $secs;
 $maxclass = UC_SEED_WHORE;
-$delusersql = 'SELECT `id`, `passkey` FROM `users` WHERE (`flags` & '.bt_bitmask::search('status').') AND `class` <= '.$maxclass.' AND `last_access` < '.$dt;
+$delusersql = 'SELECT `id`, `passkey` FROM `users` WHERE (`flags` & '.bt_options::FLAGS_CONFIRMED.') AND `class` <= '.$maxclass.' AND `last_access` < '.$dt;
 $deluserq = bt_sql::query($delusersql);
 while ($user = $deluserq->fetch_assoc())
 	$delete_users[$user['passkey']] = $user['id'];
@@ -287,7 +289,7 @@ while ($user = $deluserq->fetch_assoc())
 $secs3 = 60*86400;
 $dt3 = time() - $secs3;
 $maxclass3 = UC_SEED_WHORE;
-$delusersql = 'SELECT `id`, `passkey` FROM `users` WHERE (`flags` & '.bt_bitmask::search('status').') AND `enabled` = "no" AND `class` <= '.$maxclass3.' AND last_access < '.$dt3;
+$delusersql = 'SELECT `id`, `passkey` FROM `users` WHERE (`flags` & '.bt_options::FLAGS_CONFIRMED.') AND `enabled` = "no" AND `class` <= '.$maxclass3.' AND last_access < '.$dt3;
 $deluserq = bt_sql::query($delusersql);
 while ($user = $deluserq->fetch_assoc())
 	$delete_users[$user['passkey']] = $user['id'];
@@ -326,8 +328,8 @@ $lt = time() - $maxage;
 bt_sql::query('DELETE FROM `email_changes` WHERE `time` < '.$lt);
 
 
-bt_sql::query('UPDATE `users` SET `flags` = (`flags` & '.bt_bitmask::searchnot('uploader').') WHERE '.
-	'(`flags` & '.bt_bitmask::search('uploader').') AND `class` < '.UC_UPLOADER);
+bt_sql::query('UPDATE `users` SET `flags` = (`flags` & ~'.bt_options::FLAGS_UPLOADER.') WHERE '.
+	'(`flags` & '.bt_options::FLAGS_UPLOADER.') AND `class` < '.UC_UPLOADER);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////

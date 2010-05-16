@@ -414,7 +414,7 @@ class bt_theme {
 	}
 
 	public static function torrent_table($res, $addparam = '', &$end_new = false) {
-		bt_theme_engine::load();
+//		bt_theme_engine::load();
 		$torrenttablevars = array();
 		$torrenttablevars['PARAM'] = $addparam;
 		$defaultsort = array(1, 0, 0, 0, 1, 0, 0, 0);
@@ -436,14 +436,15 @@ class bt_theme {
 
 		$torrent_rows = '';
 		$rowi = 0;
+		$cats = bt_mem_caching::get_cat_list();
 		while ($row = $res->fetch_assoc()) {
 			$rowi++;
 			$row_style = $rowi % 2 == 0 ? 2 : 1;
 
 			$id = (int)$row['id'];
 			$catid = (int)$row['category'];
-			$catimg = $row['cat_pic'];
-			$catname = $row['cat_name'];
+			$catimg = $cats[$catid]['image'];
+			$catname = $cats[$catid]['ename'];
 			$num_files = (int)$row['numfiles'];
 			$num_comments = (int)$row['comments'];
 			$tsize = 0 + $row['size'];

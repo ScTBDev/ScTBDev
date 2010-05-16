@@ -42,7 +42,7 @@ $cleansearchstr = searchfield($searchstr);
 if (empty($cleansearchstr))
 	unset($cleansearchstr);
 
-$orderby = 'ORDER BY `t`.`id` DESC';
+$orderby = 'ORDER BY id DESC';
 
 $addparam = '';
 $wherea = array();
@@ -70,7 +70,7 @@ $all = 0 + $_GET['all'];
 if (!$all)
   {
 	if ($genre) {
-		$wherea[] = '`genre` = '.sqlesc($genre);
+		$wherea[] = 'genre = '.sqlesc($genre);
 		$addparam .= 'genre='.bt_security::html_safe($genre).'&amp;';
 	}
 	elseif ($category)
@@ -111,15 +111,14 @@ elseif ($all)
 }
 
 if (count($wherecatina) > 1)
-        $wherecatin = join(",",$wherecatina);
+	$wherecatin = join(',', $wherecatina);
 elseif (count($wherecatina) == 1)
-        $wherea[] = "`t`.`category` = $wherecatina[0]";
+	$wherea[] = 'category = '.$wherecatina[0];
 
 $wherebase = $wherea;
-$columns = '`t`.`id`, `t`.`category`, `t`.`filename`, `t`.`leechers`, `t`.`seeders`, `t`.`name`, '.
-        '`t`.`times_completed`, `t`.`size`, `t`.`added`, `t`.`comments`, `t`.`type`, `t`.`numfiles`, '.
-        '`t`.`pretime`, `t`.`genre` , `c`.`name` AS `cat_name`, `c`.`image` AS `cat_pic`, `t`.`banned` ';
-$from = '`torrents` AS `t` LEFT JOIN `categories` AS `c` ON (`c`.`id` = `t`.`category`)';
+$columns = 'id, category, filename, leechers, seeders, name, times_completed, size, added, comments, type, '.
+		'numfiles, pretime, genre, banned ';
+$from = 'torrents';
 
 //----------------  new search designed by djGrrr  -------------------//
 //--------------------------------------------------------------------//
@@ -135,17 +134,17 @@ if ($searchstr != '')
       $r = array('%','_','_','_','_');
 
       if (preg_match('/^\"(.+)\"$/i', $searchstring, $matches))
-        $wherea[] = '`t`.`name` LIKE '.sqlesc('%'.str_replace($s, $r, $matches[1]).'%');
+        $wherea[] = 'name LIKE '.sqlesc('%'.str_replace($s, $r, $matches[1]).'%');
       elseif (strpos($searchstr, '*') !== false || strpos($searchstr, '?') !== false)
-		$wherea[] = '`t`.`name` LIKE '.sqlesc(str_replace($s, $r, $searchstr));
+		$wherea[] = 'name LIKE '.sqlesc(str_replace($s, $r, $searchstr));
 	  elseif (preg_match('/^[A-Za-z0-9][a-zA-Z0-9()._-]+-[A-Za-z0-9_]*[A-Za-z0-9]$/iD', $searchstr))
-		$wherea[] = '`t`.`name` = '.sqlesc($searchstr);
+		$wherea[] = 'name = '.sqlesc($searchstr);
 	  else
-		$wherea[] = 'MATCH (`t`.`search_text`) AGAINST ('.sqlesc($searchstr).' IN BOOLEAN MODE)';
+		$wherea[] = 'MATCH (search_text) AGAINST ('.sqlesc($searchstr).' IN BOOLEAN MODE)';
      }
    else
-     $wherea[] = 'MATCH (`t`.`search_text`, `t`.`descr`) AGAINST ('.sqlesc($searchstr).' IN BOOLEAN MODE)';
-   $orderby = 'ORDER BY `t`.`id` DESC';
+     $wherea[] = 'MATCH (search_text, descr) AGAINST ('.sqlesc($searchstr).' IN BOOLEAN MODE)';
+   $orderby = 'ORDER BY id DESC';
   }
 function revtype($type)
   {
@@ -159,28 +158,28 @@ $sql_type = $type ? 'ASC' : 'DESC';
 switch($sortby)
 {
         case 1:
-                $orderby = "ORDER BY `t`.`name` {$sql_type}"; // Torrent Name
+                $orderby = "ORDER BY name {$sql_type}"; // Torrent Name
         break;
         case 2:
-                $orderby = "ORDER BY `t`.`numfiles` {$sql_type}"; // Files
+                $orderby = "ORDER BY numfiles {$sql_type}"; // Files
         break;
         case 3:
-                $orderby = "ORDER BY `t`.`comments` {$sql_type}"; // Comments
+                $orderby = "ORDER BY comments {$sql_type}"; // Comments
         break;
         case 4:
-                $orderby = "ORDER BY `t`.`id` {$sql_type}"; // Added
+                $orderby = "ORDER BY id {$sql_type}"; // Added
         break;
         case 5:
-                $orderby = "ORDER BY `t`.`size` {$sql_type}"; // Size
+                $orderby = "ORDER BY size {$sql_type}"; // Size
         break;
         case 6:
-                $orderby = "ORDER BY `t`.`times_completed` {$sql_type}"; // Snatched
+                $orderby = "ORDER BY times_completed {$sql_type}"; // Snatched
         break;
         case 7:
-                $orderby = "ORDER BY `t`.`seeders` {$sql_type}, `t`.`leechers` ".revtype($sql_type); // Seeders
+                $orderby = "ORDER BY seeders {$sql_type}, leechers ".revtype($sql_type); // Seeders
         break;
         case 8:
-                $orderby = "ORDER BY `t`.`leechers` {$sql_type}"; //Leechers
+                $orderby = "ORDER BY leechers {$sql_type}"; //Leechers
         break;
 }
 if ($_GET['sort'])
@@ -188,14 +187,14 @@ if ($_GET['sort'])
 if ($_GET['page'])
   $newparam2 = "page=".(0+$_GET['page'])."&amp;";
 if ($wherecatin)
-	$wherea[] = '`t`.`category` IN('.$wherecatin.')';
+	$wherea[] = 'category IN('.$wherecatin.')';
 
 $where = count($wherea) ? 'WHERE '.implode(' AND ', $wherea) : '';
 
 $where_key = 'browse_where:'.sha1($where);
 $count = bt_memcache::get($where_key);
 if ($count === false) {
-	$res = mysql_counted_query('SELECT COUNT(*) FROM `torrents` AS `t` '.$where) or sqlerr(__FILE__,__LINE__);
+	$res = mysql_counted_query('SELECT COUNT(*) FROM torrents '.$where) or sqlerr(__FILE__,__LINE__);
 	$row = mysql_fetch_row($res);
 	$count = 0 + $row[0];
 
@@ -206,7 +205,7 @@ $torrentsperpage = bt_user::$current['torrentsperpage'] ? bt_user::$current['tor
 
 if ($count) {
 	list($pager, $limit) = bt_theme::pager($torrentsperpage, $count, '/browse.php?'.$addparam.$newparam);
-	$query = 'SELECT '.$columns.' FROM '.$from.' '.$where.' '.$orderby.' '.$limit;
+	$query = 'SELECT '.$columns.' FROM torrents '.$where.' '.$orderby.' '.$limit;
 	$res = bt_sql::query($query) or bt_sql::err(__FILE__,__LINE__);
 }
 else
