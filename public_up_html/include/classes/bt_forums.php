@@ -73,7 +73,7 @@ class bt_forums {
 				}
 			}
 			$forumsq->free();
-			bt_memcache::add($key, $forums, 10800, false);
+			bt_memcache::add($key, $forums, 10800);
 		}
 		return $forums;
 	}
@@ -89,7 +89,7 @@ class bt_forums {
 				'postcount, sort, lasttopic FROM forums WHERE id = '.$forumid) or bt_sql::err(__FILE__, __LINE__);
 
 			if (!$forumq->num_rows) {
-				bt_memcache::add($key, 0, 86400, false);
+				bt_memcache::add($key, 0, 86400);
 				return false;
 			}
 
@@ -105,7 +105,7 @@ class bt_forums {
 			$forum['sort']				= 0 + $forum['sort'];
 			$forum['lasttopic']			= 0 + $forum['lasttopic'];
 
-			bt_memcache::add($key, $forum, 10800, false);
+			bt_memcache::add($key, $forum, 10800);
 		}
 		elseif (!$forum)
 			return false;
@@ -148,7 +148,7 @@ class bt_forums {
 			$topicq = bt_sql::query('SELECT subject, locked, forumid, sticky, posts, lastpost FROM topics WHERE id = '.$topicid) or bt_sql::err(__FILE__, __LINE__);
 
 			if (!$topicq->num_rows) {
-				bt_memcache::add($key, 0, 86400, true);
+				bt_memcache::add($key, 0, 86400);
 				return false;
 			}
 
@@ -161,7 +161,7 @@ class bt_forums {
 			$topic['posts'] = 0 + $topic['posts'];
 			$topic['lastpost'] = 0 + $topic['lastpost'];
 
-			bt_memcache::add($key, $topic, 10800, false);
+			bt_memcache::add($key, $topic, 10800);
 		}
 
 		return $topic;

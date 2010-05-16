@@ -204,7 +204,7 @@ class bt_mem_caching {
 
 		bt_memcache::del($key);
 		if ($make_bad)
-			bt_memcache::set($key, 0, self::BAD_TTL_TIME, false);
+			bt_memcache::set($key, 0, self::BAD_TTL_TIME);
 	}
 
 	private static function _cache_countries() {
@@ -245,7 +245,7 @@ class bt_mem_caching {
 			}
 			$ct_r->free();
 
-			bt_memcache::add($key, self::$_countries, self::TTL_TIME, true);
+			bt_memcache::add($key, self::$_countries, self::TTL_TIME);
 		}
 
 		self::$_countries_populated = true;
@@ -305,7 +305,7 @@ class bt_mem_caching {
 			$res->free();
 
 			ksort($cats, SORT_NUMERIC);
-			bt_memcache::add($key, $cats, self::TTL_TIME, false);
+			bt_memcache::add($key, $cats, self::TTL_TIME);
 		}
 
 		return $cats;

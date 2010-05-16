@@ -53,7 +53,7 @@ class bt_string {
 			}
 
 			$chars = array($chrs, $ords, $b2cs, $c2bs);
-			bt_memcache::set($key, $chars, 86400, false);
+			bt_memcache::set($key, $chars, 86400);
 		}
 
 		self::$chr = $chars[0];

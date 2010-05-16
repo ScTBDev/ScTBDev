@@ -108,19 +108,19 @@ if (!bt_hash::verify_hash($password, $row['password'], $SECRETS['salt1'], $SECRE
 		$passes = bt_memcache::get($pass_key);
 		if ($passes === false) {
 			$passes = igbinary_unserialize(file_get_contents('badpasses.bin'));
-			bt_memcache::set($pass_key, $passes, 86400, true);
+			bt_memcache::set($pass_key, $passes, 86400);
 		}
 
 		if (isset($passes[$uname])) {
 			$pwds = $passes[$uname];
 			if (in_array($password, $pwds, true)) {
-				bt_memcache::add($key, 0, 2592000, false);
+				bt_memcache::add($key, 0, 2592000);
 				add_failure(20);
 				die();
 			}
 		}
 
-		bt_memcache::add($key, 1, 2592000, false);
+		bt_memcache::add($key, 1, 2592000);
 	}
 	elseif (!$login)
 		die();

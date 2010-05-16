@@ -49,7 +49,7 @@ class bt_donations {
 				'from'		=> $fromdt,
 				'to'		=> $todt,
 			);
-			bt_memcache::add('stats:donations', $donations, 900, false);
+			bt_memcache::add('stats:donations', $donations, 900);
 		}
 		return $donations;
 	}

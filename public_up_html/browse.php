@@ -199,7 +199,7 @@ if ($count === false) {
 	$row = mysql_fetch_row($res);
 	$count = 0 + $row[0];
 
-	bt_memcache::set($where_key, $count, 60, false);
+	bt_memcache::set($where_key, $count, 60);
 }
 
 $torrentsperpage = bt_user::$current['torrentsperpage'] ? bt_user::$current['torrentsperpage'] : 25;

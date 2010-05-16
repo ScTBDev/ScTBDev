@@ -45,7 +45,7 @@ class bt_bans {
 		if (!self::keys($ip, $key))
 			return false;
 
-		bt_memcache::add($key, $reason, 86400, false);
+		bt_memcache::add($key, $reason, 86400);
 		return true;
 	}
 
@@ -102,7 +102,7 @@ class bt_bans {
 				}
 
 				if ($addgood)
-					bt_memcache::add($key, 0, 86400, false);
+					bt_memcache::add($key, 0, 86400);
 			
 				return false;
 			}
@@ -121,7 +121,7 @@ class bt_bans {
 				$banq->free();
 
 				if ($addgood)
-					bt_memcache::add($key, 0, 86400, false);
+					bt_memcache::add($key, 0, 86400);
 
 				return false;
 			}
