@@ -57,6 +57,7 @@ $num = $num ? ($num < 5 ? 5 : ($num > 50 ? 50 : $num)) : 10;
 if ($num != 10)
 	$urls[] = 'num='.$num;
 $feed = $_SERVER['REQUEST_METHOD'] == 'POST' ? (int)$_POST['feed'] : 1;
+$urls[] = 'type='.($feed == 2 ? 'dt' : 'dl');
 $feed_1 = $feed != 2 ? $radio_on : '';
 $feed_2 = $feed == 2 ? $radio_on : '';
 
@@ -84,7 +85,7 @@ foreach ($cats as $catid => $cat) {
 }
 $cat_table = implode($tsettings['join_row'], $catrows);
 
-$feed_url = ($ssl ? bt_config::$conf['default_ssl_url'] : bt_config::$conf['default_plain_url']).'/rss'.($feed == 2 ? '' : 'dl').'.php?'.implode('&amp;', $urls);
+$feed_url = ($ssl ? bt_config::$conf['default_ssl_url'] : bt_config::$conf['default_plain_url']).'/rss.php?'.implode('&amp;', $urls);
 
 $rsservars = array(
 	'FEED_URL'	=> $feed_url,

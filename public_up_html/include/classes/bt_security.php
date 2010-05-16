@@ -70,9 +70,9 @@ class bt_security {
 			$data = str_replace($invalid_chars, '', $data);
 
 		if ($onlyspecialchars) // now the default since everything is UTF-8
-			return htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
+			return htmlspecialchars($data, ENT_QUOTES, 'UTF-8', true);
 		else
-			return htmlentities($data, ENT_QUOTES, 'UTF-8');
+			return htmlentities($data, ENT_QUOTES, 'UTF-8', true);
 	}
 
 	public static function valid_email($email) {

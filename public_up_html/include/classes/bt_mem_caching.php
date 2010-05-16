@@ -304,7 +304,8 @@ class bt_mem_caching {
 			}
 			$res->free();
 
-			 bt_memcache::add($key, $cats, self::TTL_TIME, false);
+			ksort($cats, SORT_NUMERIC);
+			bt_memcache::add($key, $cats, self::TTL_TIME, false);
 		}
 
 		return $cats;

@@ -82,6 +82,7 @@ class bt_memcache {
 		return self::$connected;
 	}
 
+
 	public static function add($key, $var, $expire) {
 		if (!self::$connected) {
 			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = "'.$key.'"', E_USER_WARNING);
@@ -97,7 +98,7 @@ class bt_memcache {
 		return $add;
 	}
 
-	public static function replace($key, $var, $expire) {
+	public static function rpl($key, $var, $expire) {
 		if (!self::$connected) {
 			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = "'.$key.'"', E_USER_WARNING);
 			return false;
@@ -110,6 +111,9 @@ class bt_memcache {
 
 		self::set_error(__METHOD__, $key);
 		return $replace;
+	}
+	public static function replace($key, $var, $expire) {
+		return self::rpl(($key, $var, $expire);
 	}
 
 	public static function set($key, $var, $expire) {
@@ -127,7 +131,7 @@ class bt_memcache {
 		return $set;
 	}
 
-	public static function get($key) {
+	public static function get($key, &$cas = NULL) {
 		if (!self::$connected) {
 			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = "'.$key.'"', E_USER_WARNING);
 			return false;
@@ -135,7 +139,7 @@ class bt_memcache {
 
 		self::$count++;
 		$time = microtime(true);
-		$get = self::$link->get($key);
+		$get = self::$link->get($key, NULL, $cas);
 		self::$time += (microtime(true) - $time);
 
 		self::set_error(__METHOD__, $key);
@@ -145,6 +149,22 @@ class bt_memcache {
 			return false;
 
 		return $get;
+	}
+
+	// Compare And Swap
+	public static function cas($key, $var, $expire, $token) {
+		if (!self::$connected) {
+			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = "'.$key.'"', E_USER_WARNING);
+			return false;
+		}
+
+		self::$count++;
+		$time = microtime(true);
+		$cas = self::$link->cas($token, $key, $var, $expire);
+		self::$time += (microtime(true) - $time);
+
+		self::set_error(__METHOD__, $key);
+		return $cas;
 	}
 
 	public static function inc($key, $howmuch = 1) {
@@ -177,7 +197,7 @@ class bt_memcache {
 		return $dec;
 	}
 
-	public static function append($key, $var) {
+	public static function app($key, $var) {
 		if (!self::$connected) {
 			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = "'.$key.'"', E_USER_WARNING);
 			return false;
@@ -192,7 +212,11 @@ class bt_memcache {
 		return $append;
 	}
 
-	public static function prepend($key, $var) {
+	public static function append($key, $var) {
+		return self::app($key, $var);
+	}
+
+	public static function pre($key, $var) {
 		if (!self::$connected) {
 			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = "'.$key.'"', E_USER_WARNING);
 			return false;
@@ -205,6 +229,10 @@ class bt_memcache {
 
 		self::set_error(__METHOD__, $key);
 		return $prepend;
+	}
+
+	public static function prepend($key, $var) {
+		return self::pre($key, $var);
 	}
 
 	public static function del($key) {

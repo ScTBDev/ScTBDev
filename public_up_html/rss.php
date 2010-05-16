@@ -29,6 +29,7 @@ require_once(CLASS_PATH.'bt_vars.php');
 $num = isset($_GET['num']) ? (0 + $_GET['num']) : 10;
 $strip = isset($_GET['strip']) ? 1 : 0;
 $stripun = isset($_GET['stripun']) ? 1 : 0;
+$download = isset($_GET['type']) ? $_GET['type'] === 'dl' : false;
 
 if ($num > 50)
 	$num = 50;
@@ -40,11 +41,93 @@ if (!$passkey)
 	die;
 
 $user = bt_mem_caching::get_user_from_passkey($passkey);
+
 if (!$user)
 	die;
 
+bt_memcache::connect();
+$last_torrents = bt_memcache::get('last_torrents');
+if (!$last_torrents) {
+	$last_torrents = array();
+	bt_sql::connect();
+	$ltorrentsq = bt_sql::query('SELECT category, MAX(id) AS id FROM torrents GROUP BY category ORDER BY category ASC') or bt_sql::err(__FILE__, __LINE__);
+	while ($lt = $ltorrentq->fetch_row())
+		$last_torrents[$lt[0]] = (int)$lt[1];
+
+	$ltorrentsq->free();
+	bt_memcache::add('last_torrents', $last_torrents, 10800);
+}
+$categories = bt_mem_caching::get_cat_list();
+$valid_cats = array_keys($categories);
+$whereq = array();
+if (isset($_GET['c']) && is_array($_GET['c'])) {
+	$cats = array();
+	foreach ($_GET['c'] as $cat)
+		$cats[] = (int)$cat;
+
+	$cats = array_unique($cats);
+	$cats = array_intersect($cats, $valid_cats);
+	sort($cats, SORT_NUMERIC);
+
+	if (count($cats))
+		$whereq[] = 'category IN ('.implode(', ', $cats).')';
+	else
+		$cats = $valid_cats;
+}
+else
+	$cats = $valid_cats;
+
+// Create a $last_torrent array containing only info about the currently selected categories
+$last_torrent = array();
+foreach ($cats as $cat)
+	$last_torrent[$cat] = $last_torrents[$cat];
+ksort($last_torrent, SORT_NUMERIC);
+
+
+$where = count($whereq) ? ' WHERE '.implode(' AND ', $whereq) : '';
+
+$key = 'rss::cache:::'.sha1($where);
+$torrents = bt_memcache::get($key, $cas);
+
+if (!$torrents || $torrents['last'] != $last_torrent) {
+	$torrents = array();
+	$torrents['last'] = $last_torrent;
+	$torrents['list'] = array();
+
+	bt_sql::connect();
+	$torrentsq = bt_sql::query('SELECT id, name, descr, category, filename, added FROM torrents'.$where.' ORDER BY id DESC LIMIT 50') or bt_sql::err(__FILE__, __LINE__);
+
+	while ($torrent = $torrentsq->fetch_assoc()) {
+		$torrent['id'] = (int)$torrent['id'];
+		$torrent['added'] = (int)$torrent['added'];
+		$torrent['name_strip'] = bt_security::html_safe(strtr($torrent['name'], '._', '  '), true);
+		$torrent['name_stripun'] = bt_security::html_safe(strtr($torrent['name'], '_', ' '), true);
+		$torrent['name'] = bt_security::html_safe($torrent['name'], true);
+		$torrent['filename'] = bt_security::html_safe($torrent['filename'], true);
+		$torrent['catname'] = isset($categories[$torrent['category']]) ? $categories[$torrent['category']]['ename'] : 'None';
+		$torrent['descr'] = bt_security::html_safe($torrent['descr'], true);
+		$torrents['list'][] = $torrent;
+	}
+	$torrentsq->free();
+
+	bt_memcache::cas($key, $torrents, 10800, $cas);
+}
+
+
 header('Content-Type: application/xml; charset=UTF-8');
-echo <<<HEAD
+if ($download)
+	echo <<<HEAD
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="0.91">
+	<channel>
+		<title>ScT</title>
+		<description>ScT RSS DL Feed</description>
+		<link>{bt_vars::$base_url}/</link>
+		<language>en-US</language>
+
+HEAD;
+else
+	echo <<<HEAD
 <?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0">
 	<channel>
@@ -54,64 +137,7 @@ echo <<<HEAD
 		<language>en-US</language>
 
 HEAD;
-
-bt_memcache::connect();
-$last_torrents = bt_memcache::get('last_torrents');
-if (!$last_torrents) {
-    $last_torrents = array();
-    bt_sql::connect();
-    $ltorrentsq = bt_sql::query('SELECT category, MAX(id) AS id FROM torrents GROUP BY category ORDER BY category ASC') or bt_sql::err(__FILE__, __LINE__);
-    while ($lt = $ltorrentq->fetch_row())
-        $last_torrents[$lt[0]] = (int)$lt[1];
-
-    $ltorrentsq->free();
-    bt_memcache::add('last_torrents', $last_torrents, 10800);
 }
-$last_torrent = max($last_torrents);
-
-
-$whereq = array();
-if (isset($_GET['c']) && is_array($_GET['c'])) {
-	$cats = array();
-	foreach ($_GET['c'] as $cat)
-		$cats[] = (int)$cat;
-
-	$cats = array_unique($cats);
-	sort($cats, SORT_NUMERIC);
-	$whereq[] = 'category IN ('.implode(', ', $cats).')';
-}
-
-$where = count($whereq) ? ' WHERE '.implode(' AND ', $whereq) : '';
-
-$key = 'rss::norm:::'.sha1($where);
-$torrents = bt_memcache::get($key);
-
-if ($torrents === false || $torrents['last'] != $last_torrent) {
-	$torrents = array();
-	$torrents['last'] = $last_torrent;
-	$torrents['list'] = array();
-
-	bt_sql::connect();
-
-	$torrentsq = bt_sql::query('SELECT t.id, t.name, t.descr, t.added, c.name AS catname FROM torrents AS t '.
-		'LEFT JOIN categories AS c ON (c.id = t.category)'.$where.' ORDER BY t.id DESC LIMIT 50') or bt_sql::err(__FILE__, __LINE__);
-
-	while ($torrent = $torrentsq->fetch_assoc()) {
-		$torrent['id'] = 0 + $torrent['id'];
-		$torrent['added'] = 0 + $torrent['added'];
-		$torrent['name_strip'] = bt_security::html_safe(strtr($torrent['name'], '._', '  '), true);
-		$torrent['name_stripun'] = bt_security::html_safe(strtr($torrent['name'], '_', ' '), true);
-		$torrent['name'] = bt_security::html_safe($torrent['name'], true);
-		$torrent['catname'] = $torrent['catname'] ? bt_security::html_safe($torrent['catname'], true) : 'None';
-		$torrent['descr'] = bt_security::html_safe($torrent['descr'], true);
-		$torrents['list'][] = $torrent;
-	}
-	$torrentsq->free();
-
-	bt_memcache::set($key, $torrents, 10800, true);
-}
-
-
 for ($i = 0; $i < $num; $i++) {
 	if (!isset($torrents['list'][$i]))
 		break;
@@ -123,12 +149,38 @@ for ($i = 0; $i < $num; $i++) {
 		$title = $row['name_stripun'];
 	else
 		$title = $row['name'];
-	
-	echo "\t\t".'<item>'."\n\t\t\t".'<title>'.$title.'</title>'."\n\t\t\t".'<pubDate>'.gmdate('D, d M Y H:i:s', $row['added']).
-		' +0000</pubDate>'."\n\t\t\t".'<category>'.$row['catname'].'</category>'."\n\t\t\t".'<link>'.bt_vars::$base_url.
-		'/details.php?id='.$row['id'].'&amp;hit=1</link>'."\n\t\t\t".'<description>'.$row['descr'].'</description>'."\n\t\t".
-		'</item>'."\n";
+
+	$date = gmdate('D, d M Y H:i:s', $row['added']);
+
+	echo <<<STARTITEM
+		<item>
+			<title>{$title}</title>
+			<pubDate>{$date} +0000</pubDate>
+
+STARTITEM;
+
+	if ($download)
+		echo <<<ITEM
+			<description>{$row['catname']}</description>
+			<link>{bt_vars::$base_url}/download.php/{$row['id']}/{$row['filename']}?passkey={$passkey}</link>
+
+ITEM;
+	else
+		echo <<<ITEM
+			<category>{$row['catname']}</category>
+			<description>{$row['descr']}</description>
+			<link>{bt_vars::$base_url}/details.php?id={$row['id']}&amp;hit=1</link>
+
+ITEM;
+
+	echo <<<ENDITEM
+		</item>
+
+ENDITEM;
 }
 
-echo "\t".'</channel>'."\n".'</rss>';
+echo <<<FOOT
+	</channel>
+</rss>
+FOOT;
 ?>
