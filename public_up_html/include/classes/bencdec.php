@@ -21,8 +21,8 @@
 
 /*
 Author:			djGrrr <djgrrr AT p2p-network DOT net>
-Version:		1.2.4
-Date:			2009-12-13
+Version:		1.2.5
+Date:			2010-05-17
 PHP Verion:		5.2.0 +
 
 This is a new, faster, and easier to use b-encoding/decoding php library .
@@ -223,6 +223,11 @@ complete contents of the bencdoded data.
 this will log a php error when trying to encode something that is invalid.
 - Add error message in bdecode function if data ends unexpectedly.
 
+1.2.5 - Fix input string '0:' for decoding, used to return false, now correctly
+returns 0 length string ''
+- Changed the initial input data check for decode() to give errors instwad of simply
+returning false
+
 */
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'class_config.php');
@@ -274,8 +279,10 @@ class bencdec {
 	}
 
 	public static function decode($str, $options = 0) {
-		if (empty($str))
-			return false;
+		if (!is_string($str))
+			return self::decode_error('Input data must be string in order to decode, "'.gettype($str).'" given');
+		if (strlen($str) == 0)
+			return self::decode_error('Input string empty');
 
 		self::$bdata_position	= 0;
 		self::$bdata_depth		= 0;
@@ -394,7 +401,7 @@ class bencdec {
 			return self::decode_error('String was not expected length, data too short?');
 
 		self::$bdata_position += $llen + $len;
-		return $string;
+		return $string === false ? '' : $string;
 	}
 
 	private static function dec_list() {

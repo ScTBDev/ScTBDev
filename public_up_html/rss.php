@@ -137,7 +137,7 @@ else
 		<language>en-US</language>
 
 HEAD;
-}
+
 for ($i = 0; $i < $num; $i++) {
 	if (!isset($torrents['list'][$i]))
 		break;
