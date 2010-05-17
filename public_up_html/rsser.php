@@ -53,7 +53,7 @@ else {
 	}
 	reset($cats);
 }
-$num = $num ? ($num < 5 ? 5 : ($num > 50 ? 50 : $num)) : 10;
+$num = $num ? ($num < 10 ? 10 : ($num > 100 ? 100 : $num)) : 10;
 if ($num != 10)
 	$urls[] = 'num='.$num;
 $feed = $_SERVER['REQUEST_METHOD'] == 'POST' ? (int)$_POST['feed'] : 1;

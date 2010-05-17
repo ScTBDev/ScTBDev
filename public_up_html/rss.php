@@ -31,10 +31,10 @@ $strip = isset($_GET['strip']) ? 1 : 0;
 $stripun = isset($_GET['stripun']) ? 1 : 0;
 $download = isset($_GET['type']) ? $_GET['type'] === 'dl' : false;
 
-if ($num > 50)
-	$num = 50;
-elseif ($num < 5)
-	$num = 5;
+if ($num > 100)
+	$num = 100;
+elseif ($num < 10)
+	$num = 10;
 
 $passkey = isset($_GET['passkey']) ? $_GET['passkey'] : '';
 if (!$passkey)
@@ -95,7 +95,7 @@ if (!$torrents || $torrents['last'] != $last_torrent) {
 	$torrents['list'] = array();
 
 	bt_sql::connect();
-	$torrentsq = bt_sql::query('SELECT id, name, descr, category, filename, added FROM torrents'.$where.' ORDER BY id DESC LIMIT 50') or bt_sql::err(__FILE__, __LINE__);
+	$torrentsq = bt_sql::query('SELECT id, name, descr, category, filename, added FROM torrents'.$where.' ORDER BY id DESC LIMIT 100') or bt_sql::err(__FILE__, __LINE__);
 
 	while ($torrent = $torrentsq->fetch_assoc()) {
 		$torrent['id'] = (int)$torrent['id'];
