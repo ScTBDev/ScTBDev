@@ -21,6 +21,10 @@
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'defines.php');
 
+// Add Click-Jacking and XSS Protection
+header('X-Frame-Options: DENY');
+header('X-Content-Security-Policy: allow "self"; frame-ancestors "none"');
+
 
 if (!isset($_NO_CACHEHEADERS))
 	header('Cache-Control: no-store, no-transform, private, must-revalidate, max-age=0');

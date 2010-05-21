@@ -113,7 +113,7 @@ class bt_memcache {
 		return $replace;
 	}
 	public static function replace($key, $var, $expire) {
-		return self::rpl(($key, $var, $expire);
+		return self::rpl($key, $var, $expire);
 	}
 
 	public static function set($key, $var, $expire) {
