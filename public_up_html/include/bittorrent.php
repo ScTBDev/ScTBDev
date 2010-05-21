@@ -23,7 +23,7 @@ require_once(__DIR__.DIRECTORY_SEPARATOR.'defines.php');
 
 // Add Click-Jacking and XSS Protection
 header('X-Frame-Options: DENY');
-header('X-Content-Security-Policy: allow "self"; frame-ancestors "none"');
+header('X-Content-Security-Policy: allow "self"; img-src *; frame-ancestors "none"');
 
 
 if (!isset($_NO_CACHEHEADERS))
