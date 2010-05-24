@@ -28,6 +28,8 @@ dbconn();
 loggedinorreturn();
 
 $cats = bt_mem_caching::get_cat_list();
+$last_torrents = bt_mem_caching::get_last_torrents();
+
 $searchstr = $_GET['search'];
 $sortby = 0 + $_GET['sort'];
 $genre = isset($_GET['genre']) ? trim($_GET['genre']) : false;

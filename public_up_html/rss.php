@@ -40,23 +40,13 @@ $passkey = isset($_GET['passkey']) ? $_GET['passkey'] : '';
 if (!$passkey)
 	die;
 
+bt_memcache::connect();
 $user = bt_mem_caching::get_user_from_passkey($passkey);
 
 if (!$user)
 	die;
 
-bt_memcache::connect();
-$last_torrents = bt_memcache::get('last_torrents');
-if (!$last_torrents) {
-	$last_torrents = array();
-	bt_sql::connect();
-	$ltorrentsq = bt_sql::query('SELECT category, MAX(id) AS id FROM torrents GROUP BY category ORDER BY category ASC') or bt_sql::err(__FILE__, __LINE__);
-	while ($lt = $ltorrentq->fetch_row())
-		$last_torrents[$lt[0]] = (int)$lt[1];
-
-	$ltorrentsq->free();
-	bt_memcache::add('last_torrents', $last_torrents, 10800);
-}
+$last_torrents = bt_mem_caching::get_last_torrents();
 $categories = bt_mem_caching::get_cat_list();
 $valid_cats = array_keys($categories);
 $whereq = array();

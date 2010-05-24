@@ -24,6 +24,7 @@ require_once(CLASS_PATH.'bt_memcache.php');
 require_once(CLASS_PATH.'bt_bitmask.php');
 require_once(CLASS_PATH.'bt_sql.php');
 require_once(CLASS_PATH.'bt_string.php');
+require_once(CLASS_PATH.'bt_security.php');
 
 class bt_mem_caching {
 	const TTL_TIME = 21600;
@@ -309,6 +310,29 @@ class bt_mem_caching {
 		}
 
 		return $cats;
+	}
+
+	public static function get_last_torrents() {
+		bt_memcache::connect();
+		$last_torrents = bt_memcache::get('last_torrents');
+		if (!$last_torrents) {
+			$last_torrents = array();
+			bt_sql::connect();
+			$ltorrentsq = bt_sql::query('SELECT category, MAX(id) FROM torrents GROUP BY category') or bt_sql::err(__FILE__, __LINE__);
+			while ($lt = $ltorrentq->fetch_row())
+				$last_torrents[$lt[0]] = (int)$lt[1];
+			$ltorrentsq->free();
+
+			ksort($last_torrents, SORT_NUMERIC);
+			bt_memcache::add('last_torrents', $last_torrents, 10800);
+		}
+
+		return $last_torrents;
+	}
+
+	public static function remove_last_torrents() {
+		bt_memcache::connect();
+		bt_memcache::del('last_torrents');
 	}
 }
 ?>

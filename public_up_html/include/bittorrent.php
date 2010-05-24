@@ -80,13 +80,13 @@ if (!isset($_NO_REDIRECT) && $_SERVER['REQUEST_METHOD'] == 'GET' && substr($_SER
 */
 
 // TODO: really need to do this a lot better
-if (preg_match('/(\< *(java|script)|script\:|\+document\.)/i', serialize($_SERVER)))
+if (preg_match('/(?:\< *(?:java|script)|script\:|\+document\.)/i', serialize($_SERVER)))
   httperr(403,'Forbidden');
-if (preg_match('/(\< *(java|script)|script\:|\+document\.)/i', serialize($_GET)))
+if (preg_match('/(?:\< *(?:java|script)|script\:|\+document\.)/i', serialize($_GET)))
   httperr(403, 'Forbidden');
-if (preg_match('/(\< *(java|script)|script\:|\+document\.)/i', serialize($_POST)))
+if (preg_match('/(?:\< *(?:java|script)|script\:|\+document\.)/i', serialize($_POST)))
   httperr(403, 'Forbidden');
-if (preg_match('/(\< *(java|script)|script\:|\+document\.)/i', serialize($_COOKIE)))
+if (preg_match('/(?:\< *(?:java|script)|script\:|\+document\.)/i', serialize($_COOKIE)))
   httperr(403, 'Forbidden');
 
 $TIMES['start'] = microtime(true);

@@ -85,7 +85,7 @@ class bt_memcache {
 
 	public static function add($key, $var, $expire) {
 		if (!self::$connected) {
-			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = "'.$key.'"', E_USER_WARNING);
+			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = '.var_export($key, true), E_USER_WARNING);
 			return false;
 		}
 
@@ -100,7 +100,7 @@ class bt_memcache {
 
 	public static function rpl($key, $var, $expire) {
 		if (!self::$connected) {
-			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = "'.$key.'"', E_USER_WARNING);
+			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = '.var_export($key, true), E_USER_WARNING);
 			return false;
 		}
 
@@ -118,7 +118,7 @@ class bt_memcache {
 
 	public static function set($key, $var, $expire) {
 		if (!self::$connected) {
-			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = "'.$key.'"', E_USER_WARNING);
+			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = '.var_export($key, true), E_USER_WARNING);
 			return false;
 		}
 
@@ -133,14 +133,30 @@ class bt_memcache {
 
 	public static function get($key, &$cas = NULL) {
 		if (!self::$connected) {
-			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = "'.$key.'"', E_USER_WARNING);
+			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = '.var_export($key, true), E_USER_WARNING);
 			return false;
 		}
 
-		self::$count++;
-		$time = microtime(true);
-		$get = self::$link->get($key, NULL, $cas);
-		self::$time += (microtime(true) - $time);
+		if (is_string($key)) {
+			self::$count++;
+			$time = microtime(true);
+			$get = self::$link->get($key, NULL, $cas);
+			self::$time += (microtime(true) - $time);
+		}
+		elseif (is_array($key)) {
+			self::$count++;
+			$time = microtime(true);
+			$gets = self::$link->getMulti($key, $casp);
+			$get = $cas = array();
+			foreach($key as $k) {
+				$get[$k] = isset($gets[$k]) ? $gets[$k] : false;
+				$cas[$k] = isset($gets[$k]) ? $casp[$k] : false;
+			}
+			unset($gets, $casp);
+			self::$time += (microtime(true) - $time);
+		}
+		else
+			return false;
 
 		self::set_error(__METHOD__, $key);
 
@@ -154,7 +170,7 @@ class bt_memcache {
 	// Compare And Swap
 	public static function cas($key, $var, $expire, $token) {
 		if (!self::$connected) {
-			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = "'.$key.'"', E_USER_WARNING);
+			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = '.var_export($key, true), E_USER_WARNING);
 			return false;
 		}
 
@@ -169,7 +185,7 @@ class bt_memcache {
 
 	public static function inc($key, $howmuch = 1) {
 		if (!self::$connected) {
-			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = "'.$key.'"', E_USER_WARNING);
+			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = '.var_export($key, true), E_USER_WARNING);
 			return false;
 		}
 
@@ -184,7 +200,7 @@ class bt_memcache {
 
 	public static function dec($key, $howmuch = 1) {
 		if (!self::$connected) {
-			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = "'.$key.'"', E_USER_WARNING);
+			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = '.var_export($key, true), E_USER_WARNING);
 			return false;
 		}
 
@@ -199,7 +215,7 @@ class bt_memcache {
 
 	public static function app($key, $var) {
 		if (!self::$connected) {
-			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = "'.$key.'"', E_USER_WARNING);
+			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = '.var_export($key, true), E_USER_WARNING);
 			return false;
 		}
 
@@ -218,7 +234,7 @@ class bt_memcache {
 
 	public static function pre($key, $var) {
 		if (!self::$connected) {
-			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = "'.$key.'"', E_USER_WARNING);
+			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = '.var_export($key, true), E_USER_WARNING);
 			return false;
 		}
 
@@ -237,7 +253,7 @@ class bt_memcache {
 
 	public static function del($key) {
 		if (!self::$connected) {
-			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = "'.$key.'"', E_USER_WARNING);
+			trigger_error('Not connected to Memcache server in '.__METHOD__.' KEY = '.var_export($key, true), E_USER_WARNING);
 			return false;
 		}
 
@@ -307,7 +323,7 @@ class bt_memcache {
 				case Memcached::RES_NOTSTORED:
 					break;
 				default:
-					trigger_error('Error in '.$method.($key ? ' KEY "'.$key.'"' : '').' ['.self::$errno.']: '.
+					trigger_error('Error in '.$method.($key ? ' KEY '.var_export($key, true) : '').' ['.self::$errno.']: '.
 						self::$error, E_USER_WARNING);
 					break;
 			}

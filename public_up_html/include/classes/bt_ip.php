@@ -25,8 +25,8 @@ require_once(CLASS_PATH.'bt_vars.php');
 require_once(CLASS_PATH.'bt_memcache.php');
 
 class bt_ip {
-	const IP4 = 1;
-	const IP6 = 2;
+	const IP4		= 1;
+	const IP6		= 2;
 
 	private static $ip_cache = array();
 
@@ -53,11 +53,13 @@ class bt_ip {
 		return $ip;
 	}
 
-	public static function type(&$ip, &$type) {
+	public static function type(&$ip, &$type, &$ip2 = NULL) {
 		if (isset(self::$ip_cache[$ip])) {
-			list($ip, $type, $addr) = self::$ip_cache[$ip];
+			list($ip, $type, $addr, $ip2) = self::$ip_cache[$ip];
 			return $addr;
 		}
+
+		$ip2 = false;
 
 		$addr = @inet_pton($ip);
 		if (!$addr) {
@@ -74,13 +76,41 @@ class bt_ip {
 				$addr = $addr[12].$addr[13].$addr[14].$addr[15];
 				$type = self::IP4;
 			}
-			else
+			elseif (!strncmp($addr, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", 12)) {
+				if (!bt_string::bincmp($addr, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", 127))
+					$type = self::IP6;
+				else {
+					$addr = $addr[12].$addr[13].$addr[14].$addr[15];
+					$type = self::IP4;
+				}
+			}
+			else {
 				$type = self::IP6;
+
+				if (!strncmp($addr, "\x20\x02", 2)) {
+					// 6to4
+					$ip4 = $addr[2].$addr[3].$addr[4].$addr[5];
+					$ip4 = @inet_ntop($ip4);
+					if ($ip4)
+						$ip2 = $ip4;
+				}
+				elseif (!strncmp($addr, "\x20\x01\x00\x00", 4)) {
+					// Teredo
+					$ip4 = $addr[12].$addr[13].$addr[14].$addr[15];
+					$ip4 = @inet_ntop($ip4);
+					if ($ip4) {
+						$ip4 = ip2long($ip4);
+						$ip4 = ($ip4 ^ 0xffffffff) & 0xffffffff;
+						$ip4 = long2ip($ip4);
+						$ip2 = $ip4;
+					}
+				}
+			}
 		}
 		else
 			$type = false;
 
-		self::$ip_cache[$ip] = array(@inet_ntop($addr), $type, $addr);
+		self::$ip_cache[$ip] = array(@inet_ntop($addr), $type, $addr, $ip2);
 		$ip = self::$ip_cache[$ip][0];
 
 		return $addr;
@@ -227,7 +257,7 @@ class bt_ip {
 				// As of 2010-05-07
 
 				$reserved_ips = array (
-					array(0x0			, 0xffffff),	// 0.0.0.0		- 0.255.255.255		0 - IANA - Local Identification
+					array(0x0			, 0xffffff),	// 0.0.0.0		- 0.255.255.255		0 - IANA - Local Identification [RFC1122]
 					array(0x3000000		, 0x3ffffff),	// 3.0.0.0		- 3.255.255.255		3 - General Electric Company
 
 					array(0x5000000		, 0x7ffffff),	// 5.0.0.0		- 7.255.255.255		5 - IANA
@@ -235,7 +265,7 @@ class bt_ip {
 														//									7 - DoD Information Systems Agency Network
 
 					array(0x9000000		, 0xbffffff),	// 9.0.0.0		- 11.255.255.255	9 - IBM
-														//									10 - IANA - Private Use
+														//									10 - IANA - Private Use [RFC1918]
 														//									11 - DoD Intel Information Systems
 
 					array(0xd000000		, 0xdffffff),	// 13.0.0.0		- 13.255.255.255	13 - Xerox Corporation
@@ -287,10 +317,10 @@ class bt_ip {
 														//									105 - IANA
 														//									106 - IANA
 
-					array(0x7f000000	, 0x7fffffff),	// 127.0.0.0	- 127.255.255.255	127 - IANA - Loopback
+					array(0x7f000000	, 0x7fffffff),	// 127.0.0.0	- 127.255.255.255	127 - IANA - Loopback [RFC1122]
 
-					array(0xa9fe0000	, 0xa9feffff),	// 169.254.0.0	- 169.254.255.255	IANA - Link Local
-					array(0xac100000	, 0xac1fffff),	// 172.16.0.0	- 172.31.255.255	IANA - Private Use
+					array(0xa9fe0000	, 0xa9feffff),	// 169.254.0.0	- 169.254.255.255	IANA - Link Local [RFC3927]
+					array(0xac100000	, 0xac1fffff),	// 172.16.0.0	- 172.31.255.255	IANA - Private Use [RFC1918]
 
 					array(0xb1000000	, 0xb1ffffff),	// 177.0.0.0	- 177.255.255.255	177 - IANA
 
@@ -300,16 +330,18 @@ class bt_ip {
 
 					array(0xb9000000	, 0xb9ffffff),	// 185.0.0.0	- 185.255.255.255	185 - IANA
 
-					array(0xc0000200	, 0xc00002ff),	// 192.0.2.0	- 192.0.2.255		IANA - TEST-NET-1
-					array(0xc0586300	, 0xc05863ff),	// 192.88.99.0	- 192.88.99.255		IANA - 6to4 Relay Anycast
-					array(0xc0a80000	, 0xc0a8ffff),	// 192.168.0.0	- 192.168.255.255	IANA - Private Use
-
-					array(0xc6120000	, 0xc613ffff),	// 198.18.0.0	- 198.19.255.255	IANA - IPv4 Special Purpose Address Registry
+					array(0xc0000000	, 0xc00000ff),	// 192.0.0.0	- 192.0.0.255		IANA - IETF protocol assignments [RFC5735]
+					array(0xc0000200	, 0xc00002ff),	// 192.0.2.0	- 192.0.2.255		IANA - TEST-NET-1 [RFC5737]
+					array(0xc0586300	, 0xc05863ff),	// 192.88.99.0	- 192.88.99.255		IANA - 6to4 Relay Anycast [RFC3068]
+					array(0xc0a80000	, 0xc0a8ffff),	// 192.168.0.0	- 192.168.255.255	IANA - Private Use [RFC1918]
+					array(0xc6120000	, 0xc613ffff),	// 198.18.0.0	- 198.19.255.255	IANA - IPv4 Special Purpose Address Registry [RFC2544]
+					array(0xc6336400	, 0xc63364ff)	// 198.51.100.0	- 198.51.100.255	IANA - TEST-NET-2 [RFC5737]
+					array(0xcb007100	, 0xcb0071ff)	// 203.0.113.0	- 203.0.113.255		IANA - TEST-NET-3 [RFC5737]
 
 					array(0xd6000000	, 0xd7ffffff),	// 214.0.0.0	- 215.255.255.255	214 - US DoD
 														//									215 - US DoD
 
-					array(0xe0000000	, 0xffffffff),	// 224.0.0.0	- 255.255.255.255	IANA - Multicast / Future use
+					array(0xe0000000	, 0xffffffff),	// 224.0.0.0	- 255.255.255.255	IANA - Multicast [RFC2171] / Future use [RFC1122]
 				);
 
 				foreach ($reserved_ips as $range) {
@@ -380,7 +412,8 @@ class bt_ip {
 				*/
 
 				$reserved_nets = array(
-					'2001:0DB8::/32',			// NON-ROUTABLE range to be used for documentation purpose [RFC3849]
+					'2001:DB8::/32',			// NON-ROUTABLE range to be used for documentation purpose [RFC3849]
+					'2001:10::/28',				// Overlay Routable Cryptographic Hash IDentifiers (ORCHID) addresses [RFC4843]
 				);
 
 				if (!(self::verify_ip($valid_nets, $ip) && !self::verify_ip($reserved_nets, $ip)))
