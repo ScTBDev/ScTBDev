@@ -335,8 +335,8 @@ class bt_ip {
 					array(0xc0586300	, 0xc05863ff),	// 192.88.99.0	- 192.88.99.255		IANA - 6to4 Relay Anycast [RFC3068]
 					array(0xc0a80000	, 0xc0a8ffff),	// 192.168.0.0	- 192.168.255.255	IANA - Private Use [RFC1918]
 					array(0xc6120000	, 0xc613ffff),	// 198.18.0.0	- 198.19.255.255	IANA - IPv4 Special Purpose Address Registry [RFC2544]
-					array(0xc6336400	, 0xc63364ff)	// 198.51.100.0	- 198.51.100.255	IANA - TEST-NET-2 [RFC5737]
-					array(0xcb007100	, 0xcb0071ff)	// 203.0.113.0	- 203.0.113.255		IANA - TEST-NET-3 [RFC5737]
+					array(0xc6336400	, 0xc63364ff),	// 198.51.100.0	- 198.51.100.255	IANA - TEST-NET-2 [RFC5737]
+					array(0xcb007100	, 0xcb0071ff),	// 203.0.113.0	- 203.0.113.255		IANA - TEST-NET-3 [RFC5737]
 
 					array(0xd6000000	, 0xd7ffffff),	// 214.0.0.0	- 215.255.255.255	214 - US DoD
 														//									215 - US DoD
