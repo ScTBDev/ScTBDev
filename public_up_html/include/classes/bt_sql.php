@@ -44,9 +44,9 @@ class bt_sql {
 			define('MYSQL_NEEDED', true);
 
 		if (!$SECRETS)
-			require_once(BASE_PATH.'includes'.DIRECTORY_SEPARATOR.'secrets.php');
+			require_once(SCRTS_PATH.'secrets.php');
 
-		require_once(CLASS_PATH.'db'.DIRECTORY_SEPARATOR.'sql_mysql.php');
+		require_once(DBM_PATH.'sql_mysql.php');
 
 		if (!self::$DB || !self::$DB->ping()) {
 			self::$DB = new sql_database_mysql($SECRETS['mysql']['host'], $SECRETS['mysql']['user'],

@@ -1,0 +1,4 @@
+
+Optional SQL Settings:
+sql_mode - should have the option NO_UNSIGNED_SUBTRACTION enabled
+	- Suggest adding to /etc/my.cnf: sql-mode = "NO_UNSIGNED_SUBTRACTION"
