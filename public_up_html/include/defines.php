@@ -19,10 +19,10 @@
  *	along with ScTBDev.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const REQUIRED_PHP = '5.3.0';
+const REQUIRED_PHP = 50300, REQUIRED_PHP_VERSION = '5.3.0';
 
-if (!version_compare(PHP_VERSION, REQUIRED_PHP, '>='))
-	die('PHP '.REQUIRED_PHP.' or higher is required.');
+if (!defined('PHP_VERSION_ID') || PHP_VERSION_ID < REQUIRED_PHP)
+	die('PHP '.REQUIRED_PHP_VERSION.' or higher is required.');
 
 if (PHP_INT_SIZE < 8)
 	die('A 64bit or higher OS + Processor is required.');
