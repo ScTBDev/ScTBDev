@@ -20,7 +20,6 @@
  */
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'class_config.php');
-require_once(CLASS_PATH.'bt_utf8.php');
 require_once(CLASS_PATH.'bt_vars.php');
 
 class bt_security {
