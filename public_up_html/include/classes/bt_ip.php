@@ -254,7 +254,7 @@ class bt_ip {
 
 				// reserved/unroutable IANA IPv4 addresses
 				// http://www.iana.org/assignments/ipv4-address-space
-				// As of 2010-05-07
+				// As of 2010-06-02
 
 				$reserved_ips = array (
 					array(0x0			, 0xffffff),	// 0.0.0.0		- 0.255.255.255		0 - IANA - Local Identification [RFC1122]
@@ -322,11 +322,7 @@ class bt_ip {
 					array(0xa9fe0000	, 0xa9feffff),	// 169.254.0.0	- 169.254.255.255	IANA - Link Local [RFC3927]
 					array(0xac100000	, 0xac1fffff),	// 172.16.0.0	- 172.31.255.255	IANA - Private Use [RFC1918]
 
-					array(0xb1000000	, 0xb1ffffff),	// 177.0.0.0	- 177.255.255.255	177 - IANA
-
 					array(0xb3000000	, 0xb3ffffff),	// 179.0.0.0	- 179.255.255.255	179 - IANA
-
-					array(0xb5000000	, 0xb5ffffff),	// 181.0.0.0	- 181.255.255.255	181 - IANA
 
 					array(0xb9000000	, 0xb9ffffff),	// 185.0.0.0	- 185.255.255.255	185 - IANA
 
