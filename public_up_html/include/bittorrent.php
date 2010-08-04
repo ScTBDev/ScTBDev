@@ -63,7 +63,7 @@ if (!isset($_NO_REDIRECT) && isset($_SERVER['HTTP_HOST']) && $hosts[0] != 'www')
 	die();
 }
 
-if (!bt_vars::$ssl && in_array(bt_vars::$geoip['country_code'], bt_config::$conf['ssl_only_ccs'])) {
+if (!bt_vars::$ssl && in_array(@bt_vars::$geoip['country_code'], bt_config::$conf['ssl_only_ccs'])) {
 	header('Location: '.bt_config::$conf['default_ssl_url'].$_SERVER['REQUEST_URI']);
 	die();
 }
@@ -176,7 +176,8 @@ function userlogin() {
 		die('Invalid Session');
 	}
 
-    $res = bt_sql::query('SELECT *, CAST(flags AS SIGNED) AS flags_signed FROM users WHERE id = '.$id.' AND enabled = "yes" AND (flags & '.bt_options::FLAGS_CONFIRMED.')')
+	$flags = bt_options::FLAGS_ENABLED | bt_options::FLAGS_CONFIRMED;
+    $res = bt_sql::query('SELECT *, CAST(flags AS SIGNED) AS flags_signed FROM users WHERE id = '.$id.' AND (flags & '.$flags.') = '.$flags)
 		or bt_sql::err(__FILE__, __LINE__);
     $row = $res->fetch_assoc();
 	$res->free();
@@ -184,7 +185,7 @@ function userlogin() {
         return;
 
 	$updateuser = $updatesession = array();
-	bt_user::prepare_curuser($row);
+	bt_user::prepare_user($row, true);
 
 	if (!$row['settings']['bypass_ban']) {
 		if (bt_bans::check(bt_vars::$realip, true, true, $reason)) {
@@ -568,7 +569,7 @@ function get_user_icons($arr, $big = false) {
 	}
 
 	$pics = $arr['settings']['donor'] ? '<img src="pic/'.$donorpic.'" alt="Donor" border="0" '.$style.'>' : '';
-	if ($arr['enabled'] == 'yes')
+	if ($arr['settings']['enabled'])
 		$pics .= $arr['settings']['warned'] ? '<img src="pic/'.$warnedpic.'" alt="Warned" border="0" '.$style.'>' : '';
 	else
 		$pics .= '<img src="pic/'.$disabledpic.'" alt="Disabled" border="0" '.$style.'>'."\n";

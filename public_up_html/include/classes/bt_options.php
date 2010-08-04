@@ -49,8 +49,8 @@ class bt_options {
 	const FLAGS_BYPASS_BANS			= BIT_26;	// bypass_ban			allows a user to bypass bans
 	const FLAGS_HIDE_LAST_SEEN		= BIT_27;	// hide_last_seen		hide last seen time from other users
 	const FLAGS_DISABLE_INVITE_BUY	= BIT_28;	// disable_invites		disable buying of invites
-	const FLAGS_UNALLOCATED29		= BIT_29;	//
-	const FLAGS_UNALLOCATED30		= BIT_30;	//
+	const FLAGS_PROBED				= BIT_29;	//
+	const FLAGS_CONNECTABLE			= BIT_30;	//
 	const FLAGS_UNALLOCATED31		= BIT_31;	//
 	const FLAGS_UNALLOCATED32		= BIT_32;	//
 

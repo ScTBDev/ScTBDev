@@ -234,6 +234,8 @@ class bt_forums {
 			$theme |= BIT_2;
 		if ($settings['forum_3'])
 			$theme |= BIT_3;
+		if ($settings['forum_4'])
+			$theme |= BIT_4;
 
 		return (int)$theme;
 	}
@@ -246,6 +248,7 @@ class bt_forums {
 			'forum_1'	=> (bool)($theme & BIT_1),
 			'forum_2'	=> (bool)($theme & BIT_2),
 			'forum_3'	=> (bool)($theme & BIT_3),
+			'forum_4'	=> (bool)($theme & BIT_4),
 		);
 		return $settings;
 	}

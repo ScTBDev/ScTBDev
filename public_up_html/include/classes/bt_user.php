@@ -68,44 +68,80 @@ class bt_user {
 		self::UC_LEADER				=> 'Staff Leader'
 	);
 
-	public static function prepare_curuser(&$user) {
-		if (empty($user))
+	public static function prepare_user(&$user, $curuser = false) {
+		if ($curuser && empty($user))
 			die;
 
-		$user['id'] = 0 + $user['id'];
-		$user['class'] = 0 + $user['class'];
-		$user['theme'] - 0 + $user['theme'];
-		$user['stylesheet'] = 0 + $user['stylesheet'];
-		$user['added'] = 0 + $user['added'];
-		$user['last_login'] = 0 + $user['last_login'];
-		$user['last_access'] = 0 + $user['last_access'];
-		$user['uploaded'] = (float)$user['uploaded'];
-		$user['downloaded'] = (float)$user['downloaded'];
-		$user['payed_uploaded'] = (float)$user['payed_uploaded'];
-		$user['seeding'] = 0 + $user['seeding'];
-		$user['leeching'] = 0 + $user['leeching'];
-		$user['country'] = 0 + $user['country'];
-		$user['timezone'] = (float)$user['timezone'];
-		$user['dst_offset'] = 0 + $user['dst_offset'];
-		$user['warneduntil'] = 0 + $user['warneduntil'];
-		$user['torrentsperpage'] = 0 + $user['torrentsperpage'];
-		$user['topicsperpage'] = 0 + $user['topicsperpage'];
-		$user['postsperpage'] = 0 + $user['postsperpage'];
-		$user['last_browse'] = 0 + $user['last_browse'];
-		$user['inbox_new'] = 0 + $user['inbox_new'];
-		$user['inbox'] = 0 + $user['inbox'];
-		$user['sentbox'] = 0 + $user['sentbox'];
-		$user['posts'] = 0 + $user['posts'];
-		$user['last_forum_visit'] = 0 + $user['last_forum_visit'];
-		$user['invites'] = 0 + $user['invites'];
-		$user['invitedby'] = 0 + $user['invitedby'];
-		$user['flags'] = (int)$user['flags_signed'];
-		unset($user['flags_signed']);
-		$user['donations'] = (float)$user['donations'];
-		$user['irc_time'] = 0 + $user['irc_time'];
-		$user['ip'] = (int)$user['ip'];
-		$user['realip'] = (int)$user['realip'];
-		$user['settings'] = bt_bitmask::fetch_all($user['flags']);
+		if (isset($user['id']))
+			$user['id'] = (int)$user['id'];
+		if (isset($user['class']))
+			$user['class'] = (int)$user['class'];
+		if (isset($user['theme']))
+			$user['theme'] - (int)$user['theme'];
+		if (isset($user['stylesheet']))
+			$user['stylesheet'] = (int)$user['stylesheet'];
+		if (isset($user['added']))
+			$user['added'] = (int)$user['added'];
+		if (isset($user['last_login']))
+			$user['last_login'] = (int)$user['last_login'];
+		if (isset($user['last_access']))
+			$user['last_access'] = (int)$user['last_access'];
+		if (isset($user['uploaded']))
+			$user['uploaded'] = (float)$user['uploaded'];
+		if (isset($user['downloaded']))
+			$user['downloaded'] = (float)$user['downloaded'];
+		if (isset($user['payed_uploaded']))
+			$user['payed_uploaded'] = (float)$user['payed_uploaded'];
+		if (isset($user['seeding']))
+			$user['seeding'] = (int)$user['seeding'];
+		if (isset($user['leeching']))
+			$user['leeching'] = (int)$user['leeching'];
+		if (isset($user['country']))
+			$user['country'] = (int)$user['country'];
+		if (isset($user['warneduntil']))
+			$user['warneduntil'] = (int)$user['warneduntil'];
+		if (isset($user['torrentsperpage']))
+			$user['torrentsperpage'] = (int)$user['torrentsperpage'];
+		if (isset($user['topicsperpage']))
+			$user['topicsperpage'] = (int)$user['topicsperpage'];
+		if (isset($user['postsperpage']))
+			$user['postsperpage'] = (int)$user['postsperpage'];
+		if (isset($user['last_browse']))
+			$user['last_browse'] = (int)$user['last_browse'];
+		if (isset($user['inbox_new']))
+			$user['inbox_new'] = (int)$user['inbox_new'];
+		if (isset($user['inbox']))
+			$user['inbox'] = (int)$user['inbox'];
+		if (isset($user['sentbox']))
+			$user['sentbox'] = (int)$user['sentbox'];
+		if (isset($user['posts']))
+			$user['posts'] = (int)$user['posts'];
+		if (isset($user['last_forum_visit']))
+			$user['last_forum_visit'] = (int)$user['last_forum_visit'];
+		if (isset($user['invites']))
+			$user['invites'] = (int)$user['invites'];
+		if (isset($user['invitedby']))
+			$user['invitedby'] = (int)$user['invitedby'];
+
+
+		if (isset($user['donations']))
+			$user['donations'] = (float)$user['donations'];
+		if (isset($user['irc_time']))
+			$user['irc_time'] = (int)$user['irc_time'];
+		if (isset($user['ip']))
+			$user['ip'] = (int)$user['ip'];
+		if (isset($user['realip']))
+			$user['realip'] = (int)$user['realip'];
+
+		if (isset($user['flags_signed'])) {
+			$user['flags'] = (int)$user['flags_signed'];
+			unset($user['flags_signed']);
+		}
+		elseif (isset($user['flags']))
+			$user['flags'] = (int)$user['flags'];
+
+		if ($curuser)
+			$user['settings'] = bt_bitmask::fetch_all($user['flags']);
 	}
 
 	public static function valid_class($class) {
@@ -223,7 +259,7 @@ class bt_user {
 		if (!empty(self::$_users_cache))
 			return;
 
-		$res = bt_sql::query('SELECT id, uploaded, payed_uploaded, downloaded, added, class FROM users WHERE enabled = "yes"');
+		$res = bt_sql::query('SELECT id, uploaded, payed_uploaded, downloaded, added, class FROM users WHERE (flags & '.bt_options::FLAGS_ENABLED.')');
 		while ($arr = $res->fetch_assoc()) {
 			$class = (int)$arr['class'];
 

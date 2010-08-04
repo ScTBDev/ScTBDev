@@ -77,8 +77,8 @@ bt_theme::head('Signup');
 
 $countries = bt_mem_caching::get_countrylist();
 $list = array();
-foreach ($countries as $carr)
-	$list[] = bt_theme::$settings['signup']['list_prefix'].'<option value="'.$carr['id'].'"'.
+foreach ($countries as $cid => $carr)
+	$list[] = bt_theme::$settings['signup']['list_prefix'].'<option value="'.$cid.'"'.
 		($carr['cc'] == $cc ? ' selected="selected"' : '').'>'.$carr['name'].'</option>';
 
 $country_list = implode("\n", $list);

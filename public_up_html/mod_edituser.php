@@ -130,7 +130,7 @@ if ($userid < 1 || !bt_user::valid_class($class))
 	bt_theme::error('Error', 'Bad user ID or class ID.');
 
 // check target user class
-$res = bt_sql::query('SELECT * FROM `users` WHERE `id` = '.$userid) or bt_sql::err(__FILE__, __LINE__);
+$res = bt_sql::query('SELECT *, CAST(flags AS SIGNED) AS flags_signed FROM users WHERE id = '.$userid) or bt_sql::err(__FILE__, __LINE__);
 $arr = $res->fetch_assoc() or puke();
 $res->free();
 $arr['settings'] = bt_bitmask::fetch_all($arr['flags']);

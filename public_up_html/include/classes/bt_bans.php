@@ -85,7 +85,7 @@ class bt_bans {
 			bt_sql::connect();
 			if ($type === bt_ip::IP4) {
 				$nip = ip2long($ip);
-				$banq = bt_sql::query('SELECT comment FROM bans WHERE (first <= '.$nip.' AND last >= '.$nip.') LIMIT 1');
+				$banq = bt_sql::query('SELECT comment FROM bans WHERE '.$nip.' BETWEEN first AND last LIMIT 1');
 				if ($banq->num_rows) {
 					$comment = $banq->fetch_row();
 					$banq->free();
@@ -107,16 +107,13 @@ class bt_bans {
 				return false;
 			}
 			elseif ($type === bt_ip::IP6) {
-				$banq = bt_sql::query('SELECT ip, mask, comment FROM bansv6 WHERE LEFT(ip, smask) = LEFT('.bt_sql::esc($packed_ip).', smask)');
+				$banq = bt_sql::query('SELECT comment FROM bansv6 WHERE '.bt_sql::esc($packed_ip).' BETWEEN first AND last LIMIT 1');
 				if ($banq->num_rows) {
-					while ($ban6 = $banq->fetch_row()) {
-						if (!bt_string::bincmp($packed_ip, $ban6[0], $ban6[1])) {
-							$banq->free();
-							$reason = 'Manual Ban ('.$ban6[2].')';
-							self::add($ip, $reason);
-							return true;
-						}
-					}
+					$comment = $banq->fetch_row();
+					$banq->free();
+					$reason = 'Manual Ban ('.$comment[0].')';
+					self::add($ip, $reason);
+					return true;
 				}
 				$banq->free();
 

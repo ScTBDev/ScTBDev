@@ -155,7 +155,8 @@ class bt_string {
 	public static function cut_word($txt, $max_length = 24, $pad_with = '&#8203;') {
 		if (empty($txt))
 			return false;
-		for ($c = 0, $a = 0, $g = 0; $c < strlen($txt); $c++) {
+
+		for ($c = 0, $a = 0, $g = 0, $txtlen = strlen($txt); $c < $txtlen; $c++) {
 			$d[($c + $g)] = $txt[$c];
 			if ($txt[$c] != ' ')
 				$a++;
@@ -177,15 +178,15 @@ class bt_string {
 		if (!is_int($max_length))
 			return false;
 
-		$length = strlen($str);
+		$length = bt_utf8::strlen($str);
 		if ($length <= $max_length)
 			return $str;
 		elseif ($mid_cut) {
 			$mid = (int)ceil($max_length / 2);
-			$string = substr($str, 0, $mid).'...'.substr($str, $mid);
+			$string = bt_utf8::substr($str, 0, $mid).'...'.bt_utf8::substr($str, $mid);
 		}
 		else
-			return substr($str, 0, $max_length).'...';
+			return bt_utf8::substr($str, 0, $max_length).'...';
 	}
 };
 ?>

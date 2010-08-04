@@ -21,6 +21,7 @@
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'class_config.php');
 require_once(CLASS_PATH.'bt_user.php');
+require_once(CLASS_PATH.'bt_memcache.php');
 
 bt_time::init();
 class bt_time {

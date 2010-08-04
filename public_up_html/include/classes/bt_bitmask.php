@@ -86,7 +86,7 @@ class bt_bitmask {
 		'forum_1'			=> BIT_53,	// yes		forum_1-4 used for button selection in forums
 		'forum_2'			=> BIT_54,	// yes		see bit 53
 		'forum_3'			=> BIT_55,	// yes		see bit 53
-//		'unallocated64'		=> BIT_56,	//
+		'forum_4'			=> BIT_56,	// yes		see bit 53
 //		'unallocated64'		=> BIT_57,	//
 //		'unallocated64'		=> BIT_58,	//
 //		'unallocated64'		=> BIT_59,	//
