@@ -20,11 +20,12 @@
  */
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorrent.php');
+require_once(CLASS_PATH.'bt_location.php');
 
 dbconn();
 loggedinorreturn();
 
-$countries = bt_mem_caching::get_countrylist();
+$countries = bt_location::countries();
 $tsettings = bt_theme::$settings['staff'];
 $online_time = time() - 300;
 bt_theme::head('Staff');

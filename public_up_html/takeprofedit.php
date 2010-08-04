@@ -26,6 +26,7 @@ require_once(CLASS_PATH.'bt_chans.php');
 require_once(CLASS_PATH.'bt_forums.php');
 require_once(CLASS_PATH.'bt_hash.php');
 require_once(CLASS_PATH.'bt_mem_caching.php');
+require_once(CLASS_PATH.'bt_location.php');
 
 function bark($msg)
   {
@@ -370,7 +371,7 @@ if ($theme >= 0)
   $updateset[] = 'theme = '.$theme;
 
 if ($country != bt_user::$current['country']) {
-	if (bt_mem_caching::get_country_from_id($country))
+	if (bt_location::country_by_id($country))
 		$updateset[] = '`country` = '.$country;
 }
 

@@ -20,6 +20,7 @@
  */
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorrent.php');
+require_once(CLASS_PATH.'bt_location.php');
 
 dbconn();
 function check_ban($ip) {
@@ -61,6 +62,7 @@ $ip = bt_ip::get_ip();
 $rip = bt_vars::$realip;
 $geoip = bt_geoip::lookup_ip($rip);
 $cc = $geoip['country_code'];
+$ccid = bt_location::country_by_cc($cc);
 
 if ((check_ban($ip) || bt_bans::check($ip)) || ($ip != $rip && (check_ban($rip) || bt_bans::check($rip))))
 	bt_theme::error('Sorry', 'Sorry, signups are closed!');
@@ -75,11 +77,11 @@ if ($arr[0] >= bt_config::$conf['maxusers'] && !($invite && $invite['class'] >= 
 
 bt_theme::head('Signup');
 
-$countries = bt_mem_caching::get_countrylist();
+$countries = bt_location::country_list($cc);
 $list = array();
 foreach ($countries as $cid => $carr)
 	$list[] = bt_theme::$settings['signup']['list_prefix'].'<option value="'.$cid.'"'.
-		($carr['cc'] == $cc ? ' selected="selected"' : '').'>'.$carr['name'].'</option>';
+		($id == $ccid ? ' selected="selected"' : '').'>'.$carr['name'].'</option>';
 
 $country_list = implode("\n", $list);
 

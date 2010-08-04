@@ -23,6 +23,7 @@ require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorre
 require_once(CLASS_PATH.'bt_session.php');
 require_once(CLASS_PATH.'bt_forums.php');
 require_once(CLASS_PATH.'bt_chans.php');
+require_once(CLASS_PATH.'bt_location.php');
 
 dbconn();
 loggedinorreturn();
@@ -66,7 +67,7 @@ foreach ($themesl as $tid => $theme) {
 $theme_list = implode($tsettings['themes_join'], $themes);
 
 
-$countries = bt_mem_caching::get_countrylist();
+$countries = bt_location::countries();
 $countrys = array();
 foreach ($countries as $cid => $carr) {
     $selected = $user['country'] == $cid ? $list_s : '';

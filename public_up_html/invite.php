@@ -20,6 +20,7 @@
  */
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorrent.php');
+require_once(CLASS_PATH.'bt_location.php');
 
 dbconn();
 loggedinorreturn();
@@ -98,7 +99,7 @@ if ($res->num_rows) {
 		else
 			$ratio = '---';
 
-		$country = bt_mem_caching::get_country_from_id($conf['country']);
+		$country = bt_location::country_by_id($conf['country']);
 
 		$rowvars = array(
 			'NAME'		=> $name,

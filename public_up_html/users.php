@@ -20,6 +20,7 @@
  */
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorrent.php');
+require_once(CLASS_PATH.'bt_location.php');
 
 dbconn();
 loggedinorreturn();
@@ -80,7 +81,7 @@ while ($i <= $maxclass && $c = get_user_class_name($i)) {
 }
 $class_list = implode(bt_theme::$settings['users']['class_list']['join'], $classes);
 
-$countries = bt_mem_caching::get_countrylist();
+$countries = bt_location::countries();
 $countrys = array();
 foreach ($countries as $cid => $carr) {
 	$selected = $country == $cid ? bt_theme::$settings['users']['country_list']['selected'] : '';

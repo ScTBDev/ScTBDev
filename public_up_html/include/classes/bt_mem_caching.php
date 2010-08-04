@@ -25,15 +25,10 @@ require_once(CLASS_PATH.'bt_bitmask.php');
 require_once(CLASS_PATH.'bt_sql.php');
 require_once(CLASS_PATH.'bt_string.php');
 require_once(CLASS_PATH.'bt_security.php');
-require_once(CLASS_PATH.'bt_location.php');
 
 class bt_mem_caching {
 	const TTL_TIME = 21600;
 	const BAD_TTL_TIME = 86400;
-
-	private static $_countries = array();
-	private static $_countries_populated = false;
-	
 
 	public static function get_torrent_from_hash($info_hash) {
 		if (strlen($info_hash) != 40 || !bt_string::is_hex($info_hash))
@@ -208,81 +203,6 @@ class bt_mem_caching {
 		bt_memcache::del($key);
 		if ($make_bad)
 			bt_memcache::set($key, 0, self::BAD_TTL_TIME);
-	}
-
-	private static function _cache_countries() {
-		if (self::$_countries_populated)
-			return;
-
-		$key = 'country::cache';
-		bt_memcache::connect();
-		self::$_countries = bt_memcache::get($key);
-
-		if (self::$_countries === false) {
-			self::$_countries = array(
-				'by_id'		=> array(),
-				'by_cc'		=> array(),
-				'from_ccs'	=> array(),
-			);
-
-			bt_sql::connect();
-			$ct_r = bt_sql::query('SELECT id, cc, ccc, name, flagpic FROM countries ORDER BY name ASC') or bt_sql::err(__FILE__,__LINE__);
-
-			$cc_ccc = array();
-
-			while ($ct_a = $ct_r->fetch_assoc()) {
-				$id = 0 + $ct_a['id'];
-				$cc = $ct_a['cc'];
-				$ccc = $ct_a['ccc'];
-				$name = bt_security::html_safe($ct_a['name'], false, true, true);
-				$flagpic = bt_security::html_safe($ct_a['flagpic'], false, true, true);
-
-				self::$_countries['by_id'][$id] = array(
-					'cc'		=> $cc,
-					'ccc'		=> $ccc,
-					'name'		=> $name,
-					'flagpic'	=> $flagpic,
-				);
-
-				if ($cc) {
-					self::$_countries['by_cc'][$cc] = $id;
-					$cc_ccc[$ccc] = $cc;
-				}
-			}
-			$ct_r->free();
-
-			foreach (self::$_countries['by_id'] as $id => $country) {
-				if (!$country['cc'])
-					self::$_countries['by_id'][$id]['cc'] = $cc_ccc[$country['ccc']];
-			}
-
-			foreach (self::$_countries['by_id'] as $id => $country) {
-				if (!isset(self::$_countries['from_ccs'][$country['cc']]))
-					self::$_countries['from_ccs'][$country['cc']] = array();
-
-				self::$_countries['from_ccs'][$country['cc']][] = $id;
-			}
-
-			bt_memcache::add($key, self::$_countries, self::TTL_TIME);
-		}
-
-		self::$_countries_populated = true;
-	}
-
-	public static function get_countrylist() {
-		return bt_location::countries();
-	}
-
-	public static function get_country_from_id($id) {
-		return bt_location::country_by_id($id);
-	}
-
-	public static function get_country_from_cc($cc) {
-		return bt_location::country_by_cc($cc);
-	}
-
-	public static function get_countries_from_cc($cc) {
-		return bt_location::countries_by_cc($cc);
 	}
 
 	public static function get_cat_list() {
