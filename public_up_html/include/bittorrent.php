@@ -177,7 +177,7 @@ function userlogin() {
 	}
 
 	$flags = bt_options::FLAGS_ENABLED | bt_options::FLAGS_CONFIRMED;
-    $res = bt_sql::query('SELECT *, CAST(flags AS SIGNED) AS flags_signed FROM users WHERE id = '.$id.' AND (flags & '.$flags.') = '.$flags)
+    $res = bt_sql::query('SELECT *, CAST(flags AS SIGNED) AS flags_signed, CAST(chans AS SIGNED) AS chans_signed FROM users WHERE id = '.$id.' AND (flags & '.$flags.') = '.$flags)
 		or bt_sql::err(__FILE__, __LINE__);
     $row = $res->fetch_assoc();
 	$res->free();

@@ -107,7 +107,7 @@ class bt_bans {
 				return false;
 			}
 			elseif ($type === bt_ip::IP6) {
-				$banq = bt_sql::query('SELECT comment FROM bansv6 WHERE '.bt_sql::esc($packed_ip).' BETWEEN first AND last LIMIT 1');
+				$banq = bt_sql::query('SELECT comment FROM bans6 WHERE '.bt_sql::esc($packed_ip).' BETWEEN first AND last LIMIT 1');
 				if ($banq->num_rows) {
 					$comment = $banq->fetch_row();
 					$banq->free();

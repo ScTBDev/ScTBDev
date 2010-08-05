@@ -27,7 +27,7 @@ require_once(CLASS_PATH.'allowed_staff.php');
 dbconn();
 loggedinorreturn();
 
-if (!bt_user::required_class(bt_user::UC_STAFF))
+if (!bt_user::required_class(UC_STAFF))
   bt_theme::error('Error','Permission Denied');
 
 
@@ -43,28 +43,28 @@ $check_on = $tsettings['check_on'];
 $radio_on = $tsettings['radio_on'];
 $list_on = $tsettings['list_on'];
 
-if (bt_user::required_class(bt_user::UC_LEADER))
+if (bt_user::required_class(UC_LEADER))
 	$maxeditclass = bt_user::$current['class'];
-elseif (bt_user::required_class(bt_user::UC_FORUM_MODERATOR, bt_user::UC_MODERATOR))
-	$maxeditclass = bt_user::UC_UPLOADER;
+elseif (bt_user::required_class(UC_FORUM_MODERATOR, UC_MODERATOR))
+	$maxeditclass = UC_UPLOADER;
 else
 	$maxeditclass = bt_user::$current['class'] - 1;
 
 
 $id = 0 + $_GET['id'];
 if ($id < 1)
-  die();
+	die();
 
-$r = bt_sql::query('SELECT * FROM `users` WHERE `id` = '.$id);
+$r = bt_sql::query('SELECT *, CAST(flags AS SIGNED) AS flags_signed, CAST(chans AS SIGNED) AS chans_signed FROM users WHERE id = '.$id);
 if ($r->num_rows === 1)
-  $user = $r->fetch_assoc();
+	$user = $r->fetch_assoc();
 else
-  bt_theme::error('Error','Unknown User');
+	bt_theme::error('Error','Unknown User');
+bt_user::prepare_user($user);
 
 if ($user['class'] > $maxeditclass)
-  bt_theme::error('Error','Permission Denied');
+	bt_theme::error('Error','Permission Denied');
 
-$user['settings'] = bt_bitmask::fetch_all($user['flags']);
 $modcomment = trim($user['modcomment']);
 $username = $user['username'];
 $user_link = bt_forums::user_link($id, $username, $user['class']);
@@ -79,24 +79,24 @@ $euvars = array(
 	'MOD_COMMENTS'	=> bt_security::html_safe($modcomment),
 );
 
-if (bt_user::required_class(bt_user::UC_FORUM_MODERATOR)) {
+if (bt_user::required_class(UC_FORUM_MODERATOR)) {
 	$template = 'fmod';
 
 	$avatar = trim($user['avatar']);
-	$avatar_po = $user['settings']['avatar_po'];
+	$avatar_po = (bool)($user['flags'] & bt_options::FLAGS_AVATAR_PO);
 	$offensive_on = $avatar_po ? $radio_on : '';
 	$offensive_off = !$avatar_po ? $radio_on : '';
 
-	$warn = $user['settings']['warned'];
+	$warn = (bool)($user['flags'] & bt_options::FLAGS_WARNED);
 	$warneduntil = 0 + $user['warneduntil'];
 	$warned = $warn ? sprintf($tsettings['warned_yes'], ($warneduntil ? mkprettytime($warneduntil - time()).' to go' : 'arbitrary duration')) :
 		$tsettings['warned_no'];
 
-	$post_en = $user['settings']['post_enable'];
+	$post_en = (bool)($user['flags'] & bt_options::FLAGS_POST_ENABLE);
 	$post_on = $post_en ? $radio_on : '';
 	$post_off = !$post_en ? $radio_on : '';
 
-	$irc_en  = $user['settings']['irc_enable'];
+	$irc_en  = (bool)($user['flags'] & bt_options::FLAGS_IRC_ENABLE);
 	$irc_on = $irc_en ? $radio_on : '';
 	$irc_off = !$irc_en ? $radio_on : '';
 
@@ -110,7 +110,7 @@ if (bt_user::required_class(bt_user::UC_FORUM_MODERATOR)) {
 	$euvars['IRC_OFF']			= $irc_off;
 }
 
-if (bt_user::required_class(bt_user::UC_MODERATOR)) {
+if (bt_user::required_class(UC_MODERATOR)) {
 	$template = 'mod';
 
 	$username = $user['username'];
@@ -120,9 +120,9 @@ if (bt_user::required_class(bt_user::UC_MODERATOR)) {
 	$enabled_on = $enabled ? $radio_on : '';
 	$enabled_off = !$enabled ? $radio_on : '';
 
-	if (bt_user::$current['class'] === bt_user::UC_MODERATOR)
-		$maxclass = bt_user::UC_VIP;
-	elseif (bt_user::$current['class'] === bt_user::UC_LEADER)
+	if (bt_user::$current['class'] === UC_MODERATOR)
+		$maxclass = UC_VIP;
+	elseif (bt_user::$current['class'] === UC_LEADER)
 		$maxclass = bt_user::$current['class'];
 	else
 		$maxclass = bt_user::$current['class'] - 1;
@@ -143,7 +143,7 @@ if (bt_user::required_class(bt_user::UC_MODERATOR)) {
 
 	$ip_access = implode("\n", explode(';', trim($user['ip_access'])));
 
-	$fls = $user['settings']['fls'];
+	$fls = (bool)($user['flags'] & bt_options::FLAGS_FIRST_LINE_SUPPORT);
 	if ($fls) {
 		$fq = bt_sql::query('SELECT * FROM `firstline` WHERE `id` = '.$user['id']);
 		$firstline = $fq->fetch_assoc();
@@ -175,11 +175,11 @@ if (bt_user::required_class(bt_user::UC_MODERATOR)) {
 	$ban_on = $banned ? $radio_on : '';
 	$ban_off = !$banned ? $radio_on : '';
 
-    $protect = $user['settings']['protect'];
+    $protect = (bool)($user['flags'] & bt_options::FLAGS_PROTECT);
 	$protect_on = $protect ? $radio_on : '';
 	$protect_off = !$protect ? $radio_on : '';
 
-	$bypass_ban = $user['settings']['bypass_ban'];
+	$bypass_ban = (bool)($user['flags'] & bt_options::FLAGS_BYPASS_BANS);
 	$bypass_on = $bypass_ban ? $radio_on : '';
 	$bypass_off = !$bypass_ban ? $radio_on : '';
 
@@ -208,25 +208,25 @@ if (bt_user::required_class(bt_user::UC_MODERATOR)) {
 	$euvars['INFO']				= bt_security::html_safe($info);
 }
 
-if (bt_user::required_class(bt_user::UC_ADMINISTRATOR)) {
+if (bt_user::required_class(UC_ADMINISTRATOR)) {
 	$template = 'admin';
 
 	$uploaded = 0 + $user['uploaded'];
 	$downloaded = 0 + $user['downloaded'];
 
-	$anon = $user['settings']['privacy'];
+	$anon = (bool)($user['flags'] & bt_options::FLAGS_ANON);
 	$anon_on = $anon ? $radio_on : '';
 	$anon_off = !$anon ? $radio_on : '';
-	$hide_stats = $user['settings']['hide_stats'];
+	$hide_stats = (bool)($user['flags'] & bt_options::FLAGS_HIDE_STATS);
 	$hide_on = $hide_stats ? $radio_on : '';
 	$hide_off = !$hide_stats ? $radio_on : '';
-	$confirmed = $user['settings']['status'];
+	$confirmed = (bool)($user['flags'] & bt_options::FLAGS_CONFIRMED);
 	$status_on = $confirmed ? $radio_on : '';
 	$status_off = !$confirmed ? $radio_on : '';
-	$donor = $user['settings']['donor'];
+	$donor = (bool)($user['flags'] & bt_options::FLAGS_DONOR);
 	$donor_on = $donor ? $radio_on : '';
 	$donor_off = !$donor ? $radio_on : '';
-	$disable_invites = $user['settings']['disable_invites'] ? $check_on : '';
+	$disable_invites = (bool)($user['flags'] & bt_options::FLAGS_DISABLE_INVITE_BUY) ? $check_on : '';
 
 	$channels = bt_bitmask::fetch_all($user['chans'], true);
 	$chans = $chanrows = array();

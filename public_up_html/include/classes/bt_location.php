@@ -35,7 +35,7 @@ class bt_location {
 	private static $tzs = false;
 	private static $cns = false;
 
-	public static function country_list($cc) {
+	public static function country_list($cc = '') {
 		if (!self::country_by_cc($cc))
 			$cc = 'O1';
 
@@ -48,10 +48,11 @@ class bt_location {
 		return $countries;
 	}
 
-	public static function timezone_list($cc) {
-		self::cache_timezones();
-		
-		$tz = @DateTimeZone::listIdentifiers(DateTimeZone::PER_COUNTRY, $cc);
+	public static function timezone_list($cc = '') {
+		$tz = array();
+
+		if ($cc)				
+			$tz = @DateTimeZone::listIdentifiers(DateTimeZone::PER_COUNTRY, $cc);
 
 		if (!$tz || empty($tz)) {
 			if ($cc === 'EU')
@@ -63,7 +64,9 @@ class bt_location {
 		$tz[] = 'UTC';
 		$timezones = array_flip($tz);
 
-		foreach (self::$timezones as $tz => $name)
+		$tzs = self::timezones();
+
+		foreach ($tzs as $tz => $name)
 			$timezones[$tz] = $name;
 
 		return $timezones;
@@ -114,6 +117,11 @@ class bt_location {
 		}
 
 		return $countries;
+	}
+
+	public static function timezones() {
+		self::cache_timezones();
+		return self::$timezones;
 	}
 
 	private static function cache_timezones() {

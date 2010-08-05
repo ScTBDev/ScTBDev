@@ -140,6 +140,13 @@ class bt_user {
 		elseif (isset($user['flags']))
 			$user['flags'] = (int)$user['flags'];
 
+		if (isset($user['chans_signed'])) {
+			$user['chans'] = (int)$user['chans_signed'];
+			unset($user['chans_signed']);
+		}
+		elseif (isset($user['chans']))
+			$user['chans'] = (int)$user['chans'];
+
 		if ($curuser)
 			$user['settings'] = bt_bitmask::fetch_all($user['flags']);
 	}
