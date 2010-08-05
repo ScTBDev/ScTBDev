@@ -163,7 +163,7 @@ function userlogin() {
     if (!$id || strlen($_COOKIE['pass']) != 40)
         return;
 
-	$sres = bt_sql::query('SELECT * FROM `sessions` WHERE `sid` = '.bt_sql::esc($_COOKIE['pass']).' AND `uid` = '.$id) or bt_sql::err(__FILE__, __LINE__);
+	$sres = bt_sql::query('SELECT * FROM sessions WHERE sid = '.bt_sql::esc($_COOKIE['pass']).' AND uid = '.$id) or bt_sql::err(__FILE__, __LINE__);
 	$srow = $sres->fetch_assoc();
 	$sres->free();
 
@@ -187,7 +187,7 @@ function userlogin() {
 	$updateuser = $updatesession = array();
 	bt_user::prepare_user($row, true);
 
-	if (!$row['settings']['bypass_ban']) {
+	if (!($row['flags'] & bt_options::FLAGS_BYPASS_BANS)) {
 		if (bt_bans::check(bt_vars::$realip, true, true, $reason)) {
     	    $banned = true;
 			$geoip = bt_geoip::lookup_ip(bt_vars::$realip);
@@ -202,8 +202,11 @@ function userlogin() {
 		}
 		if ($banned) {
 			header('Content-Type: text/html; charset=utf-8');
-			echo '<?xml version="1.0" encoding="utf-8" ?>
-<html>
+			echo <<<XML
+<?xml version="1.0" encoding="utf-8" ?>
+
+XML;
+echo '<html>
 <head>
 	<title>IP Banned</title>
 </head>
@@ -258,40 +261,40 @@ Daca IP-ul dumneavoastra este din Polonia, Israel sau Romania, acest ban face pa
 	if ($row)
 		define('USER_CLASS', $row['class']);
 
-	if ($row['settings']['ssl_site'] && !bt_vars::$ssl) {
+	if (($row['flags'] & bt_options::FLAGS_SSL_SITE) && !bt_vars::$ssl) {
 		header('Location: '.bt_config::$conf['default_ssl_url'].$_SERVER['REQUEST_URI']);
 		die;
 	}
 
-	$hideip = $row['settings']['protect'] || $row['class'] >= bt_user::UC_VIP;
+	$hideip = ($row['flags'] & bt_options::FLAGS_PROTECT) || $row['class'] >= UC_VIP;
     $newip = $hideip ? 0 : bt_vars::$long_ip;
 	$newrealip = $hideip ? 0 : bt_vars::$long_realip;
 
 	if ($newip != $row['ip']) {
-		$updateuser[] = '`ip` = '.$newip;
+		$updateuser[] = 'ip = '.$newip;
 		$row['ip'] = $newip;
 	}
 	if ($newrealip != $row['realip']) {
-		$updateuser[] = '`realip` = '.$newrealip;
+		$updateuser[] = 'realip = '.$newrealip;
 		$row['realip'] = $newrealip;
 	}
 	if ($row['last_access'] < (bt_vars::$timestamp - 300))
-		$updateuser[] = '`last_access` = '.bt_vars::$timestamp;
+		$updateuser[] = 'last_access = '.bt_vars::$timestamp;
 
 	if ($srow['ip'] != bt_vars::$long_ip)
-		$updatesession[] = '`ip` = '.bt_vars::$long_ip;
+		$updatesession[] = 'ip = '.bt_vars::$long_ip;
 
 	if ($srow['realip'] != bt_vars::$long_realip)
-		$updatesession[] = '`realip` = '.bt_vars::$long_realip;
+		$updatesession[] = 'realip = '.bt_vars::$long_realip;
 
 	if ($srow['lastaction'] < (bt_vars::$timestamp - 300))
-		$updatesession[] = '`lastaction` = '.bt_vars::$timestamp;
+		$updatesession[] = 'lastaction = '.bt_vars::$timestamp;
 
 	if (count($updateuser))
-		bt_sql::query('UPDATE `users` SET '.implode(', ', $updateuser).' WHERE `id` = '.$row['id']) or bt_sql::err(__FILE__, __LINE__);
+		bt_sql::query('UPDATE users SET '.implode(', ', $updateuser).' WHERE id = '.$row['id']) or bt_sql::err(__FILE__, __LINE__);
 
 	if (count($updatesession))
-		bt_sql::query('UPDATE `sessions` SET '.implode(', ', $updatesession).' WHERE `sid` = '.bt_sql::esc($srow['sid'])) or bt_sql::err(__FILE__, __LINE__);
+		bt_sql::query('UPDATE sessions SET '.implode(', ', $updatesession).' WHERE sid = '.bt_sql::esc($srow['sid'])) or bt_sql::err(__FILE__, __LINE__);
 
 	bt_user::$current = $row;
 	$GLOBALS['CURUSER'] =& bt_user::$current;
@@ -463,85 +466,6 @@ function deletetorrent($id) {
 	}
 }
 
-function pager($rpp, $count, $href, $opts = array()) {
-    $pages = ceil($count / $rpp);
-
-    if (!isset($opts["lastpagedefault"]) || !$opts["lastpagedefault"])
-        $pagedefault = 0;
-    else {
-        $pagedefault = floor(($count - 1) / $rpp);
-        if ($pagedefault < 0)
-            $pagedefault = 0;
-    }
-
-    if (isset($_GET["page"])) {
-        $page = 0 + $_GET["page"];
-        if ($page < 0)
-            $page = $pagedefault;
-    }
-    else
-        $page = $pagedefault;
-
-    $pager = "";
-
-    $mp = $pages - 1;
-    $as = "<b>&lt;&lt;&nbsp;Prev</b>";
-    if ($page >= 1) {
-        $pager .= "<a href=\"{$href}page=" . ($page - 1) . "\">";
-        $pager .= $as;
-        $pager .= "</a>";
-    }
-    else
-        $pager .= $as;
-    $pager .= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-    $as = "<b>Next&nbsp;&gt;&gt;</b>";
-    if ($page < $mp && $mp >= 0) {
-        $pager .= "<a href=\"{$href}page=" . ($page + 1) . "\">";
-        $pager .= $as;
-        $pager .= "</a>";
-    }
-    else
-        $pager .= $as;
-
-    if ($count) {
-        $pagerarr = array();
-        $dotted = 0;
-        $dotspace = 3;
-        $dotend = $pages - $dotspace;
-        $curdotend = $page - $dotspace;
-        $curdotstart = $page + $dotspace;
-        for ($i = 0; $i < $pages; $i++) {
-            if (($i >= $dotspace && $i <= $curdotend) || ($i >= $curdotstart && $i < $dotend)) {
-                if (!$dotted)
-                    $pagerarr[] = "...";
-                $dotted = 1;
-                continue;
-            }
-            $dotted = 0;
-            $start = $i * $rpp + 1;
-            $end = $start + $rpp - 1;
-            if ($end > $count)
-                $end = $count;
-            $text = "$start&nbsp;-&nbsp;$end";
-            if ($i != $page)
-                $pagerarr[] = "<a href=\"{$href}page=$i\"><b>$text</b></a>";
-            else
-                $pagerarr[] = "<b>$text</b>";
-        }
-        $pagerstr = join(" | ", $pagerarr);
-        $pagertop = '<p style="text-align: center">'.$pager.'<br />'.$pagerstr.'</p>'."\n";
-        $pagerbottom = '<p style="text-align: center">'.$pagerstr.'<br />'.$pager.'</p>'."\n";
-    }
-    else {
-        $pagertop = '<p style="text-align: center">'.$pager.'</p>'."\n";
-        $pagerbottom = $pagertop;
-    }
-
-    $start = $page * $rpp;
-
-    return array($pagertop, $pagerbottom, "LIMIT $start,$rpp");
-}
-
 function searchfield($s) {
     return preg_replace(array('/[^a-z0-9]/si', '/^\s*/s', '/\s*$/s', '/\s+/s'), array(" ", "", "", " "), $s);
 }
@@ -552,29 +476,6 @@ function linkcolor($num) {
 //    if ($num == 1)
 //        return "yellow";
     return "green";
-}
-
-function get_user_icons($arr, $big = false) {
-	if ($big) {
-		$donorpic = 'starbig.gif';
-		$warnedpic = 'warnedbig.gif';
-		$disabledpic = 'disabledbig.gif';
-		$style = 'style="margin-left: 4pt"';
-	}
-	else {
-		$donorpic = 'star.gif';
-		$warnedpic = 'warned.gif';
-		$disabledpic = 'disabled.gif';
-		$style = 'style="margin-left: 2pt"';
-	}
-
-	$pics = $arr['settings']['donor'] ? '<img src="pic/'.$donorpic.'" alt="Donor" border="0" '.$style.'>' : '';
-	if ($arr['settings']['enabled'])
-		$pics .= $arr['settings']['warned'] ? '<img src="pic/'.$warnedpic.'" alt="Warned" border="0" '.$style.'>' : '';
-	else
-		$pics .= '<img src="pic/'.$disabledpic.'" alt="Disabled" border="0" '.$style.'>'."\n";
-
-	return $pics;
 }
 
 require_once(INCL_PATH.'global.php');

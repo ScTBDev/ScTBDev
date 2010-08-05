@@ -66,7 +66,6 @@ class bt_theme {
 
 		define('BT_HEADER_DONE', true);
 
-		$fakesite = bt_user::$current['id'] == 17455;
 		bt_theme_engine::load();
 		self::identify_browser();
 
@@ -90,10 +89,10 @@ class bt_theme {
 		}
 
 		$statbar = '';
-		$rss_feed = (bt_user::$current && !$fakesite) ? "\n".'	<link rel="alternate" title="SceneTorrents RSS Feed" href="/rss.php?passkey='.urlencode(bt_user::$current['passkey']).'" type="application/rss+xml" />' : '';
+		$rss_feed = bt_user::$current ? "\n".'	<link rel="alternate" title="SceneTorrents RSS Feed" href="/rss.php?passkey='.urlencode(bt_user::$current['passkey']).'" type="application/rss+xml" />' : '';
 
 
-		if (bt_user::$current && !$fakesite && bt_user::$current['settings']['statbar']) {
+		if (bt_user::$current && (bt_user::$current['flags'] & bt_options::FLAGS_STATBAR)) {
 			$uped = self::mksize(bt_user::$current['uploaded']);
 			$downed = self::mksize(bt_user::$current['downloaded']);
 
@@ -114,7 +113,7 @@ class bt_theme {
 			else
 				$conn = '<span style="color: black">Yes</span>';
 
-			$stars = bt_forums::user_stars(bt_user::$current['settings']);;
+			$stars = bt_forums::user_stars(bt_user::$current['flags']);;
 
 			$messages = bt_user::$current['inbox'];
 			$unread = bt_user::$current['inbox_new'];
@@ -148,7 +147,7 @@ class bt_theme {
 
 
 		$donbar = '';
-		if (bt_user::$current && !$fakesite) {
+		if (bt_user::$current) {
 			$donations = bt_donations::get_donations(bt_config::$conf['donate_day']);
 			$donation_current = 0 + $donations['ammount'];
 			$donation_target = bt_config::$conf['require_donations'];
@@ -190,7 +189,7 @@ class bt_theme {
 
 
 		$navbar = '';
-		if (bt_user::$current && !$fakesite) {
+		if (bt_user::$current) {
 			$upload_btn = bt_user::required_class(bt_user::UC_UPLOADER) ? bt_theme_engine::load_tpl('upload_btn') : '';
 			$invite_btn = (bt_user::required_class(bt_user::UC_STAFF) || bt_user::$current['invites'] > 0) ? bt_theme_engine::load_tpl('invite_btn') : '';
 
@@ -202,7 +201,7 @@ class bt_theme {
 		}
 
 		$alerts = '';
-		if ($show_alerts && bt_user::$current && !$fakesite) {
+		if ($show_alerts && bt_user::$current) {
 			$connalert = '';
 			if (bt_user::$current['connectable'] == 'no' && !bt_user::required_class(bt_user::UC_XTREME_USER))
 				$connalert = bt_theme_engine::load_tpl('alert_conn');

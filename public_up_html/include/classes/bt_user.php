@@ -21,7 +21,6 @@
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'class_config.php');
 require_once(CLASS_PATH.'bt_pm.php');
-require_once(CLASS_PATH.'bt_bitmask.php');
 require_once(CLASS_PATH.'bt_sql.php');
 
 class bt_user {
@@ -146,9 +145,6 @@ class bt_user {
 		}
 		elseif (isset($user['chans']))
 			$user['chans'] = (int)$user['chans'];
-
-		if ($curuser)
-			$user['settings'] = bt_bitmask::fetch_all($user['flags']);
 	}
 
 	public static function valid_class($class) {

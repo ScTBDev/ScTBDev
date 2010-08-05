@@ -36,7 +36,7 @@ if ($class < 0 || !is_valid_user_class($class))
   $class = -1;
 
 if ($search != '' || $class >= 0 || $country > 0) {
-	$query = '`username` LIKE '.sqlesc('%'.$search.'%').(!bt_user::required_class(bt_user::UC_STAFF) ? ' AND (`flags` & '.bt_bitmask::search('status').')' : '');
+	$query = 'username LIKE '.sqlesc('%'.$search.'%').(!bt_user::required_class(UC_STAFF) ? ' AND (flags & '.bt_options::FLAGS_CONFIRMED.')' : '');
 	if ($search)
 		$q = 'search='.htmlentities($search);
 }
@@ -47,26 +47,26 @@ else {
 
 	if ($letter == '' || strpos($lowchars, $letter) === false)
 		$letter = '1';
-	$query = '`username` LIKE "'.$letter.'%"'.(!bt_user::required_class(bt_user::UC_STAFF) ? ' AND (`flags` & '.bt_bitmask::search('status').')' : '');
+	$query = 'username LIKE "'.$letter.'%"'.(!bt_user::required_class(UC_STAFF) ? ' AND (flags & '.bt_options::FLAGS_CONFIRMED.')' : '');
 	$q = 'letter='.$letter;
 }
 
-if (bt_user::required_class(bt_user::UC_STAFF))
-	$maxclass = bt_user::UC_MAX;
-elseif (bt_user::required_class(bt_user::UC_WHORE))
-	$maxclass = bt_user::UC_OVERSEEDER;
+if (bt_user::required_class(UC_STAFF))
+	$maxclass = UC_MAX;
+elseif (bt_user::required_class(UC_WHORE))
+	$maxclass = UC_OVERSEEDER;
 else
-	$maxclass = bt_user::UC_WHORE;
+	$maxclass = UC_WHORE;
 
 
 if ($class >= 0 && $class <= $maxclass) {
-	$query .= ' AND `class` = '.$class;
+	$query .= ' AND class = '.$class;
 	$q .= ($q ? '&amp;' : '').'class='.$class;
 }
 else
-	$query .= ' AND `class` <= '.$maxclass;
+	$query .= ' AND class <= '.$maxclass;
 if ($country > 0) {
-	$query .= ' AND `country` = '.$country;
+	$query .= ' AND country = '.$country;
 	$q .= ($q ? '&amp;' : '').'country='.$country;
 }
 
@@ -101,7 +101,7 @@ for ($i = 0, $ln = strlen($lowchars); $i < $ln; $i++) {
 $page_links = implode(bt_theme::$settings['users']['page_links']['join'], $links);
 
 $perpage = 100;
-$res = bt_sql::query('SELECT COUNT(*) FROM `users` WHERE '.$query) or bt_sql::err(__FILE__,__LINE__);
+$res = bt_sql::query('SELECT COUNT(*) FROM users WHERE '.$query) or bt_sql::err(__FILE__,__LINE__);
 $arr = $res->fetch_row();
 $res->free();
 $count = $arr[0];
@@ -109,14 +109,14 @@ $count = $arr[0];
 if ($count) {
 	list($pager, $limit) = bt_theme::pager($perpage, $count, '?'.($q ? $q.'&amp;' : ''), bt_theme::PAGER_SHOW_PAGES);
 
-	$res = bt_sql::query('SELECT `id`, `username`, `added`, `last_access`, `country`, `flags`, `class` FROM `users` '.
-		'WHERE '.$query.' ORDER BY `username` '.$limit) or bt_sql::err(__FILE__,__LINE__);
+	$res = bt_sql::query('SELECT id, username, added, last_access, country, CAST(flags AS SIGNED) AS flags, class FROM users '.
+		'WHERE '.$query.' ORDER BY username '.$limit) or bt_sql::err(__FILE__,__LINE__);
 	$num = $res->num_rows;
 
 	if ($num) {
 		$users = array();
 		while ($arr = $res->fetch_assoc()) {
-			$arr['settings'] = bt_bitmask::fetch($arr['flags'],'donor','warned');
+			$arr['flags'] = (int)$arr['flags'];
 			if ($arr['country'] && isset($countries[$arr['country']])) {
 				$flagpic = bt_config::$conf['pic_base_url'].'flag/'.$countries[$arr['country']]['flagpic'];
 				$flagname = $countries[$arr['country']]['name'];
@@ -126,7 +126,7 @@ if ($count) {
 				$flag = '---';
 
 			$user_link = bt_forums::user_link($arr['id'], $arr['username'], $arr['class']);
-			$user_stars = bt_forums::user_stars($arr['settings']);
+			$user_stars = bt_forums::user_stars($arr['flags']);
 
 			list($date, $time) = explode(' ', format_time($arr['added']));
 			list($ldate, $ltime) = explode(' ', format_time($arr['last_access']));

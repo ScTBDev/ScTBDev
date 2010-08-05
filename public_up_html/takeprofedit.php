@@ -27,6 +27,7 @@ require_once(CLASS_PATH.'bt_forums.php');
 require_once(CLASS_PATH.'bt_hash.php');
 require_once(CLASS_PATH.'bt_mem_caching.php');
 require_once(CLASS_PATH.'bt_location.php');
+require_once(CLASS_PATH.'bt_bitmask.php');
 
 function bark($msg)
   {
@@ -34,11 +35,6 @@ function bark($msg)
   }
 dbconn();
 loggedinorreturn();
-
-function debugc($msg) {
-	if (bt_user::$current['id'] == 2)
-		echo $msg."\n";
-}
 
 if (!mkglobal('email:oldpassword:chpassword:passagain'))
   bark('missing form data');
@@ -59,7 +55,6 @@ $clrflags = 0;
 
 $ip = bt_vars::$ip;
 $rip = bt_vars::$realip;
-debugc(1);
 
 if ($chpassword != '') {
    if (strlen($chpassword) > 40)
@@ -140,7 +135,7 @@ else {
 }
 
 $avatar_po = 0 + $_POST['avatar_po'];
-$dst = 0 + $_POST['dst'];
+/*
 $timezone = (float)0 + $_POST['timezone'];
 if ($timezone != bt_user::$current['timezone']) {
 	if (!isset(bt_time::$time_zones["$timezone"]))
@@ -148,26 +143,17 @@ if ($timezone != bt_user::$current['timezone']) {
 
 	$updateset[] = '`timezone` = '.$timezone;
 }
+*/
 
-$dst_offset = (int)0 + $_POST['dst_offset'];
-if ($dst_offset != bt_user::$current['dst_offset']) {
-	if (!isset(bt_time::$dst_offsets[$dst_offset]))
-		bt_theme::error('Error','Invalid DST offset');
-
-	$updateset[] = '`dst_offset` = '.$dst_offset;
-}
-
-
-debugc(3);
-if ($_POST['resetpasskey'] && $CURUSER['class'] >= UC_STAFF) {
-	$passkey = md5($CURUSER['username'].time().$CURUSER['password']);
+if (bt_user::required_class(UC_STAFF) && $_POST['resetpasskey']) {
+	$passkey = md5(bt_user::$current['username'].time().bt_user::$current['password']);
 	$updateset[] = 'passkey = '.sqlesc($passkey);
-	bt_mem_caching::remove_passkey($CURUSER['passkey'], true);
+	bt_mem_caching::remove_passkey(bt_user::$current['passkey'], true);
 	bt_mem_caching::remove_passkey($passkey);
 
-	mysql_query('INSERT INTO `passkeylog` (`added`, `userid`, `oldkey`, `newkey`) '.
-		'VALUES ('.time().', '.$CURUSER['id'].', '.sqlesc($CURUSER['passkey']).
-		', '.sqlesc($passkey).')') or sqlerr(__FILE__,__LINE__);
+	mysql_query('INSERT INTO passkeylog (added, userid, oldkey, newkey) '.
+		'VALUES ('.time().', '.bt_user::$current['id'].', '.bt_sql::esc(bt_user::$current['passkey']).
+		', '.bt_sql::esc($passkey).')') or sqlerr(__FILE__,__LINE__);
 }
 
 
@@ -182,22 +168,21 @@ $privacy = 0 + $_POST['privacy'];
 $fb = 0 + $_POST['forum_buttons'];
 $hide_stats = (bool)0 + $_POST['hide_stats'];
 
-if (bt_user::required_class(bt_user::UC_WHORE)) {
-	if ($privacy != bt_user::$current['settings']['privacy']) {
+if (bt_user::required_class(UC_WHORE)) {
+	if ($privacy != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_ANON))) {
 		if ($privacy)
-			$setflags |= bt_bitmask::search('privacy');
+			$setflags |= bt_options::FLAGS_ANON;
 		else
-			$clrflags |= bt_bitmask::search('privacy');
+			$clrflags |= bt_options::FLAGS_ANON;
 	}
-	if ($hide_stats != bt_user::$current['settings']['hide_stats']) {
+	if ($hide_stats != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_HIDE_STATS))) {
 		if ($hide_stats)
-			$setflags |= bt_bitmask::search('hide_stats');
+			$setflags |= bt_options::FLAGS_HIDE_STATS;
 		else
-			$clrflags |= bt_bitmask::search('hide_stats');
+			$clrflags |= bt_options::FLAGS_HIDE_STATS;
 	}
 }
 
-debugc(4);
 if (bt_user::required_class(bt_user::UC_STAFF)) {
 	if (trim($ip_access) != '') {
 		$ipas = explode(';',$ip_access);
@@ -209,134 +194,135 @@ if (bt_user::required_class(bt_user::UC_STAFF)) {
 		$updateset[] = 'ip_access = '.sqlesc($ip_access);
 }
 
-if (bt_user::required_class(bt_user::UC_WHORE) || bt_user::$current['settings']['donor']) {
+if (bt_user::required_class(bt_user::UC_WHORE) || (bt_user::$current['flags'] & bt_options::FLAGS_DONOR)) {
 	$title = sqlesc((trim($_POST['title']) != '') ? trim($_POST['title']) : '');
 	$updateset[] = 'title = '.$title;
 }
 
-
-if ($acceptpms != bt_user::$current['settings']['acceptpms']) {
+if ($acceptpms != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_ACCEPT_PMS))) {
 	if ($acceptpms)
-		$setflags |= bt_bitmask::search('acceptpms');
+		$setflags |= bt_options::FLAGS_ACCEPT_PMS;
 	else
-		$clrflags |= bt_bitmask::search('acceptpms');
+		$clrflags |= bt_options::FLAGS_ACCEPT_PMS;
 }
 
-if ($acceptfriendpms != bt_user::$current['settings']['acceptfriendpms']) {
+if ($acceptfriendpms != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_ACCEPT_FRIEND_PMS))) {
 	if ($acceptfriendpms)
-		$setflags |= bt_bitmask::search('acceptfriendpms');
+		$setflags |= bt_options::FLAGS_ACCEPT_FRIEND_PMS;
 	else
-		$clrflags |= bt_bitmask::search('acceptfriendpms');
+		$clrflags |= bt_options::FLAGS_ACCEPT_FRIEND_PMS;
 }
 
-if ($pmnotif != bt_user::$current['settings']['pmnotif']) {
+if ($pmnotif != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_PM_NOTIFICATION))) {
 	if ($pmnotif)
-		$setflags |= bt_bitmask::search('pmnotif');
+		$setflags |= bt_options::FLAGS_PM_NOTIFICATION;
 	else
-		$clrflags |= bt_bitmask::search('pmnotif');
+		$clrflags |= bt_options::FLAGS_PM_NOTIFICATION;
 }
 
-if ($dst != bt_user::$current['settings']['dst']) {
-	if ($dst)
-		$setflags |= bt_bitmask::search('dst');
-	else
-		$clrflags |= bt_bitmask::search('dst');
-}
-
-if ($statbar!= bt_user::$current['settings']['statbar']) {
+if ($statbar != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_STATBAR))) {
 	if ($statbar)
-		$setflags |= bt_bitmask::search('statbar');
+		$setflags |= bt_options::FLAGS_STATBAR;
 	else
-		$clrflags |= bt_bitmask::search('statbar');
+		$clrflags |= bt_options::FLAGS_STATBAR;
 }
 
-if ($proxy != bt_user::$current['settings']['proxy']) {
+if ($proxy != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_PROXY_TRACKER))) {
 	if ($proxy)
-		$setflags |= bt_bitmask::search('proxy');
+		$setflags |= bt_options::FLAGS_PROXY_TRACKER;
 	else
-		$clrflags |= bt_bitmask::search('proxy');
+		$clrflags |= bt_options::FLAGS_PROXY_TRACKER;
 }
 
-if ($ssl_tracker != bt_user::$current['settings']['ssl_tracker']) {
+if ($ssl_tracker != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_SSL_TRACKER))) {
 	if ($ssl_tracker)
-		$setflags |= bt_bitmask::search('ssl_tracker');
+		$setflags |= bt_options::FLAGS_SSL_TRACKER;
 	else
-		$clrflags |= bt_bitmask::search('ssl_tracker');
+		$clrflags |= bt_options::FLAGS_SSL_TRACKER;
 }
 
-if ($ssl_site != bt_user::$current['settings']['ssl_site']) {
+if ($ssl_site != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_SSL_SITE))) {
 	if ($ssl_site)
-		$setflags |= bt_bitmask::search('ssl_site');
+		$setflags |= bt_options::FLAGS_SSL_SITE;
 	else
-		$clrflags |= bt_bitmask::search('ssl_site');
+		$clrflags |= bt_options::FLAGS_SSL_SITE;
 }
 
-if ($deletepms != bt_user::$current['settings']['deletepms']) {
+if ($deletepms != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_DELETE_PMS))) {
 	if ($deletepms)
-		$setflags |= bt_bitmask::search('deletepms');
+		$setflags |= bt_options::FLAGS_DELETE_PMS;
 	else
-		$clrflags |= bt_bitmask::search('deletepms');
+		$clrflags |= bt_options::FLAGS_DELETE_PMS;
 }
 
-if ($savepms != bt_user::$current['settings']['savepms']) {
+$cursavepms = (bool)(bt_user::$current['flags'] & bt_options::FLAGS_SAVE_PMS);
+if ($savepms != $cursavepms) {
 	if ($savepms)
-		$setflags |= bt_bitmask::search('savepms');
+		$setflags |= bt_options::FLAGS_SAVE_PMS;
 	else
-		$clrflags |= bt_bitmask::search('savepms');
+		$clrflags |= bt_options::FLAGS_SAVE_PMS;
 }
 
-if ($avatar_po != bt_user::$current['settings']['avatar_po']) {
+$curavatar_po = (bool)(bt_user::$current['flags'] & bt_options::FLAGS_AVATAR_PO);
+if ($avatar_po != $curavatar_po) {
 	if ($avatar_po)
-		$setflags |= bt_bitmask::search('avatar_po');
+		$setflags |= bt_options::FLAGS_AVATAR_PO;
 	else
-		$clrflags |= bt_bitmask::search('avatar_po');
+		$clrflags |= bt_options::FLAGS_AVATAR_PO;
 }
 
-if ($avatars != bt_user::$current['settings']['avatars']) {
+if ($avatars != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_SHOW_AVATARS))) {
 	if ($avatars)
-		$setflags |= bt_bitmask::search('avatars');
+		$setflags |= bt_options::FLAGS_SHOW_AVATARS;
 	else
-		$clrflags |= bt_bitmask::search('avatars');
+		$clrflags |= bt_options::FLAGS_SHOW_AVATARS;
 }
 
-if ($avatars_po != bt_user::$current['settings']['avatars_po']) {
+if ($avatars_po != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_SHOW_PO_AVATARS))) {
 	if ($avatars_po)
-		$setflags |= bt_bitmask::search('avatars_po');
+		$setflags |= bt_options::FLAGS_SHOW_PO_AVATARS;
 	else
-		$clrflags |= bt_bitmask::search('avatars_po');
+		$clrflags |= bt_options::FLAGS_SHOW_PO_AVATARS;
 }
-debugc(5);
-$cur_fb = bt_forums::settings_to_forum_theme(bt_user::$current['settings']);
+$cur_fb = bt_forums::settings_to_forum_theme(bt_user::$current['flags']);
 if ($fb != $cur_fb) {
 	if (!isset(bt_forums::$buttons[$fb]))
 		$fb = 0;
 
-	$ftheme = bt_forums::forum_theme_to_settings($fb);
+	$forum_1 = (bool)($fb & BIT_1);
+	$forum_2 = (bool)($fb & BIT_2);
+	$forum_3 = (bool)($fb & BIT_3);
+	$forum_4 = (bool)($fb & BIT_4);
 
-	if ($ftheme['forum_1'] != bt_user::$current['settings']['forum_1']) {
-		if ($ftheme['forum_1'])
-			$setflags |= bt_bitmask::search('forum_1');
+	if ($forum_1 != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_FORUM_ICONS_1))) {
+		if ($forum_1)
+			$setflags |= bt_options::FLAGS_FORUM_ICONS_1;
 		else
-			$clrflags |= bt_bitmask::search('forum_1');
+			$clrflags |= bt_options::FLAGS_FORUM_ICONS_1;
 	}
-	if ($ftheme['forum_2'] != bt_user::$current['settings']['forum_2']) {
-		if ($ftheme['forum_2'])
-			$setflags |= bt_bitmask::search('forum_2');
+	if ($forum_2 != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_FORUM_ICONS_2))) {
+		if ($forum_2)
+			$setflags |= bt_options::FLAGS_FORUM_ICONS_2;
 		else
-			$clrflags |= bt_bitmask::search('forum_2');
+			$clrflags |= bt_options::FLAGS_FORUM_ICONS_2;
 	}
-	if ($ftheme['forum_3'] != bt_user::$current['settings']['forum_3']) {
-		if ($ftheme['forum_3'])
-			$setflags |= bt_bitmask::search('forum_3');
+	if ($forum_3 != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_FORUM_ICONS_3))) {
+		if ($forum_3)
+			$setflags |= bt_options::FLAGS_FORUM_ICONS_3;
 		else
-			$clrflags |= bt_bitmask::search('forum_3');
+			$clrflags |= bt_options::FLAGS_FORUM_ICONS_3;
+	}
+	if ($forum_4 != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_FORUM_ICONS_4))) {
+		if ($forum_4)
+			$setflags |= bt_options::FLAGS_FORUM_ICONS_4;
+		else
+			$clrflags |= bt_options::FLAGS_FORUM_ICONS_4;
 	}
 }
 
 $curchannels = bt_bitmask::fetch_all(bt_user::$current['chans'], true);
 $add_chans = 0;
 $rem_chans = 0;
-debugc(6);
 foreach (bt_chans::$channels as $chid => $chan) {
     if ($curchannels['allow_'.$chid]) {
 		$channel = (bool)(0 + $_POST['chan_'.$chid]);
@@ -348,7 +334,6 @@ foreach (bt_chans::$channels as $chid => $chan) {
 		}
 	}
 }
-debugc(7);
 if ($avatar != bt_user::$current['avatar'])
   {
    if ($avatar == '')
@@ -420,7 +405,6 @@ your profile will remain unchanged.';
    bt_user::mod_comment(bt_user::$current['id'], 'Email change process initiated from '.$ip.($rip != $ip ? ' ('.$rip.')' : ''));
   }
 
-debugc(8);
 //// Do NOT EDIT THESE LINES
 if ($setflags)
   $updateset[] = '`flags` = (`flags` | '.$setflags.')';

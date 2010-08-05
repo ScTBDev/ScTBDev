@@ -42,6 +42,8 @@ $topic = bt_forums::get_topic($topicid);
 if (!$topic)
 	bt_theme::error('Forum error', 'Topic not found');
 
+
+$post_enable = (bool)(bt_user::$current['flags'] & bt_options::FLAGS_POST_ENABLE);
 $subject = $topic['en_subject'];
 $nsubject = $topic['subject'];
 $forumid = $topic['forumid'];
@@ -91,17 +93,17 @@ else
 
 
 //------ Get posts
-$postsq = bt_sql::query('SELECT `p`.*, `u`.`username`,`u`.`class`,`u`.`avatar`,`u`.`title`,`u`.`enabled`,'.
-	'`u`.`flags`, `e`.`username` AS `eusername`, `e`.`class` as `eclass` FROM `posts` AS `p` '.
-	'LEFT JOIN `users` AS `u` ON (`u`.`id` = `p`.`userid`) '.
-	'LEFT JOIN `users` AS `e` ON (`e`.`id` = `p`.`editedby`) '.
-	'WHERE `p`.`topicid` = '.$topicid.' ORDER BY `p`.`id` ASC '.$limit) or bt_sql::err(__FILE__, __LINE__);
+$postsq = bt_sql::query('SELECT p.*, u.username, u.class, u.avatar, u.title, u.enabled, '.
+	'CAST(u.flags AS SIGNED) AS flags, e.username AS eusername, e.class as eclass FROM posts AS p '.
+	'LEFT JOIN users AS u ON (u.id = p.userid) '.
+	'LEFT JOIN users AS e ON (e.id = p.editedby) '.
+	'WHERE p.topicid = '.$topicid.' ORDER BY p.id ASC '.$limit) or bt_sql::err(__FILE__, __LINE__);
 
 bt_theme::head('View topic :: '.$nsubject);
 
 $pc = $postsq->num_rows;
 $pn = 0;
-$r = bt_sql::query('SELECT `lastpostread` FROM `readposts` WHERE `userid` = '.bt_user::$current['id'].' AND `topicid` = '.$topicid)
+$r = bt_sql::query('SELECT lastpostread FROM readposts WHERE userid = '.bt_user::$current['id'].' AND topicid = '.$topicid)
 	or bt_sql::err(__FILE__, __LINE__);
 
 $lpr = false;
@@ -116,14 +118,16 @@ while ($post = $postsq->fetch_assoc()) {
 	$pn++;
 	$postid = (int)$post['id'];
 	$username = $post['username'];
-	$post['settings'] = bt_bitmask::fetch($post['flags'], 'avatar_po', 'donor', 'warned');
+	$post['flags'] = (int)$post['flags'];
 	$user_link = bt_forums::user_link($post['userid'], $username, $post['class']);
-	$user_stars = bt_forums::user_stars($post['settings']);
+	$user_stars = bt_forums::user_stars($post['flags']);
 	$user_title = $post['title'] != '' ? $post['title'] : bt_user::get_class_name($post['class']);
 	$post_time = bt_time::format($post['added']);
 	$post_ago = bt_time::ago_time($post['added']);
 	$avatar = $post['avatar'];
-	bt_forums::avatar($avatar, $avtext, $post['settings']['avatar_po']);
+	$avatar_po = (bool)($post['flags'] & bt_options::FLAGS_AVATAR_PO);
+	bt_forums::avatar($avatar, $avtext, $avatar_po);
+
 	if ($post['editedby'] && $post['eusername']) {
 		$euser = bt_forums::user_link($post['editedby'], $post['eusername'], $post['eclass']);
 		$etime = bt_time::format($post['editedat']);
@@ -133,17 +137,17 @@ while ($post = $postsq->fetch_assoc()) {
 		$last_edit = '';
 	$ptools = array();
 
-	if (bt_user::required_class(bt_user::UC_FORUM_MODERATOR) && $post['edits'] > 0)
+	if (bt_user::required_class(UC_FORUM_MODERATOR) && $post['edits'] > 0)
 		$ptools[] = sprintf($psettings['tools']['viewe'], $postid);
 
-	if ((!$topic['locked'] && bt_user::$current['settings']['post_enable']) || bt_user::required_class(bt_user::UC_FORUM_MODERATOR))
+	if ((!$topic['locked'] && $post_enable) || bt_user::required_class(UC_FORUM_MODERATOR))
 		$ptools[] = sprintf($psettings['tools']['quote'], $postid);
 
-	if ((bt_user::$current['id'] == $post['userid'] && !$topic['locked'] && bt_user::$current['settings']['post_enable']) ||
-		bt_user::required_class(bt_user::UC_FORUM_MODERATOR))
+	if ((bt_user::$current['id'] == $post['userid'] && !$topic['locked'] && $post_enable) ||
+		bt_user::required_class(UC_FORUM_MODERATOR))
 		$ptools[] = sprintf($psettings['tools']['edit'], $postid);
 
-	if (bt_user::required_class(bt_user::UC_FORUM_MODERATOR))
+	if (bt_user::required_class(UC_FORUM_MODERATOR))
 		$ptools[] = sprintf($psettings['tools']['delete'], $postid);
 
 
@@ -157,11 +161,11 @@ while ($post = $postsq->fetch_assoc()) {
 		$last_post = $psettings['last_post'];
 		if ($new) {
 			if ($lpr === false)
-				bt_sql::query('INSERT INTO `readposts` (`userid`, `topicid`, `lastpostread`) '.
+				bt_sql::query('INSERT INTO readposts (userid, topicid, lastpostread) '.
 					'VALUES('.bt_user::$current['id'].', '.$topicid.', '.$postid.')') or bt_sql::err(__FILE__, __LINE__);
 			else
-				bt_sql::query('UPDATE `readposts` SET `lastpostread` = '.$postid.' WHERE `userid` = '.bt_user::$current['id'].' '.
-					'AND `topicid` = '.$topicid) or bt_sql::err(__FILE__, __LINE__);
+				bt_sql::query('UPDATE readposts SET lastpostread = '.$postid.' WHERE userid = '.bt_user::$current['id'].' '.
+					'AND topicid = '.$topicid) or bt_sql::err(__FILE__, __LINE__);
 		}
 	}
 
@@ -190,9 +194,9 @@ $quick_jump = bt_forums::insert_quick_jump_menu($forumid, true);
 
 $maypost = true;
 $message = '';
-if (!bt_user::required_class(bt_user::UC_FORUM_MODERATOR)) {
+if (!bt_user::required_class(UC_FORUM_MODERATOR)) {
 	$modtools = '';
-	if (!bt_user::$current['settings']['post_enable']) {
+	if (!$post_enable) {
 		$maypost = false;
 		$message = $tsettings['no_post'];
 	}
@@ -205,7 +209,7 @@ if (!bt_user::required_class(bt_user::UC_FORUM_MODERATOR)) {
 		$message = $tsettings['no_fpost'];
 	}
 	else {
-		$lp = bt_sql::query('SELECT `userid` FROM `posts` WHERE `topicid` = '.$topicid.' ORDER BY `added` DESC LIMIT 1');
+		$lp = bt_sql::query('SELECT userid FROM posts WHERE topicid = '.$topicid.' ORDER BY added DESC LIMIT 1');
 		$lu = $lp->fetch_row();
 		$lp->free();
 

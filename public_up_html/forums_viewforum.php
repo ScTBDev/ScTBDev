@@ -45,7 +45,7 @@ $ppager_opts = bt_theme::PAGER_SHOW_PAGES | bt_theme::PAGER_NO_SEPARATOR | bt_th
 
 $count = $forum['topiccount'];
 if ($count) {
-	$fbid = bt_forums::settings_to_forum_theme(bt_user::$current['settings']);
+	$fbid = bt_forums::settings_to_forum_theme(bt_user::$current['flags']);
 	if (!isset(bt_forums::$buttons[$fbid]))
 		$fbid = 0;
 	$fbname = bt_forums::$buttons[$fbid];
@@ -158,7 +158,7 @@ else {
 }
 
 $maypost = (bt_user::required_class($forum['minclassread']) && bt_user::required_class($forum['minclasswrite']) && bt_user::required_class($forum['minclasscreate']));
-if (!bt_user::$current['settings']['post_enable'] && !bt_user::required_class(bt_user::UC_FORUM_MODERATOR))
+if (!(bt_user::$current['flags'] & bt_options::FLAGS_POST_ENABLE) && !bt_user::required_class(UC_FORUM_MODERATOR))
 	$maypost = false;
 
 $new_topic = $maypost ? sprintf($fsettings['newtopic'], $forumid) : $fsettings['no_posts'];

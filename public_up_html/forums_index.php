@@ -44,7 +44,7 @@ $forums_res = bt_sql::query('SELECT `f`.*, `t`.`subject`, `t`.`lastpost`, `p`.`a
 	'WHERE `f`.`minclassread` <= '.bt_user::$current['class'].' '.
 	'ORDER BY `f`.`sort`, `f`.`name`') or bt_sql::err(__FILE__, __LINE__);
 
-$fbid = bt_forums::settings_to_forum_theme(bt_user::$current['settings']);
+$fbid = bt_forums::settings_to_forum_theme(bt_user::$current['flags']);
 if (!isset(bt_forums::$buttons[$fbid]))
 	$fbid = 0;
 $fbname = bt_forums::$buttons[$fbid];

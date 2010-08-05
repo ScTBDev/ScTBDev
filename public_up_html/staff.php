@@ -32,9 +32,10 @@ bt_theme::head('Staff');
 
 
 // Search User Database for Staff and display in alphabetical order
-$res = bt_sql::query('SELECT `u`.`id`, `u`.`username`, `u`.`class`, `u`.`last_access`, `u`.`country`, `f`.`lang`, `f`.`helpwith` '.
-	'FROM `users` AS `u` LEFT JOIN `firstline` AS `f` ON (`f`.`id` = `u`.`id`) WHERE `u`.`class` >= '.bt_user::UC_STAFF.' AND '.
-	'(`u`.`flags` & '.bt_bitmask::search('status').') ORDER BY `u`.`class` DESC, `u`.`username` ASC') or bt_sql::err(__FILE__,__LINE__);
+$reqflags = bt_options::FLAGS_CONFIRMED | bt_options::FLAGS_ENABLED;
+$res = bt_sql::query('SELECT u.id, u.username, u.class, u.last_access, u.country, f.lang, f.helpwith '.
+	'FROM users AS u LEFT JOIN firstline AS f ON (f.id = u.id) WHERE u.class >= '.UC_STAFF.' AND '.
+	'(u.flags & '.$reqflags.') = '.$reqflags.' ORDER BY u.class DESC, u.username ASC') or bt_sql::err(__FILE__,__LINE__);
 
 $staffs = array();
 if ($res->num_rows) {
@@ -83,10 +84,9 @@ foreach ($staffs as $class => $staff) {
 $staff_list = implode($tsettings['staff_list_join'], $staff_lists);
 
 
-$res = bt_sql::query('SELECT `f`.`id`, `f`.`lang`, `f`.`helpwith`, `u`.`last_access`, `u`.`username`, `u`.`class`, `u`.`country` '.
-	'FROM `firstline` AS `f` JOIN `users` AS `u` ON (`u`.`id` = `f`.`id`) WHERE `u`.`enabled` = "yes" AND '.
-	'(`u`.`flags` & '.bt_bitmask::search('fls').') AND `u`.`class` < '.bt_user::UC_STAFF.' ORDER BY `u`.`username` ASC')
-	or bt_sql::err(__FILE__,__LINE__);
+$res = bt_sql::query('SELECT f.id, f.lang, f.helpwith, u.last_access, u.username, u.class, u.country '.
+	'FROM firstline AS f JOIN users AS u ON (u.id = f.id) WHERE u.class < '.UC_STAFF.' AND '.
+	'(u.flags & '.$reqflags.') = '.$reqflags.' ORDER BY u.username ASC') or bt_sql::err(__FILE__,__LINE__);
 
 $flss = array();
 if ($res->num_rows) {

@@ -34,7 +34,7 @@ if (!bt_vars::$ssl) {
 }
 dbconn();
 if (bt_user::$current) {
-	$redirectbase = bt_security::redirect_base(($use_ssl || bt_user::$current['settings']['ssl_site']));
+	$redirectbase = bt_security::redirect_base(($use_ssl || (bt_user::$current['flags'] & bt_options::FLAGS_SSL_SITE)));
 	$url = $returnto ? $returnto : '/my.php';
 	header('Location: '.$redirectbase.$url);
 	die;

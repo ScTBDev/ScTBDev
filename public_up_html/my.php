@@ -57,8 +57,9 @@ $username = bt_security::html_safe($user['username']);
 
 $themesl = bt_theme_engine::$themes;
 $themes = array();
+$donor = (bool)(bt_user::$current['flags'] & bt_options::FLAGS_DONOR);
 foreach ($themesl as $tid => $theme) {
-	if ((!$theme['donor'] || ($theme['donor'] && !bt_user::$current['settings']['donor'])) && !bt_user::required_class($theme['class']))
+	if ((!$theme['donor'] || ($theme['donor'] && !$donor)) && !bt_user::required_class($theme['class']))
 		continue;
 
 	$selected = $user['theme'] == $tid ? $list_s : '';
@@ -201,7 +202,7 @@ foreach ($chans as $chan) {
 $irc_table = implode($tsettings['irclist']['row_join'], $chanrows);
 
 
-$forum_buttons = bt_forums::settings_to_forum_theme($settings);
+$forum_buttons = bt_forums::settings_to_forum_theme($user['flags']);
 
 $imgtypes = array('unlocked','unlockedposted','unlockednew','unlockednewposted','locked','lockedposted','lockednew','lockednewposted');
 $fbs = array();

@@ -42,10 +42,10 @@ if ($id && $invid) {
 	if ($id < 1 || strlen($invid) != 40 || !bt_string::is_hex($invid))
 		bt_theme::error('Sorry','Invalid invite');
 
-	$inv = bt_sql::query('SELECT `i`.`inviteid`, `i`.`userid`, `u`.`class` '.
-		'FROM `invites` AS `i` '.
-		'JOIN `users` AS `u` ON (`u`.`id` = `i`.`userid`) '.
-		'WHERE `i`.`id` = '.$id.' AND `u`.`enabled` = "yes"') or bt_sql::err(__FILE__,__LINE__);
+	$inv = bt_sql::query('SELECT i.inviteid, i.userid, u.class '.
+		'FROM invites AS i '.
+		'JOIN users AS u ON (u.id = i.userid) '.
+		'WHERE i.id = '.$id.' AND (u.flags & '.bt_options::FLAGS_ENABLED.')') or bt_sql::err(__FILE__,__LINE__);
 
 	if ($inv->num_rows) {
 		$invite = $inv->fetch_assoc();

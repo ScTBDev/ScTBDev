@@ -140,7 +140,7 @@ $curusername		= trim($arr['username']);
 $curpasskey			= trim($arr['passkey']);
 $curtitle			= trim($arr['title']);
 $curavatar			= trim($arr['avatar']);
-$curenabled			= $arr['enabled'] == 'yes';
+$curenabled			= (bool)($arr['flags'] & bt_options::FLAGS_ENABLED);
 $curdonor			= (bool)($arr['flags'] & bt_options::FLAGS_DONOR);
 $curclass			= 0 + $arr['class'];
 $curwarned			= (bool)($arr['flags'] & bt_options::FLAGS_WARNED);
@@ -331,7 +331,7 @@ if (bt_user::required_class(UC_FORUM_MODERATOR)) {
 if (bt_user::required_class(UC_MODERATOR)) {
 	if ($enabled != $curenabled) {
 		if ($enabled) {
-			$updateset[] = 'enabled = "yes"';
+			$setflags |= bt_options::FLAGS_ENABLED;
 			bt_mem_caching::remove_passkey($curpasskey, true);
 			bt_user::mod_comment($userid, 'Enabled by '.$modname);
 			if ($stafflog)
@@ -341,7 +341,7 @@ if (bt_user::required_class(UC_MODERATOR)) {
 			if ($reason == '')
 				bt_theme::error('Error', 'You must enter a reason before disabling');
 
-			$updateset[] = 'enabled = "no"';
+			$clrflags |= bt_options::FLAGS_ENABLED;
 			bt_mem_caching::remove_passkey($curpasskey);
 			bt_user::mod_comment($userid, 'Disabled by '.$modname.' ('.$reason.')');
 			if ($stafflog)

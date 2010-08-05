@@ -61,7 +61,7 @@ $urls[] = 'type='.($feed == 2 ? 'dt' : 'dl');
 $feed_1 = $feed != 2 ? $radio_on : '';
 $feed_2 = $feed == 2 ? $radio_on : '';
 
-$ssl = $_SERVER['REQUEST_METHOD'] == 'POST' ? ((bool)0 + $_POST['ssl']) : (bt_user::$current['settings']['ssl_site'] || bt_vars::$ssl);
+$ssl = $_SERVER['REQUEST_METHOD'] == 'POST' ? ((bool)0 + $_POST['ssl']) : ((bt_user::$current['flags'] & bt_options::FLAGS_SSL_SITE) || bt_vars::$ssl);
 $ssl_on = $ssl ? $check_on : '';
 
 $catrows = $catentrys = array();

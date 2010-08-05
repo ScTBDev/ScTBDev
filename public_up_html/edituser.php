@@ -116,7 +116,7 @@ if (bt_user::required_class(UC_MODERATOR)) {
 	$username = $user['username'];
 	$title = trim($user['title']);
 	$email = trim($user['email']);
-	$enabled = $user['enabled'] == 'yes';
+	$enabled = (bool)($user['flags'] & bt_options::FLAGS_ENABLED);
 	$enabled_on = $enabled ? $radio_on : '';
 	$enabled_off = !$enabled ? $radio_on : '';
 

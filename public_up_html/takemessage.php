@@ -125,23 +125,23 @@ if (isset($_POST['n_pms'])) {
 
           $location = $save ? bt_pm::PM_BOTH : bt_pm::PM_INBOX;
 
-          $res = mysql_query('SELECT `email`, `flags`, `last_access` as `la` FROM `users` WHERE `id`= '.$receiver) or sqlerr(__FILE__, __LINE__);
+          $res = mysql_query('SELECT email, CAST(flags AS SIGNED) AS flags, last_access as la FROM users WHERE id = '.$receiver) or sqlerr(__FILE__, __LINE__);
           $user = mysql_fetch_assoc($res);
           if (!$user)
             bt_theme::error("Error", "No user with that receiver ID.");
 
-		  $user['settings'] = bt_bitmask::fetch($user['flags'],'pmnotif','acceptpms','acceptfriendpms');
+		  $user['flags'] = (int)$user['flags'];
 
           //Make sure recipient wants this message
-			if (!bt_user::required_class(bt_user::UC_STAFF))
+			if (!bt_user::required_class(UC_STAFF))
                 {
-            if ($user['settings']['acceptpms'] && $user['settings']['acceptfriendpms'])
+            if ($user['flags'] & bt_options::FLAGS_ACCEPT_PMS)
             {
               $res2 = mysql_query("SELECT * FROM blocks WHERE userid=$receiver AND blockid=" . $CURUSER["id"]) or sqlerr(__FILE__, __LINE__);
               if (mysql_num_rows($res2) == 1)
                 bt_theme::error("Refused", "This user has blocked PMs from you.");
             }
-            elseif ($user['settings']['acceptfriendpms'])
+            elseif ($user['flags'] & bt_options::FLAGS_ACCEPT_FRIEND_PMS)
             {
               $res2 = mysql_query("SELECT * FROM friends WHERE userid=$receiver AND friendid=" . $CURUSER["id"]) or sqlerr(__FILE__, __LINE__);
               if (mysql_num_rows($res2) != 1)
@@ -155,7 +155,7 @@ if (isset($_POST['n_pms'])) {
           if (!$sent)
             bt_theme::error('Error', 'Error sending PM');
 
-           if ($user['settings']['pmnotif'])
+           if ($user['flags'] & bt_options::FLAGS_PM_NOTIFICATION)
           {
 
             if (time() - $user["la"] >= 300)

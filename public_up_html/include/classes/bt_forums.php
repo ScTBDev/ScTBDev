@@ -169,7 +169,7 @@ class bt_forums {
 
 	public static function get_formated_post($id, $text) {
 		$postid = 0 + $id;
-		$type = bt_user::$current['settings']['avatars_po'] ? 'showpo' : 'hidepo';
+		$type = (bt_user::$current['flags'] & bt_options::FLAGS_AVATAR_PO) ? 'showpo' : 'hidepo';
 		$key = 'post::'.$type.':::'.$postid;
 		bt_memcache::connect();
 		$formated = bt_memcache::get($key);
@@ -183,11 +183,11 @@ class bt_forums {
 
 	public static function avatar(&$url, &$text, $is_po) {
 		$url = trim($url);
-		if ($url == '' || !bt_user::$current['settings']['avatars']) {
+		if ($url == '' || !(bt_user::$current['flags'] & bt_options::FLAGS_SHOW_AVATARS)) {
 			$url = bt_theme_engine::$theme_pic_dir.'avatar_default.png';
 			$text = '';
 		}
-		elseif (bt_user::$current['settings']['avatars_po'] || !$is_po)
+		elseif ((bt_user::$current['flags'] & bt_options::FLAGS_SHOW_PO_AVATARS) || !$is_po)
 			$text = '';
 		else {
 			$url = bt_theme_engine::$theme_pic_dir.'avatar_disabled.png';
@@ -214,43 +214,34 @@ class bt_forums {
 		return $user_link;
 	}
 
-	public static function user_stars($settings) {
+	public static function user_stars($flags) {
+		$flags = (int)$flags;
 		$stars = '';
-		if (isset($settings['donor']) && $settings['donor'])
+		if ($flags & bt_options::FLAGS_DONOR)
 			$stars .= ' <img src="'.bt_theme_engine::$theme_pic_dir.'donor_small.png" alt="Donor" title="Donor" />';
 
-		if (isset($settings['warned']) && $settings['warned'])
+		if ($flags & bt_options::FLAGS_WARNED)
 			$stars .= ' <a href="/rules.php#warning"><img src="'.bt_theme_engine::$theme_pic_dir.'warning_small.png" alt="Warned" '.
 				'title="Warned" style="border: none" /></a>';
+
+		if (!($flags & bt_options::FLAGS_ENABLED))
+			$stars .= '';
 
 		return $stars;
 	}
 
-	public static function settings_to_forum_theme($settings) {
+	public static function settings_to_forum_theme($flags) {
 		$theme = 0;
-		if ($settings['forum_1'])
+		if ($flags & bt_options::FLAGS_FORUM_ICONS_1)
 			$theme |= BIT_1;
-		if ($settings['forum_2'])
+		if ($flags & bt_options::FLAGS_FORUM_ICONS_2)
 			$theme |= BIT_2;
-		if ($settings['forum_3'])
+		if ($flags & bt_options::FLAGS_FORUM_ICONS_3)
 			$theme |= BIT_3;
-		if ($settings['forum_4'])
+		if ($flags & bt_options::FLAGS_FORUM_ICONS_4)
 			$theme |= BIT_4;
 
 		return (int)$theme;
-	}
-
-	public static function forum_theme_to_settings($theme) {
-		if ($theme < 0 || $theme > 15)
-			$theme = 0;
-
-		$settings = array(
-			'forum_1'	=> (bool)($theme & BIT_1),
-			'forum_2'	=> (bool)($theme & BIT_2),
-			'forum_3'	=> (bool)($theme & BIT_3),
-			'forum_4'	=> (bool)($theme & BIT_4),
-		);
-		return $settings;
 	}
 
 	public static function format_block_tag($text, $name, $prefix, $suffix, $strip_br = false, $strip_tags = false) {

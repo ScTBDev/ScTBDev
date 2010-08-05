@@ -37,9 +37,9 @@ $col = $out ? 'receiver' : 'sender';
 $ucol = !$out ? 'receiver' : 'sender';
 $loc = $out ? 'out' : 'in';
 
-$where = '`m`.`'.$ucol.'` = '.bt_user::$current['id'].' AND `m`.`location` IN ("'.$loc.'","both")';
+$where = 'm.'.$ucol.' = '.bt_user::$current['id'].' AND m.location IN ("'.$loc.'","both")';
 
-$countq = bt_sql::query('SELECT COUNT(*) FROM `messages` AS `m` WHERE '.$where) or bt_sql::err(__FILE__, __LINE__);
+$countq = bt_sql::query('SELECT COUNT(*) FROM messages AS m WHERE '.$where) or bt_sql::err(__FILE__, __LINE__);
 $count = $countq->fetch_row();
 $countq->free();
 $count = 0 + $count[0];
@@ -51,14 +51,14 @@ $link = bt_theme::$settings['inbox']['link'];
 
 if ($count) {
 	list($pager, $limit) = bt_theme::pager(25, $count, '/inbox.php?'.($out ? 'out=1&amp;' : ''), bt_theme::PAGER_SHOW_PAGES);
-	$query = 'SELECT `m`.*, `u`.`username`, `u`.`flags`, `u`.`avatar`, `u`.`title`, `u`.`class` FROM `messages` AS `m` '.
-		'LEFT JOIN `users` AS `u` ON (`u`.`id` = `m`.`'.$col.'`) WHERE '.$where.' ORDER BY `m`.`added` DESC '.$limit;
+	$query = 'SELECT m.*, u.username, CAST(u.flags AS SIGNED) AS flags, u.avatar, u.title, u.class FROM messages AS m '.
+		'LEFT JOIN users AS u ON (u.id = m.'.$col.') WHERE '.$where.' ORDER BY m.added DESC '.$limit;
 
 	$res = bt_sql::query($query) or bt_sql::err(__FILE__, __LINE__);
 	if ($res->num_rows) {
 		$messages = array();
 		while($arr = $res->fetch_assoc()) {
-			$arr['settings'] = bt_bitmask::fetch($arr['flags'],'avatar_po','donor','warned','enabled');
+			$arr['flags'] = (int)$arr['flags'];
 			$id = 0 + $arr['id'];
 			$userid = 0 + $arr[$col];
 			$unread = $arr['unread'] == 'yes';
@@ -84,8 +84,9 @@ if ($count) {
 			if ($user_title == '')
 				$user_title = $system_message ? 'System Message' : ($has_name ? bt_user::get_class_name($arr['class']) : 'Deleted User');
 
-            $stars = bt_forums::user_stars($arr['settings']);
-			bt_forums::avatar($avatar_url, $avtext, $arr['settings']['avatar_po']);
+            $stars = bt_forums::user_stars($arr['flags']);
+			$avatar_po = (bool)($arr['flags'] & bt_options::FLAGS_AVATAR_PO);
+			bt_forums::avatar($avatar_url, $avtext, $avatar_po);
 			$avatar_txt = $avtext ? ' title="'.$avtext.'"' : '';
 
 			$msg = format_comment($arr['msg']);
@@ -120,8 +121,8 @@ if ($count) {
 		$massdel = sprintf(bt_theme::$settings['inbox']['massdel'], $loc);
 
 		if (count($upunread)) {
-			bt_sql::query('UPDATE `messages` SET `unread` = "no" WHERE `id` IN ('.implode(',',$upunread).')') or bt_sql::err(__FILE__, __LINE__);
-			bt_sql::query('UPDATE `users` SET `inbox_new` = 0 WHERE `id` = '.bt_user::$current['id']) or bt_sql::err(__FILE__, __LINE__);
+			bt_sql::query('UPDATE messages SET unread = "no" WHERE id IN ('.implode(',',$upunread).')') or bt_sql::err(__FILE__, __LINE__);
+			bt_sql::query('UPDATE users SET inbox_new = 0 WHERE id = '.bt_user::$current['id']) or bt_sql::err(__FILE__, __LINE__);
         }
 	}
 	else {

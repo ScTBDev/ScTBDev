@@ -82,10 +82,10 @@ elseif ($topicid > 0) {
 }
 elseif ($editid > 1) {
 	$type = 'edit';
-	$opostq = bt_sql::query('SELECT `p`.`topicid`, `p`.`body`, `p`.`userid`'.
-		($method == 'post' ? ', `p`.`added`, `p`.`editedby`, `p`.`editedat`, `u`.`username`, `u`.`flags`, `u`.`title`, `u`.`class`, '.
-		'`u`.`avatar`' : '').' FROM `posts` AS `p` '.($method == 'post' ? 'LEFT JOIN `users` AS `u` ON (`u`.`id` = `p`.`userid`) ' : '').
-		'WHERE `p`.`id` = '.$editid) or bt_sql::err(__FILE__, __LINE__);
+	$opostq = bt_sql::query('SELECT p.topicid, p.body, p.userid'.
+		($method == 'post' ? ', p.added, p.editedby, p.editedat, u.username, CAST(u.flags AS SIGNED) AS flags, u.title, u.class, '.
+		'u.avatar' : '').' FROM posts AS p '.($method == 'post' ? 'LEFT JOIN users AS u ON (u.id = p.userid) ' : '').
+		'WHERE p.id = '.$editid) or bt_sql::err(__FILE__, __LINE__);
 
 	if (!$opostq->num_rows)
 		bt_theme::error('Error', 'Post not found');
@@ -109,8 +109,8 @@ elseif ($editid > 1) {
 }
 elseif ($method == 'get' && $postid > 1) {
 	$type = 'reply';
-	$opostq = bt_sql::query('SELECT `p`.`topicid`, `p`.`userid`, `p`.`body`, `u`.`username` FROM `posts` AS `p` '.
-		'LEFT JOIN `users` AS `u` ON (`u`.`id` = `p`.`userid`) WHERE `p`.`id` = '.$postid) or bt_sql::err(__FILE__, __LINE__);
+	$opostq = bt_sql::query('SELECT p.topicid, p.userid, p.body, u.username FROM posts AS p '.
+		'LEFT JOIN users AS u ON (u.id = p.userid) WHERE p.id = '.$postid) or bt_sql::err(__FILE__, __LINE__);
 
 	if (!$opostq->num_rows)
 		bt_theme::error('Error', 'Post not found');
@@ -137,14 +137,14 @@ if (!bt_user::required_class($forum['minclassread']) || !bt_user::required_class
 	bt_theme::error('Error', 'Permission denied');
 
 if (!bt_user::required_class(bt_user::UC_FORUM_MODERATOR)) {
-	if (!bt_user::$current['settings']['post_enable'])
+	if (!(bt_user::$current['flags'] & bt_options::FLAGS_POST_ENABLE))
 		bt_theme::error('Error', 'Your posting rights have been revoked');
 
 	if ($type == 'reply') {
 		if ($topic['locked'])
 			bt_theme::error('Error', 'This topic is locked.');
 
-		$lp = bt_sql::query('SELECT `userid` FROM `posts` WHERE `topicid` = '.$topicid.' ORDER BY `added` DESC LIMIT 1');
+		$lp = bt_sql::query('SELECT userid FROM posts WHERE topicid = '.$topicid.' ORDER BY added DESC LIMIT 1');
 		$lu = $lp->fetch_row();
 		$lp->free();
 
@@ -182,7 +182,7 @@ if ($method == 'post') {
 				'id'		=> bt_user::$current['id'],
 				'username'	=> bt_user::$current['username'],
 				'class'		=> bt_user::$current['class'],
-				'settings'	=> bt_user::$current['settings'],
+				'flags'		=> bt_user::$current['flags'],
 				'title'		=> bt_user::$current['title'],
 				'time'		=> NULL,
 				'avatar'	=> bt_user::$current['avatar'],
@@ -196,7 +196,7 @@ if ($method == 'post') {
 				'id'		=> 0 + $opost['userid'],
 				'username'	=> $opost['username'],
 				'class'		=> 0 + $opost['class'],
-				'settings'	=> bt_bitmask::fetch($opost['flags'],'avatar_po','donor','warned','enabled'),
+				'flags'		=> (int)$opost['flags'],
 				'title'		=> $opost['title'],
 				'time'		=> $opost['added'],
 				'avatar'	=> $opost['avatar'],
@@ -207,12 +207,13 @@ if ($method == 'post') {
 			);
 		}
 		$user_link = bt_forums::user_link($preview_data['id'], $preview_data['username'], $preview_data['class']);
-		$user_stars = bt_forums::user_stars($preview_data['settings']);
+		$user_stars = bt_forums::user_stars($preview_data['flags']);
 		$user_title = $preview_data['title'] != '' ? $preview_data['title'] : bt_user::get_class_name($preview_data['class']);
 		$post_time = bt_time::format($preview_data['time']);
 		$ago_time = bt_time::ago_time($preview_data['ago']);
 		$avatar = $preview_data['avatar'];
-		bt_forums::avatar($avatar, $avtext, $preview_data['settings']['avatar_po']);		
+		$avatar_po = (bool)($preview_data['flags'] & bt_options::FLAGS_AVATAR_PO);
+		bt_forums::avatar($avatar, $avtext, $avatar_po);		
 
 		$postprevvars = array(
 			'USER_LINK'		=> $user_link,
@@ -236,7 +237,7 @@ if ($method == 'post') {
 		$userid = bt_user::$current['id'];
 		if ($type == 'new') {
 			//---- Create topic
-			bt_sql::query('INSERT INTO `topics` (`userid`, `forumid`, `subject`) '.
+			bt_sql::query('INSERT INTO topics (userid, forumid, subject) '.
 				'VALUES('.$userid.', '.$forumid.', '.bt_sql::esc($subject).')') or bt_sql::err(__FILE__, __LINE__);
 			bt_forums::delete_forum_cache($forumid);
 			$topicid = 0 + bt_sql::$insert_id;
@@ -246,7 +247,7 @@ if ($method == 'post') {
 
 		if ($type != 'edit') {
 			//------ Insert post
-			bt_sql::query('INSERT INTO `posts` (`topicid`, `userid`, `added`, `body`) ' .
+			bt_sql::query('INSERT INTO posts (topicid, userid, added, body) ' .
 				'VALUES('.$topicid.', '.$userid.', '.time().', '.bt_sql::esc($body).')') or bt_sql::err(__FILE__, __LINE__);
 
 			$postid = 0 + bt_sql::$insert_id;
@@ -256,13 +257,13 @@ if ($method == 'post') {
 			if ($type != 'new')
 				bt_forums::delete_topic_cache($topicid);
 
-			bt_sql::query('UPDATE `users` SET `posts` = (`posts` + 1) WHERE `id` = '.$userid);
+			bt_sql::query('UPDATE users SET posts = (posts + 1) WHERE id = '.$userid);
 
 
 			//------ Update topic last post
-			bt_sql::query('UPDATE `topics` SET `lastpost` = '.$postid.', `posts` = (`posts` + 1) WHERE `id` = '.$topicid);
-			bt_sql::query('UPDATE `forums` SET '.($type == 'new' ? '`topiccount` = (`topiccount` + 1), ' : '').
-				'`lasttopic` = '.$topicid.', `postcount` = (`postcount` + 1) WHERE `id` = '.$forumid);
+			bt_sql::query('UPDATE topics SET lastpost = '.$postid.', posts = (posts + 1) WHERE id = '.$topicid);
+			bt_sql::query('UPDATE forums SET '.($type == 'new' ? 'topiccount = (topiccount + 1), ' : '').
+				'lasttopic = '.$topicid.', postcount = (postcount + 1) WHERE id = '.$forumid);
 				bt_forums::delete_forum_cache($forumid);
 
 		}
@@ -272,11 +273,11 @@ if ($method == 'post') {
 				$oldid = 0 + ($opost['editedby'] != 0 ? $opost['editedby'] : $opost['userid']);
 				$oldtime = 0 + ($opost['editedat'] != 0 ? $opost['editedat'] : $opost['added']);
 
-				bt_sql::query('INSERT INTO `posts_edits` (`postid`,`userid`,`added`,`body`) '.
+				bt_sql::query('INSERT INTO posts_edits (postid, userid, added, body) '.
 					'VALUES ('.$editid.','.$oldid.','.$oldtime.','.bt_sql::esc($oldbody).')') or bt_sql::err(__FILE__, __LINE__);
 
-				bt_sql::query('UPDATE `posts` SET `body` = '.bt_sql::esc($body).', `editedat` = '.time().', '.
-					'`editedby` = '.bt_user::$current['id'].', `edits` = (`edits` + 1) WHERE `id` = '.$editid) or bt_sql::err(__FILE__, __LINE__);
+				bt_sql::query('UPDATE posts SET body = '.bt_sql::esc($body).', editedat = '.time().', '.
+					'editedby = '.bt_user::$current['id'].', edits = (edits + 1) WHERE id = '.$editid) or bt_sql::err(__FILE__, __LINE__);
 
 				bt_forums::delete_post_cache($editid);
 			}
@@ -290,8 +291,8 @@ if ($method == 'post') {
 
 //------ Get 10 last posts if this is a reply
 if ($type == 'reply') {
-	$postsq = bt_sql::query('SELECT `p`.*, `u`.`avatar`, `u`.`flags`, `u`.`username`, `u`.`class`, `u`.`title` FROM `posts` AS `p` '.
-        'LEFT JOIN `users` AS `u` ON (`u`.`id` = `p`.`userid`) WHERE `p`.`topicid`= '.$topicid.' ORDER BY `p`.`id` DESC LIMIT 10')
+	$postsq = bt_sql::query('SELECT p.*, u.avatar, CAST(u.flags AS SIGNED) AS flags, u.username, u.class, u.title FROM posts AS p '.
+        'LEFT JOIN users AS u ON (u.id = p.userid) WHERE p.topicid= '.$topicid.' ORDER BY p.id DESC LIMIT 10')
 		or bt_sql::err(__FILE__, __LINE__);
 
 //    begin_frame('10 last posts, in reverse order');
@@ -299,14 +300,15 @@ if ($type == 'reply') {
 	while ($post = $postsq->fetch_assoc()) {
 		//-- Get poster details
 		$username = $post['username'];
-		$post['settings'] = bt_bitmask::fetch($post['flags'], 'avatar_po', 'donor', 'warned');
+		$post['flags'] = (int)$post['flags'];
 		$user_link = bt_forums::user_link($post['userid'], $username, $post['class']);
-		$user_stars = bt_forums::user_stars($post['settings']);
+		$user_stars = bt_forums::user_stars($post['flags']);
 		$user_title = $post['title'] != '' ? $post['title'] : bt_user::get_class_name($post['class']);
 		$post_time = bt_time::format($post['added']);
 		$post_ago = bt_time::ago_time($post['added']);
 		$avatar = $post['avatar'];
-		bt_forums::avatar($avatar, $avtext, $post['settings']['avatar_po']);
+		$avatar_po = (bool)($post['flags'] & bt_options::FLAGS_AVATAR_PO);
+		bt_forums::avatar($avatar, $avtext, $avatar_po);
 
 		$prevpostvars = array(
 			'USER_LINK'		=> $user_link,

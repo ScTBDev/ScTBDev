@@ -21,7 +21,6 @@
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'class_config.php');
 require_once(CLASS_PATH.'bt_memcache.php');
-require_once(CLASS_PATH.'bt_bitmask.php');
 require_once(CLASS_PATH.'bt_sql.php');
 require_once(CLASS_PATH.'bt_string.php');
 require_once(CLASS_PATH.'bt_security.php');
@@ -167,7 +166,8 @@ class bt_mem_caching {
 		$user = bt_memcache::get($key);
 		if ($user === false) {
 			bt_sql::connect();
-			$usersql = 'SELECT id, class, flags FROM users WHERE passkey = '.bt_sql::esc($passkey).' AND (flags & '.bt_options::FLAGS_ENABLED.')';
+			$reqflags = bt_options::FLAGS_ENABLED | bt_options::FLAGS_CONFIRMED;
+			$usersql = 'SELECT id, class, CAST(flags AS SIGNED) AS flags FROM users WHERE passkey = '.bt_sql::esc($passkey).' AND (flags & '.$reqflags.') = '.$reqflags;
 			$userq = bt_sql::query($usersql) or bt_sql::err(__FILE__, __LINE__);
 			if (!$userq->num_rows) {
 				bt_memcache::add($key, 0, self::BAD_TTL_TIME);
@@ -180,9 +180,6 @@ class bt_mem_caching {
 			$user['id'] = (int)$user['id'];
 			$user['class'] = (int)$user['class'];
 			$user['flags'] = (int)$user['flags'];
-
-			$user['settings'] = bt_bitmask::fetch_all($user['flags']);
-			unset($user['flags']);
 
 			bt_memcache::add($key, $user, self::TTL_TIME);
 		}

@@ -33,9 +33,9 @@ if (!bt_user::required_class(bt_user::UC_UPLOADER)) {
 	die;
 }
 
-if ($CURUSER['settings']['ssl_tracker'])
+if (bt_user::$current['flags'] & bt_options::FLAGS_SSL_TRACKER)
   $urls = $announce_urls_ssl;
-elseif ($CURUSER['settings']['proxy'])
+elseif (bt_user::$current['flags'] & bt_options::FLAGS_PROXY_TRACKER)
   $urls = $announce_urls_proxy;
 else
   $urls = $announce_urls;
@@ -50,7 +50,7 @@ foreach ($cats as $catid => $cat)
 
 $type_list = implode("\n", $types);
 $checked = ' checked="checked"';
-$anon = bt_user::$current['settings']['privacy'];
+$anon = (bool)(bt_user::$current['flags'] & bt_options::FLAGS_ANON);
 $anon_unchecked = !$anon ? $checked : '';
 $anon_checked = $anon ? $checked : '';
 
