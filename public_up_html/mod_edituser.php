@@ -625,7 +625,7 @@ if (bt_user::required_class(UC_ADMINISTRATOR)) {
 
     if ($rem_dnl > 0)
         $downloaded -= $rem_dnl;
-7
+
     $downloaded = $downloaded >= 0 ? $downloaded : 0;
 
 	if ($curdownloaded != $downloaded) {
