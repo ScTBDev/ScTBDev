@@ -75,7 +75,7 @@ if ($count) {
 			$reply_link = !$out && $has_name ? '<a href="/sendmessage.php?receiver='.$userid.'&amp;replyto='.$id.'"'.$link.'>Reply</a>'.
 				bt_theme::$settings['inbox']['reply_sep'] : '';
 			$new = $unread ? bt_theme::$settings['inbox']['new_message'] : '';
-			$new = $out ? (bt_user::required_class(bt_user::UC_STAFF) ? $new : '') : $new;
+			$new = $out ? (bt_user::required_class(UC_STAFF) ? $new : '') : $new;
 			list($date, $time) = explode(' ', format_time($arr['added']), 2);
 			$subject_title = $subject != $disp_subject ? ' title="'.bt_security::html_safe($subject).'"' : '';
 			$subject = $has_subject ? bt_security::html_safe($disp_subject) : '[No Subject]';

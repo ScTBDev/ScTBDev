@@ -27,7 +27,7 @@ loggedinorreturn();
 
 bt_theme::head('Upload');
 
-if (!bt_user::required_class(bt_user::UC_UPLOADER)) {
+if (!bt_user::required_class(UC_UPLOADER)) {
 	bt_theme::message('Sorry...', 'You are not authorized to upload torrents.  (See <a href="/faq.php#up">Uploading</a> in the FAQ.)');
 	bt_theme::foot();
 	die;

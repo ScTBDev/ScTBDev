@@ -27,7 +27,7 @@ loggedinorreturn();
 
 $id = 0 + $_GET['id'];
 $download = (bool)0 + $_GET['down'];
-if (!bt_user::required_class(bt_user::UC_POWER_USER) || !is_valid_id($id))
+if (!bt_user::required_class(UC_POWER_USER) || !is_valid_id($id))
 	die();
 
 $r = bt_sql::query('SELECT `name`, `nfo` FROM `torrents` WHERE `id` = '.$id) or bt_sql::err(__FILE__,__LINE__);

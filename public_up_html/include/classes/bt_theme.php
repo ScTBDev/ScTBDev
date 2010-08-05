@@ -190,8 +190,8 @@ class bt_theme {
 
 		$navbar = '';
 		if (bt_user::$current) {
-			$upload_btn = bt_user::required_class(bt_user::UC_UPLOADER) ? bt_theme_engine::load_tpl('upload_btn') : '';
-			$invite_btn = (bt_user::required_class(bt_user::UC_STAFF) || bt_user::$current['invites'] > 0) ? bt_theme_engine::load_tpl('invite_btn') : '';
+			$upload_btn = bt_user::required_class(UC_UPLOADER) ? bt_theme_engine::load_tpl('upload_btn') : '';
+			$invite_btn = (bt_user::required_class(UC_STAFF) || bt_user::$current['invites'] > 0) ? bt_theme_engine::load_tpl('invite_btn') : '';
 
 			$navvars = array(
 				'UPLOAD_BTN'	=> $upload_btn,
@@ -203,7 +203,7 @@ class bt_theme {
 		$alerts = '';
 		if ($show_alerts && bt_user::$current) {
 			$connalert = '';
-			if (bt_user::$current['connectable'] == 'no' && !bt_user::required_class(bt_user::UC_XTREME_USER))
+			if (bt_user::$current['connectable'] == 'no' && !bt_user::required_class(UC_XTREME_USER))
 				$connalert = bt_theme_engine::load_tpl('alert_conn');
 
 			$unread = bt_user::$current['inbox_new'];

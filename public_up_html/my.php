@@ -118,7 +118,7 @@ $email = bt_security::html_safe($user['email']);
 
 
 $whore = '';
-if (bt_user::required_class(bt_user::UC_WHORE)) {
+if (bt_user::required_class(UC_WHORE)) {
 	$anon_off = !$settings['privacy'] ? $radio_c : '';
 	$anon_on = $settings['privacy'] ? $radio_c : '';
 	$hide_stats = $settings['hide_stats'] ? $check_c : '';
@@ -134,7 +134,7 @@ if (bt_user::required_class(bt_user::UC_WHORE)) {
 }
 
 $donate = '';
-if (bt_user::required_class(bt_user::UC_WHORE) || $settings['donor']) {
+if (bt_user::required_class(UC_WHORE) || $settings['donor']) {
 	$title = bt_security::html_safe($user['title']);
 
 	$donate_myvars = array(
@@ -144,7 +144,7 @@ if (bt_user::required_class(bt_user::UC_WHORE) || $settings['donor']) {
 	$donate = bt_theme_engine::load_tpl('my_donate', $donate_myvars);
 }
 $staff = '';
-if (bt_user::required_class(bt_user::UC_STAFF)) {
+if (bt_user::required_class(UC_STAFF)) {
 	$ip_access = explode(';', $user['ip_access']);
 	$ip_access = bt_security::html_safe(implode("\n", $ip_access));
 

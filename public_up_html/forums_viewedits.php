@@ -24,7 +24,7 @@ require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorre
 dbconn();
 loggedinorreturn();
 
-if (!bt_user::required_class(bt_user::UC_FORUM_MODERATOR))
+if (!bt_user::required_class(UC_FORUM_MODERATOR))
 	bt_theme::error('Error', 'Permission denied');
 
 $postid = 0 + $_GET['id'];

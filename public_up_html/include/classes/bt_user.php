@@ -24,47 +24,26 @@ require_once(CLASS_PATH.'bt_pm.php');
 require_once(CLASS_PATH.'bt_sql.php');
 
 class bt_user {
-	// User classes
-	const UC_USER = 0;
-	const UC_POWER_USER = 1;
-	const UC_XTREME_USER = 2;
-	const UC_LOVER = 3;
-	const UC_WHORE = 4;
-	const UC_SUPER_WHORE = 5;
-	const UC_SEED_WHORE = 6;
-	const UC_OVERSEEDER = 7;
-	const UC_VIP = 8;
-	const UC_UPLOADER = 9;
-	const UC_FORUM_MODERATOR = 10;
-	const UC_MODERATOR = 11;
-	const UC_ADMINISTRATOR = 12;
-	const UC_LEADER = 13;
-
-	// Staff class
-	const UC_MIN = 0;
-	const UC_MAX = 13;
-	const UC_STAFF = 10;
-
 	private static $_users_cache = array();
 	private static $_mod_comments = array();
 	private static $_mod_comments_del = array();
 	public static $current = NULL;
 
 	public static $class_names = array(
-		self::UC_USER				=> 'User',
-		self::UC_POWER_USER			=> 'Power User',
-		self::UC_XTREME_USER		=> 'Xtreme User',
-		self::UC_LOVER				=> 'ScT Lover',
-		self::UC_WHORE				=> 'ScT Whore',
-		self::UC_SUPER_WHORE		=> 'ScT Super Whore',
-		self::UC_SEED_WHORE			=> 'ScT Seed Whore',
-		self::UC_OVERSEEDER			=> 'The Overseeder',
-		self::UC_VIP				=> 'VIP',
-		self::UC_UPLOADER			=> 'Uploader',
-		self::UC_FORUM_MODERATOR	=> 'Forum Moderator',
-		self::UC_MODERATOR			=> 'Global Moderator',
-		self::UC_ADMINISTRATOR		=> 'Administrator',
-		self::UC_LEADER				=> 'Staff Leader'
+		UC_USER				=> 'User',
+		UC_POWER_USER		=> 'Power User',
+		UC_XTREME_USER		=> 'Xtreme User',
+		UC_LOVER			=> 'ScT Lover',
+		UC_WHORE			=> 'ScT Whore',
+		UC_SUPER_WHORE		=> 'ScT Super Whore',
+		UC_SEED_WHORE		=> 'ScT Seed Whore',
+		UC_OVERSEEDER		=> 'The Overseeder',
+		UC_VIP				=> 'VIP',
+		UC_UPLOADER			=> 'Uploader',
+		UC_FORUM_MODERATOR	=> 'Forum Moderator',
+		UC_MODERATOR		=> 'Global Moderator',
+		UC_ADMINISTRATOR	=> 'Administrator',
+		UC_LEADER			=> 'Staff Leader'
 	);
 
 	public static function prepare_user(&$user, $curuser = false) {
@@ -149,10 +128,10 @@ class bt_user {
 
 	public static function valid_class($class) {
 		$class = (int)$class;
-		return (bool)($class >= self::UC_MIN && $class <= self::UC_MAX);
+		return (bool)($class >= UC_MIN && $class <= UC_MAX);
 	}
 
-	public static function required_class($min = self::UC_MIN, $max = self::UC_MAX) {
+	public static function required_class($min = UC_MIN, $max = UC_MAX) {
 		$minclass = (int)$min;
 		$maxclass = (int)$max;
 		if (empty(self::$current))

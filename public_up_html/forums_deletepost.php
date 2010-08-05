@@ -30,7 +30,7 @@ $tsettings = bt_theme::$settings['forums_deletepost'];
 $postid = 0 + $_GET['id'];
 $sure = 0 + $_GET['sure'];
 
-if ($postid < 1 || !bt_user::required_class(bt_user::UC_FORUM_MODERATOR))
+if ($postid < 1 || !bt_user::required_class(UC_FORUM_MODERATOR))
 	die;
 
 //------- Make sure we know what we do :-)

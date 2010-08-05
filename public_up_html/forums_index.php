@@ -94,7 +94,7 @@ while ($forums_arr = $forums_res->fetch_assoc()) {
 		$lastpost = 'N/A';
 		$img = 'unlocked';
 	}
-	$admin_links = bt_user::required_class(bt_user::UC_ADMINISTRATOR) ? '<span'.bt_theme::$settings['forums']['index']['staff_tools'].'> '.
+	$admin_links = bt_user::required_class(UC_ADMINISTRATOR) ? '<span'.bt_theme::$settings['forums']['index']['staff_tools'].'> '.
             '[<a href="/forums_modforum.php?type=edit&amp;id='.$forumid.'"'.$link.'>Edit</a>] '.
             '[<a href="/forums_deleteforum.php?id='.$forumid.'"'.$link.'>Delete</a>]</span>' : '';
 
@@ -118,7 +118,7 @@ while ($forums_arr = $forums_res->fetch_assoc()) {
 }
 $forums_res->free();
 
-/*if (bt_user::required_class(bt_user::UC_ADMINISTRATOR))
+/*if (bt_user::required_class(UC_ADMINISTRATOR))
 	echo '<form method="get" action="forums_modforum.php">
   <input type="hidden" name="type" value="new" />
   <input type="submit" value="New forum" class="btn" style="margin-left: 10px" />

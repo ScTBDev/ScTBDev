@@ -45,10 +45,10 @@ $users = $row['rusers'];
 
 bt_theme::head('Invite');
 
-if ($invites || bt_user::required_class(bt_user::UC_STAFF)) {
+if ($invites || bt_user::required_class(UC_STAFF)) {
 	$box = '';
 
-	if ($users >= (bt_config::$conf['maxusers'] - 25) && !bt_user::required_class(bt_user::UC_MODERATOR))
+	if ($users >= (bt_config::$conf['maxusers'] - 25) && !bt_user::required_class(UC_MODERATOR))
 		$box .= bt_theme::message('Warning', 'Please note that your invite may not work because the user limit has been '.
 			'(or is close to being) reached ('.$users.'/'.bt_config::$conf['maxusers'].').', false, true);
 

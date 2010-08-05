@@ -498,7 +498,7 @@ function get_user_class_name($class) {
 }
 
 function is_valid_user_class($class) {
-	return (bool)(is_numeric($class) && floor($class) == $class && $class >= bt_user::UC_MIN && $class <= bt_user::UC_MAX);
+	return (bool)(is_numeric($class) && floor($class) == $class && $class >= UC_MIN && $class <= UC_MAX);
 }
 
 function is_valid_id($id) {
@@ -677,7 +677,7 @@ function format_log($text) {
 
 	// [anon]anon username[/anon]
 	if (stripos($s, '[anon]') !== false)
-		$s = preg_replace('/\[anon\](.+?)\[\/anon\]/is', $bbcode['i'][0].(bt_user::required_class(bt_user::UC_MODERATOR) ? '$1' : 'Anonymous').
+		$s = preg_replace('/\[anon\](.+?)\[\/anon\]/is', $bbcode['i'][0].(bt_user::required_class(UC_MODERATOR) ? '$1' : 'Anonymous').
 			$bbcode['i'][1], $s);
 
 	// [b]Bold[/b]

@@ -24,8 +24,8 @@ require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorre
 dbconn();
 bt_theme::head('Rules');
 
-$upload_rules = bt_user::required_class(bt_user::UC_UPLOADER) ? bt_theme_engine::load_tpl('rules_upload') : '';
-$staff_rules = bt_user::required_class(bt_user::UC_STAFF) ? bt_theme_engine::load_tpl('rules_staff') : '';
+$upload_rules = bt_user::required_class(UC_UPLOADER) ? bt_theme_engine::load_tpl('rules_upload') : '';
+$staff_rules = bt_user::required_class(UC_STAFF) ? bt_theme_engine::load_tpl('rules_staff') : '';
 
 $rulevars = array(
 	'UPLOAD_RULES'	=> $upload_rules,

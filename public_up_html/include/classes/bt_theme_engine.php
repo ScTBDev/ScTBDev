@@ -38,13 +38,13 @@ class bt_theme_engine {
 			'name'			=> 'blue',
 			'full_name'		=> 'Blue',
 			'donor'			=> false,
-			'class'			=> bt_user::UC_MIN,
+			'class'			=> UC_MIN,
 		),
 		array(
 			'name'		=> 'black',
 			'full_name'	=> 'Black',
 			'donor'		=> false,
-			'class'		=> bt_user::UC_STAFF,
+			'class'		=> UC_STAFF,
 		),
 //		array(
 //			'name'		=> 'blue_ajax',

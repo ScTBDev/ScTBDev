@@ -27,7 +27,7 @@ require_once(CLASS_PATH.'allowed_staff.php');
 dbconn();
 loggedinorreturn();
 
-if (!bt_user::required_class(bt_user::UC_ADMINISTRATOR))
+if (!bt_user::required_class(UC_ADMINISTRATOR))
 	bt_theme::error('Error', 'Access Denied');
 
 $as = new allowed_staff;

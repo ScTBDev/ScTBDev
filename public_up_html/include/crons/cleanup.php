@@ -203,18 +203,18 @@ $res->free();
 $limit = 50 * 1024 * 1024 * 1024;  $minratio = 1.05; $regtime = 86400 * 21;
 $extmsg = 'Your new privileges as Power User:'."\n".
           '[*] Access to torrent NFOs.';
-bt_user::auto_promote(bt_user::UC_USER, bt_user::UC_POWER_USER, $minratio, $limit, $regtime, $extmsg);			// promote power users
+bt_user::auto_promote(UC_USER, UC_POWER_USER, $minratio, $limit, $regtime, $extmsg);			// promote power users
 
 $limit = 250 * 1024 * 1024 * 1024; $minratio = 1.2; $regtime = 86400 * 35;
 $extmsg = 'Your new privileges as Xtreme User:'."\n".
           '[*] Access to Top 10 page.';
-bt_user::auto_promote(bt_user::UC_POWER_USER, bt_user::UC_XTREME_USER, $minratio, $limit, $regtime, $extmsg);	// promote xtreme users
+bt_user::auto_promote(UC_POWER_USER, UC_XTREME_USER, $minratio, $limit, $regtime, $extmsg);	// promote xtreme users
 
 $limit = 500 * 1024 * 1024 * 1024; $minratio = 1.5;  $regtime = 86400 * 70;
 $add_chans = bt_bitmask::chans('allow_tracers');
 $extmsg = 'Your new privileges as ScT Lover:
 [*] Access to #sct.tracers IRC channel (must be enabled in your profile).';
-bt_user::auto_promote(bt_user::UC_XTREME_USER, bt_user::UC_LOVER, $minratio, $limit, $regtime, $extmsg, 0, $add_chans);	// promote sct lover's
+bt_user::auto_promote(UC_XTREME_USER, UC_LOVER, $minratio, $limit, $regtime, $extmsg, 0, $add_chans);	// promote sct lover's
 
 $limit = 1024 * 1024 * 1024 * 1024; $minratio = 2; $regtime = 86400 * 105;
 $add_chans = bt_bitmask::chans('invite_pre','allow_pre');
@@ -222,16 +222,16 @@ $extmsg = 'Your new privileges as ScT Whore:'."\n".
           '[*] Access to IRC Pre Channel.'."\n".
           '[*] Ability to edit custom title.'."\n".
           '[*] Can set appear as anonymous.';
-bt_user::auto_promote(bt_user::UC_LOVER, bt_user::UC_WHORE, $minratio, $limit, $regtime, $extmsg, 0, $add_chans);				// promote sct whore's
+bt_user::auto_promote(UC_LOVER, UC_WHORE, $minratio, $limit, $regtime, $extmsg, 0, $add_chans);				// promote sct whore's
 
 $limit = 3 * 1024 * 1024 * 1024 * 1024;  $minratio = 3;  $regtime = 86400 * 140;
-bt_user::auto_promote(bt_user::UC_WHORE, bt_user::UC_SUPER_WHORE, $minratio, $limit, $regtime);					// promote sct super whore's
+bt_user::auto_promote(UC_WHORE, UC_SUPER_WHORE, $minratio, $limit, $regtime);					// promote sct super whore's
 
 $limit = 6 * 1024 * 1024 * 1024 * 1024; $minratio = 4; $regtime = 86400 * 175;
-bt_user::auto_promote(bt_user::UC_SUPER_WHORE, bt_user::UC_SEED_WHORE, $minratio, $limit, $regtime);			// promote sct seed whore's
+bt_user::auto_promote(UC_SUPER_WHORE, UC_SEED_WHORE, $minratio, $limit, $regtime);			// promote sct seed whore's
 
 $limit = 30 * 1024 * 1024 * 1024 * 1024; $minratio = 1.1; $regtime = 86400 * 365; $downlimit = 3 * 1024 * 1024 * 1024 * 1024;
-bt_user::auto_promote(bt_user::UC_SEED_WHORE, bt_user::UC_OVERSEEDER, $minratio, $limit, $regtime, '', 0, 0, $downlimit);
+bt_user::auto_promote(UC_SEED_WHORE, UC_OVERSEEDER, $minratio, $limit, $regtime, '', 0, 0, $downlimit);
 
 
 //////////////////////////////////////////////
@@ -239,16 +239,16 @@ bt_user::auto_promote(bt_user::UC_SEED_WHORE, bt_user::UC_OVERSEEDER, $minratio,
 //////////////////////////////////////////////
 
 
-bt_user::auto_demote(bt_user::UC_OVERSEEDER, bt_user::UC_SEED_WHORE, 1.09);
-bt_user::auto_demote(bt_user::UC_SEED_WHORE, bt_user::UC_SUPER_WHORE, 3.9);		// demote sct seed whore's
-bt_user::auto_demote(bt_user::UC_SUPER_WHORE, bt_user::UC_WHORE, 2.9);			// demote sct super whore's
+bt_user::auto_demote(UC_OVERSEEDER, UC_SEED_WHORE, 1.09);
+bt_user::auto_demote(UC_SEED_WHORE, UC_SUPER_WHORE, 3.9);		// demote sct seed whore's
+bt_user::auto_demote(UC_SUPER_WHORE, UC_WHORE, 2.9);			// demote sct super whore's
 $remove_flags = bt_options::FLAGS_ANON;
 $remove_chans = bt_bitmask::chans('invite_pre','allow_pre');
-bt_user::auto_demote(bt_user::UC_WHORE, bt_user::UC_LOVER, 1.9, $remove_flags, $remove_chans);	// demote sct whore's
+bt_user::auto_demote(UC_WHORE, UC_LOVER, 1.9, $remove_flags, $remove_chans);	// demote sct whore's
 $remove_chans = bt_bitmask::chans('invite_tracers','allow_tracers');
-bt_user::auto_demote(bt_user::UC_LOVER, bt_user::UC_XTREME_USER, 1.4, 0, $remove_chans);		// demote sct lover's
-bt_user::auto_demote(bt_user::UC_XTREME_USER, bt_user::UC_POWER_USER, 1.1);		// demote xtreme users's
-bt_user::auto_demote(bt_user::UC_POWER_USER, bt_user::UC_USER, 0.95);			// demote power users's
+bt_user::auto_demote(UC_LOVER, UC_XTREME_USER, 1.4, 0, $remove_chans);		// demote sct lover's
+bt_user::auto_demote(UC_XTREME_USER, UC_POWER_USER, 1.1);		// demote xtreme users's
+bt_user::auto_demote(UC_POWER_USER, UC_USER, 0.95);			// demote power users's
 
 
 // Delete Old System Messages

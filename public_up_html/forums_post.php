@@ -93,7 +93,7 @@ elseif ($editid > 1) {
 	$opost = $opostq->fetch_assoc();
 	$opostq->free();
 
-	if (!bt_user::required_class(bt_user::UC_FORUM_MODERATOR) && (bt_user::$current['id'] != $opost['userid'] || $locked))
+	if (!bt_user::required_class(UC_FORUM_MODERATOR) && (bt_user::$current['id'] != $opost['userid'] || $locked))
 		bt_theme::error('Error', 'Denied!');
 
 	if ($method == 'get')
@@ -136,7 +136,7 @@ if (!bt_user::required_class($forum['minclassread']) || !bt_user::required_class
 	($type == 'new' && !bt_user::required_class($forum['minclasscreate'])))
 	bt_theme::error('Error', 'Permission denied');
 
-if (!bt_user::required_class(bt_user::UC_FORUM_MODERATOR)) {
+if (!bt_user::required_class(UC_FORUM_MODERATOR)) {
 	if (!(bt_user::$current['flags'] & bt_options::FLAGS_POST_ENABLE))
 		bt_theme::error('Error', 'Your posting rights have been revoked');
 

@@ -183,7 +183,7 @@ if (bt_user::required_class(UC_WHORE)) {
 	}
 }
 
-if (bt_user::required_class(bt_user::UC_STAFF)) {
+if (bt_user::required_class(UC_STAFF)) {
 	if (trim($ip_access) != '') {
 		$ipas = explode(';',$ip_access);
 		foreach($ipas as $ipa)
@@ -194,7 +194,7 @@ if (bt_user::required_class(bt_user::UC_STAFF)) {
 		$updateset[] = 'ip_access = '.sqlesc($ip_access);
 }
 
-if (bt_user::required_class(bt_user::UC_WHORE) || (bt_user::$current['flags'] & bt_options::FLAGS_DONOR)) {
+if (bt_user::required_class(UC_WHORE) || (bt_user::$current['flags'] & bt_options::FLAGS_DONOR)) {
 	$title = sqlesc((trim($_POST['title']) != '') ? trim($_POST['title']) : '');
 	$updateset[] = 'title = '.$title;
 }
@@ -409,7 +409,7 @@ your profile will remain unchanged.';
 if ($setflags)
   $updateset[] = '`flags` = (`flags` | '.$setflags.')';
 if ($clrflags)
-  $updateset[] = '`flags` = (`flags` & '.bt_bitmask::invert($clrflags).')';
+  $updateset[] = '`flags` = (`flags` & ~'.$clrflags.')';
 
 if ($add_chans)
 	$updateset[] = '`chans` = (`chans` | '.$add_chans.')';

@@ -27,7 +27,7 @@ require_once(CLASS_PATH.'allowed_staff.php');
 dbconn();
 loggedinorreturn();
 
-if (!bt_user::required_class(bt_user::UC_ADMINISTRATOR))
+if (!bt_user::required_class(UC_ADMINISTRATOR))
 	bt_theme::error('Error', 'Access Denied');
 
 $as = new allowed_staff;
@@ -42,9 +42,9 @@ switch ($type) {
 		bt_theme::head('New forum');
 		begin_main_frame();
 		begin_frame('New Forum', 'center');
-		$classread		= bt_user::UC_USER;
-		$classwrite		= bt_user::UC_USER;
-		$classcreate	= bt_user::UC_USER;
+		$classread		= UC_USER;
+		$classwrite		= UC_USER;
+		$classcreate	= UC_USER;
 		$sort			= 0;
 		$forumname		= '';
 		$desc			= '';
@@ -86,15 +86,15 @@ echo '<tr><td class="rowhead">Forum name</td>' .
 	'<td align="left" style="padding: 0px"><textarea name="description" cols="68" rows="3" style="border: 0px">'.$desc.'</textarea></td></tr>'."\n".
 	'<tr><td class="rowhead"></td><td align="left" style="padding: 0px">&nbspMinimum <select name="readclass">';
 
-for ($i = bt_user::UC_MIN; $i <= bt_user::$current['class']; ++$i)
+for ($i = UC_MIN; $i <= bt_user::$current['class']; ++$i)
 	echo '<option value="'.$i.'"'.($i == $classread ? ' selected="selected"' : '').' />'.bt_user::get_class_name($i).'</option>'."\n";
 
 echo '</select> Class required to View<br />'."\n".'&nbspMinimum <select name="writeclass">';
-for ($i = bt_user::UC_MIN; $i <= bt_user::$current['class']; ++$i)
+for ($i = UC_MIN; $i <= bt_user::$current['class']; ++$i)
 	echo '<option value="'.$i.'"'.($i == $classwrite ? ' selected="selected"' : '').' />'.bt_user::get_class_name($i).'</option>'."\n";
 
 echo '</select> Class required to Post<br />'."\n".'&nbspMinimum <select name="createclass">';
-for ($i = bt_user::UC_MIN; $i <= bt_user::$current['class']; ++$i)
+for ($i = UC_MIN; $i <= bt_user::$current['class']; ++$i)
 	echo '<option value="'.$i.'"'.($i == $classcreate ? ' selected="selected"' : '').' />'.bt_user::get_class_name($i).'</option>'."\n";
 
 echo '</select> Class required to Create Topics</td></tr>'."\n".

@@ -116,9 +116,9 @@ if ($res->num_rows) {
 }
 $fls_list = implode($tsettings['fls_join'], $flss);
 
-$admin_tools = bt_user::required_class(bt_user::UC_ADMINISTRATOR) ? bt_theme_engine::load_tpl('staff_admin') : '';
-$mod_tools = bt_user::required_class(bt_user::UC_MODERATOR) ? bt_theme_engine::load_tpl('staff_mod') : '';
-$staff_tools = bt_user::required_class(bt_user::UC_STAFF) ? bt_theme_engine::load_tpl('staff_tools') : '';
+$admin_tools = bt_user::required_class(UC_ADMINISTRATOR) ? bt_theme_engine::load_tpl('staff_admin') : '';
+$mod_tools = bt_user::required_class(UC_MODERATOR) ? bt_theme_engine::load_tpl('staff_mod') : '';
+$staff_tools = bt_user::required_class(UC_STAFF) ? bt_theme_engine::load_tpl('staff_tools') : '';
 
 $staffvars = array(
 	'STAFF_LISTS'	=> $staff_list,

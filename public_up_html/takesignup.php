@@ -76,7 +76,7 @@ $res = bt_sql::query('SELECT COUNT(*) FROM `users`') or sqlerr(__FILE__, __LINE_
 $arr = $res->fetch_row();
 $res->free();
 
-if ($arr[0] >= bt_config::$conf['maxusers'] && !($invite && $invite['class'] >= bt_user::UC_STAFF))
+if ($arr[0] >= bt_config::$conf['maxusers'] && !($invite && $invite['class'] >= UC_STAFF))
 	bt_theme::error('Sorry', 'The current user account limit ('.number_format(bt_config::$conf['maxusers']).') has been reached. '.
 		'Inactive accounts are pruned all the time, please check back again later...');
 

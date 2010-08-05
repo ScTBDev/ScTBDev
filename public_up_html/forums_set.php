@@ -40,7 +40,7 @@ if (!$session->check($form_hash, 'forums_set'))
 	die('h4x');
 
 
-if ($topicid < 1 || !bt_user::required_class(bt_user::UC_FORUM_MODERATOR))
+if ($topicid < 1 || !bt_user::required_class(UC_FORUM_MODERATOR))
 	die;
 
 $topic = bt_forums::get_topic($topicid);
