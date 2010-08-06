@@ -706,7 +706,7 @@ Here is the new information for your account:
 You may login at '.bt_vars::$base_url.'/login.php
 
 --
-'.bt_config::$conf['site_name']
+'.bt_config::$conf['site_name'];
 
 	@mail($email, bt_config::$conf['site_name'].' account details', $body, 'From: '.bt_config::$conf['site_email'])
 		or bt_theme::error('Error', 'Unable to send mail.');
