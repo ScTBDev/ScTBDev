@@ -255,13 +255,13 @@ if ($user['class'] < UC_STAFF) {
 }
 
 if (!$self) {
-	if ($CONFIG['maxips']) {
+	if (bt_config::$conf['maxips']) {
 		$ipq = bt_sql::query('SELECT COUNT(DISTINCT ip, ip6) FROM peers WHERE userid = '.$userid.' AND !(ip = '.$ip4.' OR ip6 = '.bt_sql::esc($ip6).')');
 		$ipn = $ipq->fetch_row();
 		$ipq->free();
 
-		if ($ipn[0] >= $CONFIG['maxips'])
-			bt_tracker::err('You are already connected from '.$CONFIG['maxips'].' locations, this is the limit ('.$userid.')');
+		if ($ipn[0] >= bt_config::$conf['maxips'])
+			bt_tracker::err('You are already connected from '.bt_config::$conf['maxips'].' locations, this is the limit ('.$userid.')');
 	}
 	$since = 0;
 }

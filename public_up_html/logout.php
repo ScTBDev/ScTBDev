@@ -24,5 +24,5 @@ require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorre
 dbconn();
 logoutcookie();
 
-header('Location: '.$BASEURL.'/');
+header('Location: '.bt_vars::$base_url.'/');
 ?>

@@ -24,7 +24,7 @@ require_once(CLASS_PATH.'bencdec.php');
 require_once(CLASS_PATH.'bt_nfo.php');
 require_once(CLASS_PATH.'bt_pretime.php');
 
-ini_set('upload_max_filesize', $CONFIG['max_torrent_size']);
+ini_set('upload_max_filesize', bt_config::$conf['max_torrent_size']);
 ini_set('memory_limit', '64M');
 
 function bark($msg) {
@@ -179,7 +179,7 @@ $mp3cat = 8;
 $day0cat = 21;
 $xxximgcat = 26;
 
-$owner = ($_POST['anon'] ? 0 : $CURUSER['id']);
+$owner = ($_POST['anon'] ? 0 : bt_user::$current['id']);
 //pretime
 $precheck = bt_pretime::get_pretime($torrent);
 $pretime = 0 + $precheck['pretime'];
@@ -214,8 +214,8 @@ else {
 	$cat = mysql_query("SELECT name FROM categories WHERE id = \"" . (0 + $_POST["type"]) . "\"");
 	$cat = mysql_fetch_assoc($cat);
 	$catname = mysql_real_escape_string($cat["name"]);
-	$username = (($owner == 0) ? "Anonymous" : $CURUSER["username"]);
-	$url = mysql_real_escape_string($DEFAULTBASEURL . "/details.php?id={$id}&hit=1");
+	$username = (($owner == 0) ? "Anonymous" : bt_user::$current["username"]);
+	$url = mysql_real_escape_string(bt_vars::$base_url."/details.php?id={$id}&hit=1");
 	$torrent = mysql_real_escape_string($torrent);
 	$username = mysql_real_escape_string($username);
 
@@ -240,16 +240,16 @@ foreach ($filelist as $file) {
 
 
 if ($owner == 0)
-  @mysql_query('INSERT INTO `torrents_anon` (`id`, `owner`) VALUES("'.$id.'", "'.$CURUSER['id'].'")');
+  @mysql_query('INSERT INTO `torrents_anon` (`id`, `owner`) VALUES("'.$id.'", "'.bt_user::$current['id'].'")');
 
 
-$dest = $CONFIG['torrent_dir'].'/'.$id.'.torrent';
+$dest = bt_config::$conf['torrent_dir'].'/'.$id.'.torrent';
 if (!bencdec::encode_file($dest, $dict))
   bark('Could not properly encode file');
 @unlink($tmpname);
 chmod($dest, 0664);
-write_log('Torrent '.$id.' ('.$torrent.') was uploaded by '.(($owner == 0) ? '[anon]'.$CURUSER['username'].'[/anon]' : $CURUSER['username']), 'UPLD');
+write_log('Torrent '.$id.' ('.$torrent.') was uploaded by '.(($owner == 0) ? '[anon]'.bt_user::$current['username'].'[/anon]' : bt_user::$current['username']), 'UPLD');
 
-header("Location: $BASEURL/details.php?id=$id&uploaded=1");
+header('Location: '.bt_vars::$base_url.'/details.php?id='.$id.'&uploaded=1');
 die();
 ?>

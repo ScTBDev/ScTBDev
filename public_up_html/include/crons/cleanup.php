@@ -26,6 +26,7 @@ require_once(CLASS_PATH.'bt_pm.php');
 require_once(CLASS_PATH.'bt_mem_caching.php');
 require_once(CLASS_PATH.'bt_sql.php');
 require_once(CLASS_PATH.'bt_options.php');
+require_once(CLASS_PATH.'bt_config.php');
 
 ini_set('memory_limit', '64M');
 bt_sql::connect();
@@ -48,7 +49,7 @@ do {
 	if (!count($ar))
 		break;
 
-	$dp = @opendir($CONFIG['torrent_dir']);
+	$dp = @opendir(bt_config::$conf['torrent_dir']);
 	if (!$dp)
 		break;
 
@@ -62,7 +63,7 @@ do {
 		if (isset($ar[$id]) && $ar[$id])
 			continue;
 
-		$delff[] = $CONFIG['torrent_dir'].'/'.$file;
+		$delff[] = bt_config::$conf['torrent_dir'].'/'.$file;
 	}
 	closedir($dp);
 
@@ -164,12 +165,12 @@ while ($dead_peer = $dead_peers->fetch_assoc()) {
 	}
 }
 
-$deadtime -= $CONFIG['max_dead_torrent_time'];
+$deadtime -= bt_config::$conf['max_dead_torrent_time'];
 bt_sql::query('UPDATE torrents SET visible = "no" WHERE visible = "yes" AND last_action < '.$deadtime);
 
 
 // remove incomplete singups
-$deadtime = time() - $CONFIG['signup_timeout'];
+$deadtime = time() - bt_config::$conf['signup_timeout'];
 $res = bt_sql::query('SELECT `id`, `invitedby` FROM `users` WHERE !(`flags` & '.bt_options::FLAGS_CONFIRMED.') AND `added` < '.$deadtime.' AND `last_login` < '.$deadtime.' AND `last_access` < '.$deadtime);
 while ($row = $res->fetch_assoc()) {
 	// delete the user
@@ -333,7 +334,7 @@ if (count($del_torrents)) {
 
 	foreach ($del_torrents as $tid => $tname) {
 		bt_mem_caching::remove_torrent_peers($tid);
-		@unlink($CONFIG['torrent_dir'].'/'.$tid.'.torrent');
+		@unlink(bt_config::$conf['torrent_dir'].'/'.$tid.'.torrent');
 		write_log('Torrent '.$tid.' ('.$tname.') was deleted by system (dead for more than '.$days.' days)','DELE');
 	}
 

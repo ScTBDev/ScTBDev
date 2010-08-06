@@ -33,7 +33,7 @@ if (is_valid_id($cancel)) {
 
 	bt_sql::query('UPDATE `users` SET `invites` = (`invites` + 1) WHERE `id` = '.bt_user::$current['id']) or bt_sql::err(__FILE__,__LINE__);
 
-	header('Location: '.$BASEURL.'/invite.php');
+	header('Location: '.bt_vars::$base_url.'/invite.php');
 	die;
 }
 

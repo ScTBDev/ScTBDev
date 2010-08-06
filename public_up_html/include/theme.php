@@ -199,7 +199,6 @@ echo '		<td align="center" class="nobr">'.str_replace(' ', '<br />', format_time
 } // torrenttable
 
 function commenttable($rows) {
-	global $CURUSER, $_SERVER, $CONFIG;
 	begin_main_frame();
 	begin_frame();
 	$count = 0;
@@ -215,13 +214,13 @@ function commenttable($rows) {
 
 			echo '<a name="comm'.$row['id'].'" href="/userdetails.php?id='.$row['user'].'"><b>'.
 				bt_security::html_safe($row['username']).'</b></a>'.(($row['flags'] & bt_options::FLAGS_DONOR) ?
-				'<img src="'.$CONFIG['pic_base_url'].'star.gif" alt="Donor">' : '').
-				(($row['flags'] & bt_options::FLAGS_WARNED) ? '<img src="'.$CONFIG['pic_base_url'].'warned.gif" alt="Warned">' : '').' ('.$title.')'."\n";
+				'<img src="'.bt_config::$conf['pic_base_url'].'star.gif" alt="Donor">' : '').
+				(($row['flags'] & bt_options::FLAGS_WARNED) ? '<img src="'.bt_config::$conf['pic_base_url'].'warned.gif" alt="Warned">' : '').' ('.$title.')'."\n";
 		}
 		else
 			echo '<a name="comm'.$row['id'].'"><i>(orphaned)</i></a>'."\n";
 
-		echo ' at '.format_time($row['added']).(($row['user'] == $CURUSER['id'] && (bt_user::$current['flags'] & bt_options::FLAGS_POST_ENABLE))
+		echo ' at '.format_time($row['added']).(($row['user'] == bt_user::$current['id'] && (bt_user::$current['flags'] & bt_options::FLAGS_POST_ENABLE))
 			|| get_user_class() >= UC_FORUM_MODERATOR ? '- [<a href="/comment.php?action=edit&amp;cid='.$row['id'].'">Edit</a>]' : '').
 			(get_user_class() >= UC_FORUM_MODERATOR ? '- [<a href="/comment.php?action=delete&amp;cid='.$row['id'].'">Delete</a>]' : '').
 			($row['editedby'] && get_user_class() >= UC_FORUM_MODERATOR ?

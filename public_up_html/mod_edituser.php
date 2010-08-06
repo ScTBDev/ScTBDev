@@ -269,7 +269,7 @@ if (bt_user::required_class(UC_FORUM_MODERATOR)) {
 			$setflags |= bt_options::FLAGS_WARNED;
 			if ($warnlength == 255) {
 				bt_user::mod_comment($userid, 'Warned by '.$modname.'.'."\n".'Reason: '.$reason);
-				$msg = 'You have received a [url='.$DEFAULTBASEURL.'/rules.php#warning]warning[/url] from '.$modname.
+				$msg = 'You have received a [url='.bt_vars::$base_url.'/rules.php#warning]warning[/url] from '.$modname.
 					"\n\n".'Reason: '.$reason;
 				$updateset[] = 'warneduntil = 0';
 				if ($stafflog)
@@ -278,7 +278,7 @@ if (bt_user::required_class(UC_FORUM_MODERATOR)) {
 			else {
 				$warneduntil = time() + $warnlength * 604800;
 				$dur = $warnlength . ' week' . ($warnlength > 1 ? 's' : '');
-				$msg = 'You have received a '.$dur.' [url='.$DEFAULTBASEURL.'/rules.php#warning]warning[/url] from '.$modname.
+				$msg = 'You have received a '.$dur.' [url='.bt_vars::$base_url.'/rules.php#warning]warning[/url] from '.$modname.
 					"\n\n".'Reason: '.$reason;
 
 				bt_user::mod_comment($userid, 'Warned for '.$dur.' by '.$modname.'.'."\n".'Reason: '.$reason);
@@ -703,15 +703,15 @@ Here is the new information for your account:
     User name: '.$username.'
     Password: '.$newpassword.'
 
-You may login at '.$BASEURL.'/login.php
+You may login at '.bt_vars::$base_url.'/login.php
 
 --
-'.$SITENAME;
+'.bt_config::$conf['site_name']
 
-	@mail($email, $SITENAME.' account details', $body, 'From: '.$SITEEMAIL)
+	@mail($email, bt_config::$conf['site_name'].' account details', $body, 'From: '.bt_config::$conf['site_email'])
 		or bt_theme::error('Error', 'Unable to send mail.');
-}
-;
-header('Location: '.$BASEURL.'/edituser.php?id='.$userid);
+};
+
+header('Location: '.bt_vars::$base_url.'/edituser.php?id='.$userid);
 die;
 ?>

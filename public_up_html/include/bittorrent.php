@@ -152,11 +152,9 @@ function dbconn($login = true) {
 }
 
 function userlogin() {
-    global $CONFIG, $CURUSER;
-    $CURUSER = array();
 	$banned = false;
 
-    if (!$CONFIG['SITE_ONLINE'] || empty($_COOKIE['uid']) || empty($_COOKIE['pass']))
+    if (!bt_config::$conf['SITE_ONLINE'] || empty($_COOKIE['uid']) || empty($_COOKIE['pass']))
         return;
 
     $id = 0 + $_COOKIE['uid'];
@@ -203,7 +201,7 @@ function userlogin() {
 		if ($banned) {
 			header('Content-Type: text/html; charset=utf-8');
 			echo <<<XML
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 
 XML;
 echo '<html>
@@ -297,8 +295,6 @@ Daca IP-ul dumneavoastra este din Polonia, Israel sau Romania, acest ban face pa
 		bt_sql::query('UPDATE sessions SET '.implode(', ', $updatesession).' WHERE sid = '.bt_sql::esc($srow['sid'])) or bt_sql::err(__FILE__, __LINE__);
 
 	bt_user::$current = $row;
-	$GLOBALS['CURUSER'] =& bt_user::$current;
-
 	bt_theme_engine::load();
 }
 
@@ -307,8 +303,7 @@ function mksize($bytes) {
 }
 
 function deadtime() {
-    global $CONFIG;
-    return bt_vars::$timestamp - floor($CONFIG['announce_interval'] * 2);
+    return bt_vars::$timestamp - floor(bt_config::$conf['announce_interval'] * 2);
 }
 
 function mkprettytime($s) {
@@ -414,23 +409,19 @@ function logincookie($id, $ssl_only = false, $updatedb = 1, $maxage = 7776000) {
 
 
 function logoutcookie() {
-	bt_sql::query('DELETE FROM `sessions` WHERE `sid` = '.bt_sql::esc($_COOKIE['pass']));
+	bt_sql::query('DELETE FROM sessions WHERE sid = '.bt_sql::esc($_COOKIE['pass']));
 	setcookie('uid', '', 0x7fffffff, '/');
 	setcookie('pass', '', 0x7fffffff, '/');
 }
 
-function loggedinorreturn()
-  {
-   global $CURUSER;
-   if (!$CURUSER)
-     {
-      header('Location: '.$BASEURL.'/login.php?returnto='.urlencode($_SERVER['REQUEST_URI']));
-      exit();
-     }
-  }
+function loggedinorreturn() {
+	if (!bt_user::$current) {
+		header('Location: '.bt_vars::$base_url.'/login.php?returnto='.urlencode($_SERVER['REQUEST_URI']));
+		exit();
+	}
+}
 
 function deletetorrent($id) {
-	global $CONFIG;
 	$user_seeds = $user_leeches = array();
 	$id = 0 + $id;
 	bt_sql::query('DELETE FROM torrents WHERE id = '.$id) or bt_sql::err(__FILE__, __LINE__);
@@ -452,7 +443,7 @@ function deletetorrent($id) {
 	foreach(array('peers','files','comments') as $x)
 		bt_sql::query('DELETE FROM '.$x.' WHERE torrent = '.$id) or bt_sql::err(__FILE__, __LINE__);
 
-	@unlink($CONFIG['torrent_dir'].'/'.$id.'.torrent');
+	@unlink(bt_config::$conf['torrent_dir'].'/'.$id.'.torrent');
 
 	foreach (array_keys($user_seeds) as $uid) {
 		$update = array();

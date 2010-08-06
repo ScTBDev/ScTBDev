@@ -60,7 +60,7 @@ while ($arr = $res->fetch_assoc()) {
       <table border="0" cellspacing="0" cellpadding="0">
         <tr>
           <td class="embedded">
-            <img src="'.$CONFIG['pic_base_url'].'new/unlockednew.gif" alt="unlockednew" style="margin-right: 5px" />
+            <img src="'.bt_config::$conf['pic_base_url'].'new/unlockednew.gif" alt="unlockednew" style="margin-right: 5px" />
           </td>
           <td class="embedded">
             <a href="/forums_viewtopic.php?id='.$topicid.'&amp;page=last"><strong>'.$subject.'</strong></a>

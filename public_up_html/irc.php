@@ -24,7 +24,7 @@ require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorre
 dbconn();
 loggedinorreturn();
 
-$code = sha1($CURUSER['password'].$CURUSER['passkey']); 
+$code = sha1(bt_user::$current['password'].bt_user::$current['passkey']); 
 
 if (!isset($_POST['nickserv'])) {
 	bt_theme::head('IRC');

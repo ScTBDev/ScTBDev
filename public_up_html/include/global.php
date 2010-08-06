@@ -338,7 +338,7 @@ function format_quotes($s) {
 }
 
 function format_comment($text, $strip_html = true) {
-	global $smilies, $pic_base_url;
+	global $smilies;
 	$bbcode = bt_theme::$settings['bbcode'];
 	$link = $bbcode['link'];
 
@@ -481,7 +481,7 @@ function format_comment($text, $strip_html = true) {
 	$sms = $smr = array();
 	foreach ($smilies as $code => $url) {
 		$sms[] = $code;
-		$smr[] = '<img src="'.$pic_base_url.'smilies/'.$url.'" alt="'.htmlentities($code).'" style="border: none" />';
+		$smr[] = '<img src="'.bt_config::$conf['pic_base_url'].'smilies/'.$url.'" alt="'.htmlentities($code).'" style="border: none" />';
 	}
 
 	$s = str_replace($sms, $smr, $s);
@@ -504,19 +504,6 @@ function is_valid_user_class($class) {
 function is_valid_id($id) {
 	return is_numeric($id) && ($id > 0) && (floor($id) == $id);
 }
-
-
-function insert_smilies_frame() {
-	global $smilies;
-	reset($smilies);
-	begin_frame("Smilies", true);
-	begin_table(false, 5);
-	print("<tr><td class=colhead>Type...</td><td class=colhead>To make a...</td></tr>\n");
-	while (list($code, $url) = each($smilies))
-		print("<tr><td>$code</td><td><img src=$BASEURL/pic/smilies/$url></td>\n");
-	end_table();
-	end_frame();
-	}
 
 
 function get_ratio_color($ratio) {

@@ -101,7 +101,7 @@ if (!$all)
 
       if (!count($wherecatina))
         foreach ($cats as $catid => $cat)
-          if (strpos($CURUSER['notifs'], '[cat' . $catid.']') !== false)
+          if (strpos(bt_user::$current['notifs'], '[cat' . $catid.']') !== false)
             $wherecatina[] = $catid;
      }
   }

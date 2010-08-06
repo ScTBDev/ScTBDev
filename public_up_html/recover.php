@@ -50,16 +50,16 @@ If you did not do this ignore this email. Please do not reply.
 
 Should you wish to confirm this request, please follow this link:
 
-'.$BASEURL.'/recover.php/'.$arr['id'].'/'.$hash.'
+'.bt_vars::$base_url.'/recover.php/'.$arr['id'].'/'.$hash.'
 
 
 After you do this, your password will be reset and emailed back
 to you.
 
 --
-'.$SITENAME;
+'.bt_config::$conf['site_name'];
 
-   @mail($arr['email'], $SITENAME.' password reset confirmation', $body, 'From: '.$SITEEMAIL)
+   @mail($arr['email'], bt_config::$conf['site_name'].' password reset confirmation', $body, 'From: '.bt_config::$conf['site_email'])
      or bt_theme::error('Error', 'Unable to send mail. Please contact an administrator about this error.');
    bt_theme::error('Success', 'A confirmation email has been mailed to <b>'.bt_security::html_safe($email).'</b>.'."\n" .
      'Please allow a few minutes for the mail to arrive.');
@@ -108,12 +108,12 @@ Here is the information we now have on file for this account:
     User name: '.$arr['username'].'
     Password: '.$newpassword.'
 
-You may login at '.$BASEURL.'/login.php
+You may login at '.bt_vars::$base_url.'/login.php
 
 --
-'.$SITENAME;
+'.bt_config::$conf['site_name'];
 
-   @mail($email, $SITENAME.' account details', $body, 'From: '.$SITEEMAIL)
+   @mail($email, bt_config::$conf['site_name'].' account details', $body, 'From: '.bt_config::$conf['site_email'])
      or bt_theme::error('Error', 'Unable to send mail. Please contact an administrator about this error.');
    bt_theme::error('Success', 'The new account details have been mailed to <b>'.bt_security::html_safe($email).'</b>'."\n".
      'Please allow a few minutes for the mail to arrive.');

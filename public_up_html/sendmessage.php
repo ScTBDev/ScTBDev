@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && (isset($_POST['n_pms']) || isset($_P
 						<tr>
 							<td>
 								<div align="center"><b>From:&nbsp;&nbsp;</b>
-									<?=$CURUSER['username']?>
+									<?=bt_user::$current['username']?>
 									<input name="sender" type="radio" value="self" /> &nbsp; System
 									<input name="sender" type="radio" value="system" checked="checked" />
 								</div>

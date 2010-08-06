@@ -180,7 +180,7 @@ bt_sql::query('UPDATE `users` SET `uploaded` = (`uploaded` + 262144000) WHERE `i
 
 $psecret = sha1($editsecret);
 
-$body = 'You have requested a new user account on '.$SITENAME.' and you have
+$body = 'You have requested a new user account on '.bt_config::$conf['site_name'].' and you have
 specified this address ('.$email.') as user contact.
 
 If you did not do this, please ignore this email. The person who entered your
@@ -188,13 +188,13 @@ email address had the IP address '.$_SERVER['REMOTE_ADDR'].' Please do not reply
 
 To confirm your user registration, you have to follow this link:
 
-'.$BASEURL.'/confirm.php/'.$uid.'/'.$psecret.'
+'.bt_vars::$base_url.'/confirm.php/'.$uid.'/'.$psecret.'
 
 After you do this, you will be able to use your new account. If you fail to
 do this, you account will be deleted within a few days. We urge you to read
-the RULES and FAQ before you start using '.$SITENAME;
+the RULES and FAQ before you start using '.bt_config::$conf['site_name'];
 
-@mail($email, $SITENAME.' user registration confirmation', $body, 'From: '.$SITEEMAIL);
+@mail($email, bt_config::$conf['site_name'].' user registration confirmation', $body, 'From: '.bt_config::$conf['site_email']);
 header('Refresh: 0; url=ok.php?type=signup&email='.rawurlencode($email));
 die();
 ?>

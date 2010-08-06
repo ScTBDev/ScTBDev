@@ -70,44 +70,26 @@ $announce_urls_ssl[] = 'https://tracker.scenetorrents.org:443/announce.php';
 
 if (trim($_SERVER['HTTP_HOST']) == "")
   $_SERVER['HTTP_HOST'] = $_SERVER['SERVER_NAME'];
-$BASEURL = 'http'.($_SERVER['SERVER_PORT'] == 443 ? 's' : '').'://'.$_SERVER['HTTP_HOST'].
-           ($_SERVER['SERVER_PORT'] != 80 && $_SERVER['SERVER_PORT'] != 443 ? ':'.$_SERVER['SERVER_PORT'] : '');
-define('BASEURL', $BASEURL);
 
 
 // Set this to your site URL... No ending slash!
-$DEFAULTBASEURL = 'http'.($_SERVER['SERVER_PORT'] == 443 ? 's' : '').'://www.scenetorrents.test';
-define('DEFAULTBASEURL', $DEFAULTBASEURL);
 $CONFIG['default_base_url'] = 'http'.($_SERVER['HTTPS'] == 'on' ? 's' : '').'://www.scenetorrents.test';
 $CONFIG['default_plain_url'] = 'http://www.scenetorrents.test';
 $CONFIG['default_ssl_url'] = 'https://www.scenetorrents.test';
 
 $CONFIG['ssl_only_ccs'] = array('A1','A2','SE');
 
-// set this to true to make this a tracker that only registered users may use
-$MEMBERSONLY = true;
-
 // set this to true to enable delays
-$DELAYS = false;
 $CONFIG['delays'] = false;
 
 // set this to true to enable limits on unconnectable peers
 $CONFIG['limitunconn'] = false;
 $CONFIG['unconnlimit'] = 5;
 
-// maximum number of peers (seeders+leechers) allowed before torrents starts to be deleted to make room...
-// set this to something high if you don't require this feature
-$PEERLIMIT = 25000;
-
 // Email for sender/return path.
-$SITEEMAIL = 'SceneTorrents Tracker <noreply@scenetorrents.org>';
-
-$SITENAME = 'SceneTorrents';
 $CONFIG['site_name'] = 'SceneTorrents';
-define('SITENAME', 'SceneTorrents');
-
+$CONFIG['site_email'] = 'SceneTorrents Tracker <noreply@scenetorrents.org>';
 $CONFIG['pic_base_url'] = '/pic/';
-$pic_base_url = '/pic/';
 
 $CONFIG['default_user_flags'] = 7345036;
 

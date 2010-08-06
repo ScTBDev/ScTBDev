@@ -71,12 +71,12 @@ if ($chpassword != '') {
 
 	$updateset[] = '`password` = '.bt_sql::esc($password);
 
-	mysql_query('DELETE FROM `sessions` WHERE `uid` = "'.$CURUSER['id'].'"');
-	logincookie($CURUSER['id'], $passhash);
+	mysql_query('DELETE FROM `sessions` WHERE `uid` = "'.bt_user::$current['id'].'"');
+	logincookie(bt_user::$current['id'], $passhash);
 	bt_user::mod_comment(bt_user::$current['id'], 'User changed password from '.$ip.($rip != $ip ? ' ('.$rip.')' : ''));
 }
 
-if ($email != $CURUSER['email']) {
+if ($email != bt_user::$current['email']) {
         if (!validemail($email))
                 bark('That doesn\'t look like a valid email address.');
   $r = mysql_query('SELECT `id` FROM `users` WHERE `email` = '.sqlesc($email)) or sqlerr();
@@ -373,7 +373,7 @@ if ($changedemail)
    $hash = sha1($sec.strtolower($email).$sec);
    $thishost = $_SERVER['HTTP_HOST'];
    $thisdomain = preg_replace('/^www\./is', '', $thishost);
-   $body = 'You have requested that your user profile (username '.$CURUSER['username'].')
+   $body = 'You have requested that your user profile (username '.bt_user::$current['username'].')
 on '.$thisdomain.' should be updated with this email address ('.$email.') as
 user contact.
 
@@ -383,13 +383,13 @@ IP address of the person who initiated this email change. Please do not reply to
 
 To to continue with the update of your user profile, please follow this link:
 
-http://'.$thishost.'/changeemail.php?userid='.$CURUSER['id'].'&code='.$hash.'
+http://'.$thishost.'/changeemail.php?userid='.bt_user::$current['id'].'&code='.$hash.'
 
 Your new email address will need to be verified after you do this. Otherwise
 your profile will remain unchanged.';
 
    $em = mysql_query('INSERT INTO `email_changes` (`code`, `userid`, `time`, `newemail`, `ip`, `realip`) '.
-               'VALUES ('.sqlesc(bt_string::str2hex($sec)).', "'.$CURUSER['id'].'", "'.time().'", '.sqlesc($email).', '.
+               'VALUES ('.sqlesc(bt_string::str2hex($sec)).', "'.bt_user::$current['id'].'", "'.time().'", '.sqlesc($email).', '.
                sqlesc($ip).', '.sqlesc($rip).')');
 
 	if (!$em) {
@@ -400,29 +400,29 @@ your profile will remain unchanged.';
 	}
 
 
-   mail($CURUSER['email'], $thisdomain.' email change confirmation', $body, 'From: '.$SITEEMAIL);
+   mail(bt_user::$current['email'], $thisdomain.' email change confirmation', $body, 'From: '.bt_config::$conf['site_email']);
    $urladd .= '&mailsent=1';
    bt_user::mod_comment(bt_user::$current['id'], 'Email change process initiated from '.$ip.($rip != $ip ? ' ('.$rip.')' : ''));
   }
 
 //// Do NOT EDIT THESE LINES
 if ($setflags)
-  $updateset[] = '`flags` = (`flags` | '.$setflags.')';
+	$updateset[] = 'flags = (flags | '.$setflags.')';
 if ($clrflags)
-  $updateset[] = '`flags` = (`flags` & ~'.$clrflags.')';
+	$updateset[] = 'flags = (flags & ~'.$clrflags.')';
 
 if ($add_chans)
-	$updateset[] = '`chans` = (`chans` | '.$add_chans.')';
+	$updateset[] = 'chans = (chans | '.$add_chans.')';
 if ($rem_chans)
-	$updateset[] = '`chans` = (`chans` & ~'.$rem_chans.')';
+	$updateset[] = 'chans = (chans & ~'.$rem_chans.')';
 
 if ($setflags || $clrflags)
-	bt_mem_caching::remove_passkey($CURUSER['passkey']);
+	bt_mem_caching::remove_passkey(bt_user::$current['passkey']);
 
 ////////////////////////////
 
-mysql_query('UPDATE `users` SET '.implode(',', $updateset) . ' WHERE `id` = "'.$CURUSER['id'].'"') or sqlerr(__FILE__,__LINE__);
+mysql_query('UPDATE users SET '.implode(',', $updateset) . ' WHERE id = '.bt_user::$current['id']) or sqlerr(__FILE__,__LINE__);
 bt_user::comit_mod_comments();
 
-header('Location: '.$BASEURL.'/my.php?edited=1'.$urladd);
+header('Location: '.bt_vars::$base_url.'/my.php?edited=1'.$urladd);
 ?>

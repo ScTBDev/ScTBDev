@@ -44,7 +44,7 @@ if ($row["owner"] == 0)
 
 bt_theme::head("Edit torrent \"" . $row["name"] . "\"");
 
-if (!isset($CURUSER) || ($CURUSER["id"] != $row["owner"] && $CURUSER["id"] != $row2["owner"] && get_user_class() < UC_MODERATOR)) {
+if (bt_user::$current['id'] != $row['owner'] && bt_user::$current['id'] != $row2['owner'] && !bt_user::required_class(UC_MODERATOR)) {
         print("<h1>Can't edit this torrent</h1>\n");
         print("<p>You're not the rightful owner, or you're not <a href=\"login.php?returnto=" . urlencode($_SERVER["REQUEST_URI"]) . "&amp;nowarn=1\">logged in</a> properly.</p>\n");
 }
@@ -75,9 +75,6 @@ else {
         $s .= "</select>\n";
         tr("Type", $s, 1);
         tr("Visible", "<input type=\"checkbox\" name=\"visible\"" . (($row["visible"] == "yes") ? " checked=\"checked\"" : "" ) . " value=\"1\" /> Visible on main page<br /><table border=0 cellspacing=0 cellpadding=0 width=420><tr><td class=embedded>Note that the torrent will automatically become visible when there's a seeder, and will become automatically invisible (dead) when there has been no seeder for a while. Use this switch to speed the process up manually. Also note that invisible (dead) torrents can still be viewed or searched for, it's just not the default.</td></tr></table>", 1);
-
-        if ($CURUSER["admin"] == "yes")
-                tr("Banned", "<input type=\"checkbox\" name=\"banned\"" . (($row["banned"] == "yes") ? " checked=\"checked\"" : "" ) . " value=\"1\" /> Banned", 1);
 
         print("<tr><td colspan=\"2\" align=\"center\"><input type=\"submit\" value='Edit it!' style='height: 25px; width: 100px'> <input type=reset value='Revert changes' style='height: 25px; width: 100px'></td></tr>\n");
         print("</table>\n");

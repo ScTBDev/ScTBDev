@@ -60,7 +60,7 @@ if ($upspeed < 7 || $sources < 4 || $pretimes >= 4 || !$faq || !$rules || !$make
 
 if (!$ignore)
   {
-   $topicname = 'App: '.$CURUSER['username'];
+   $topicname = 'App: '.bt_user::$current['username'];
    $catlist = bt_mem_caching::get_cat_list();
    $mcats = array();
    foreach($catlist as $catid => $cat)
@@ -69,8 +69,8 @@ if (!$ignore)
         $mcats[] = $cat['name'];
      }
 
-   $posttext = '[b]Ratio:[/b] '.number_format($CURUSER['uploaded'] / $CURUSER['downloaded'], 3)."\n".
-               '[b]Uploaded:[/b] '.bt_theme::mksize($CURUSER['uploaded'])."\n".
+   $posttext = '[b]Ratio:[/b] '.number_format(bt_user::$current['uploaded'] / bt_user::$current['downloaded'], 3)."\n".
+               '[b]Uploaded:[/b] '.bt_theme::mksize(bt_user::$current['uploaded'])."\n".
                '[b]Upload Speed:[/b] '.$mupspeed[$upspeed]."\n".
                '[b]Upload Location:[/b] '.$muplocation[$uplocation]."\n".
                '[b]Sources:[/b] '.$msources[$sources]."\n".
@@ -88,14 +88,14 @@ if (!$ignore)
                ($comments != '' ? "\n\n\n".'[b]Comments:[/b] '.$comments : '');
 
    $topic   = mysql_query('INSERT INTO `topics` (`userid`,`subject`,`forumid`) '.
-                        'VALUES ("'.$CURUSER['id'].'", '.sqlesc($topicname).', "'.$UPAPPFORUM.'")') or sqlerr(__FILE__, __LINE__);
+                        'VALUES ("'.bt_user::$current['id'].'", '.sqlesc($topicname).', "'.$UPAPPFORUM.'")') or sqlerr(__FILE__, __LINE__);
    $topicid = mysql_insert_id();
    $post    = mysql_query('INSERT INTO `posts` (`topicid`,`userid`,`added`,`body`) '.
-                        'VALUES('.$topicid.','.$CURUSER['id'].', '.time().', '.sqlesc($posttext).')') or sqlerr(__FILE__, __LINE__);
+                        'VALUES('.$topicid.','.bt_user::$current['id'].', '.time().', '.sqlesc($posttext).')') or sqlerr(__FILE__, __LINE__);
    $postid  = mysql_insert_id();
    mysql_query('UPDATE `topics` SET `lastpost` = "'.$postid.'" WHERE `id` = "'.$topicid.'"') or sqlerr(__FILE__, __LINE__);
    mysql_query('UPDATE `forums` SET `postcount` = (`postcount` + 1), `topiccount` = (`topiccount` + 1) WHERE `id` = "'.$UPAPPFORUM.'"') or sqlerr(__FILE__, __LINE__);
   }
 
-header('Location: '.$BASEURL.'/upapp.php?ok=1');
+header('Location: '.bt_vars::$base_url.'/upapp.php?ok=1');
 ?>

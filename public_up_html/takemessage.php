@@ -45,7 +45,7 @@ if (isset($_POST['n_pms'])) {
 	if (!$msg || !$title)
 		bt_theme::error("Error","Please enter something!");
 
-    $sender_id = ($_POST['sender'] == 'system' ? 0 : $CURUSER['id']);
+    $sender_id = ($_POST['sender'] == 'system' ? 0 : bt_user::$current['id']);
 
 	$n_pms = (int)$_POST['n_pms'];
 	$pmees = trim($_POST['pmees']);
@@ -91,7 +91,7 @@ if (isset($_POST['n_pms'])) {
                     "UL: " . bt_theme::mksizegb($user['uploaded']) . ", " .
                     "DL: " . bt_theme::mksizegb($user['downloaded']) . ", " .
                     "r: " . ratios($user['uploaded'],$user['downloaded'], False) . " - " .
-                    ($_POST['sender'] == "system"?"System":$CURUSER['username']);
+                    ($_POST['sender'] == "system" ? "System" : bt_user::$current['username']);
                 }
                       $new .= $old?("\n".$old):$old;
                       mysql_query("UPDATE users SET modcomment = " . sqlesc($new) . " WHERE id = " . $user['id'])
@@ -101,7 +101,7 @@ if (isset($_POST['n_pms'])) {
               }
             }
     }
-   header('Location: '.$BASEURL.'/staff.php');
+   header('Location: '.bt_vars::$base_url.'/staff.php');
    die;
   }
   else
@@ -137,13 +137,13 @@ if (isset($_POST['n_pms'])) {
                 {
             if ($user['flags'] & bt_options::FLAGS_ACCEPT_PMS)
             {
-              $res2 = mysql_query("SELECT * FROM blocks WHERE userid=$receiver AND blockid=" . $CURUSER["id"]) or sqlerr(__FILE__, __LINE__);
+              $res2 = mysql_query("SELECT * FROM blocks WHERE userid=$receiver AND blockid=" . bt_user::$current["id"]) or sqlerr(__FILE__, __LINE__);
               if (mysql_num_rows($res2) == 1)
                 bt_theme::error("Refused", "This user has blocked PMs from you.");
             }
             elseif ($user['flags'] & bt_options::FLAGS_ACCEPT_FRIEND_PMS)
             {
-              $res2 = mysql_query("SELECT * FROM friends WHERE userid=$receiver AND friendid=" . $CURUSER["id"]) or sqlerr(__FILE__, __LINE__);
+              $res2 = mysql_query("SELECT * FROM friends WHERE userid=$receiver AND friendid=" . bt_user::$current["id"]) or sqlerr(__FILE__, __LINE__);
               if (mysql_num_rows($res2) != 1)
                 bt_theme::error("Refused", "This user only accepts PMs from users in his friends list.");
             }
@@ -151,7 +151,7 @@ if (isset($_POST['n_pms'])) {
               bt_theme::error("Refused", "This user does not accept PMs.");
           }
 
-          $sent = bt_pm::send($CURUSER['id'], $receiver, $msg, $subject, $location);
+          $sent = bt_pm::send(bt_user::$current['id'], $receiver, $msg, $subject, $location);
           if (!$sent)
             bt_theme::error('Error', 'Error sending PM');
 
@@ -160,18 +160,18 @@ if (isset($_POST['n_pms'])) {
 
             if (time() - $user["la"] >= 300)
             {
-             $username = $CURUSER["username"];
+             $username = bt_user::$current["username"];
 $body = 'You have received a PM from '.$username.'!
 
 You can use the URL below to view the message (you may have to login).
 
-'.$DEFAULTBASEURL.'/inbox.php
+'.bt_vars::$base_url.'/inbox.php
 
 --
-'.$SITENAME;
+'.bt_config::$conf['site_name'];
 
 
-            mail($user["email"], "You have received a PM from " . $username . "!", $body, "From: $SITEEMAIL");
+            mail($user["email"], "You have received a PM from " . $username . "!", $body, 'From: '.bt_config::$conf['site_email']);
             }
           }
           $delete = (bool)0 + $_POST['delete'];
@@ -185,22 +185,22 @@ You can use the URL below to view the message (you may have to login).
               if (mysql_num_rows($res) == 1)
               {
                 $arr = mysql_fetch_assoc($res);
-                if ($arr["receiver"] != $CURUSER["id"])
+                if ($arr["receiver"] != bt_user::$current["id"])
                   bt_theme::error("w00t","This shouldn't happen.");
                 if ($arr["location"] == "in")
                         {
                          mysql_query("DELETE FROM messages WHERE id=$origmsg AND location = 'in'") or sqlerr(__FILE__, __LINE__);
-                         mysql_query("UPDATE users SET inbox = inbox -1 WHERE id = '{$CURUSER['id']}'");
+                         mysql_query('UPDATE users SET inbox = (inbox - 1) WHERE id = '.bt_user::$current['id']);
                         }
                 elseif ($arr["location"] == "both")
                         {
                          mysql_query("UPDATE messages SET location = 'out' WHERE id=$origmsg AND location = 'both'") or sqlerr(__FILE__, __LINE__);
-                         mysql_query("UPDATE users SET inbox = inbox -1 WHERE id = '{$CURUSER['id']}'");
+                         mysql_query('UPDATE users SET inbox = (inbox - 1) WHERE id = '.bt_user::$current['id']);
                         }
               }
       }
              if (!$returnto)
-                     $returnto = "$BASEURL/inbox.php";
+                     $returnto = bt_vars::$base_url.'/inbox.php';
           }
 
     if ($returnto)

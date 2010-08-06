@@ -38,8 +38,7 @@ class allowed_staff {
 	);
 
 	function check($section = 'default') {
-		global $CURUSER;
-		$userid = (int)$CURUSER['id'];
+		$userid = bt_user::$current['id'];
 		if (!isset($this->staff[$section]))
 			die('Invalid Section');
 		if (!in_array($userid, $this->staff[$section], true))
@@ -49,9 +48,8 @@ class allowed_staff {
 	}
 
 	function error($section, $error = 'Access Denied') {
-		global $CURUSER;
 		if ($this->logging && is_file($this->log_file) && is_writeable($this->log_file)) {
-			$log = $error.' for user '.$CURUSER['id'].' ('.$CURUSER['username'].') from '.$_SERVER['REMOTE_ADDR'].' to '.$section."\n";
+			$log = $error.' for user '.bt_user::$current['id'].' ('.bt_user::$current['username'].') from '.$_SERVER['REMOTE_ADDR'].' to '.$section."\n";
 			$f = fopen($this->log_file, 'a');
 			fwrite($f, $log);
 			fclose($f);
