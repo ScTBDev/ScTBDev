@@ -100,16 +100,10 @@ class bt_user {
 			$user['invites'] = (int)$user['invites'];
 		if (isset($user['invitedby']))
 			$user['invitedby'] = (int)$user['invitedby'];
-
-
 		if (isset($user['donations']))
 			$user['donations'] = (float)$user['donations'];
 		if (isset($user['irc_time']))
 			$user['irc_time'] = (int)$user['irc_time'];
-		if (isset($user['ip']))
-			$user['ip'] = (int)$user['ip'];
-		if (isset($user['realip']))
-			$user['realip'] = (int)$user['realip'];
 
 		if (isset($user['flags_signed'])) {
 			$user['flags'] = (int)$user['flags_signed'];

@@ -28,6 +28,8 @@ class bt_ip {
 	const IP4		= 1;
 	const IP6		= 2;
 
+	const NOIP6		= "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
+
 	private static $ip_cache = array();
 
 	public static function ip2hex($ip) {
@@ -51,6 +53,24 @@ class bt_ip {
 			return false;
 
 		return $ip;
+	}
+
+	public static function ip2addr($ip) {
+		$addr = self::type($ip, $type);
+
+		return $addr;
+	}
+
+	public static function ip2addr6($ip) {
+		$addr = self::type($ip, $type);
+
+		if (!$addr)
+			return false;
+
+		if ($type === self::IP4)
+			$addr = "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff".$addr;
+
+		return $addr;
 	}
 
 	public static function type(&$ip, &$type, &$ip2 = NULL) {
