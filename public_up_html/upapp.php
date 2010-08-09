@@ -21,8 +21,7 @@
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorrent.php');
 
-dbconn();
-loggedinorreturn();
+bt_loginout::db_connect(true);
 
 if (isset($_GET['ok']))
 	bt_theme::error('Thanks','Thank you for applying for uploader status. If you are eligible/accepted for uploading, you should be contacted shortly.');

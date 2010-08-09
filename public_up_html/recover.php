@@ -23,7 +23,7 @@ const SALT_NEEDED = true;
 require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorrent.php');
 require_once(CLASS_PATH.'bt_hash.php');
 
-dbconn();
+bt_loginout::db_connect(false);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
    $email = strtolower(trim($_POST['email']));

@@ -24,8 +24,7 @@ require_once(TROOT_PATH.'announce_settings.php');
 require_once(CLASS_PATH.'bt_mem_caching.php');
 
 bt_config::$conf['tracker_settings'] = $SETTINGS;
-dbconn();
-loggedinorreturn();
+bt_loginout::db_connect(true);
 
 $cats = bt_mem_caching::get_cat_list();
 $last_torrents = bt_mem_caching::get_last_torrents();

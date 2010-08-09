@@ -22,8 +22,7 @@
 require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorrent.php');
 require_once(CLASS_PATH.'bt_session.php');
 
-dbconn();
-loggedinorreturn();
+bt_loginout::db_connect(true);
 bt_memcache::connect();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && (isset($_POST['n_pms']) || isset($_POST['pmees']))) {

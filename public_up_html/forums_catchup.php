@@ -21,8 +21,7 @@
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorrent.php');
 
-dbconn();
-loggedinorreturn();
+bt_loginout::db_connect(true);
 
 bt_sql::query('UPDATE `users` SET `last_forum_visit` = '.bt_vars::$timestamp.' WHERE `id` = '.bt_user::$current['id']) or bt_sql::err(__FILE__, __LINE__);
 bt_sql::query('DELETE FROM `readposts` WHERE `userid` = '.bt_user::$current['id']) or bt_sql::err(__FILE__, __LINE__);

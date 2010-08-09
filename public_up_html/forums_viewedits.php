@@ -21,8 +21,7 @@
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorrent.php');
 
-dbconn();
-loggedinorreturn();
+bt_loginout::db_connect(true);
 
 if (!bt_user::required_class(UC_FORUM_MODERATOR))
 	bt_theme::error('Error', 'Permission denied');

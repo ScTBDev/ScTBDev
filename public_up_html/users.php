@@ -22,8 +22,7 @@
 require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorrent.php');
 require_once(CLASS_PATH.'bt_location.php');
 
-dbconn();
-loggedinorreturn();
+bt_loginout::db_connect(true);
 
 $lowchars	= '1234567890abcdefghijklmnopqrstuvwxyz';
 $upchars	= strtoupper($lowchars);

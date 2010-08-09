@@ -21,9 +21,7 @@
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorrent.php');
 
-dbconn();
-loggedinorreturn();
-
+bt_loginout::db_connect(true);
 
 header('Content-Type: text/plain');
 $name = isset($_GET['name']) ? trim($_GET['name']) : '';
@@ -31,7 +29,7 @@ $name = isset($_GET['name']) ? trim($_GET['name']) : '';
 if (!$name)
 	die('0');
 
-$q = bt_sql::query('SELECT `id` FROM `torrents` WHERE `name` = '.bt_sql::esc($name));
+$q = bt_sql::query('SELECT id FROM torrents WHERE name = '.bt_sql::esc($name));
 if (!$q->num_rows)
 	die('0');
 

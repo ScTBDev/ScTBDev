@@ -21,7 +21,7 @@
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorrent.php');
 
-dbconn();
+bt_loginout::db_connect(false);
 bt_theme::head('Rules');
 
 $upload_rules = bt_user::required_class(UC_UPLOADER) ? bt_theme_engine::load_tpl('rules_upload') : '';

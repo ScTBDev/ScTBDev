@@ -31,8 +31,7 @@ function bark($msg) {
 	genbark($msg, 'Upload failed!');
 }
 
-dbconn();
-loggedinorreturn();
+bt_loginout::db_connect(true);
 
 if (get_user_class() < UC_UPLOADER)
   die('go away');

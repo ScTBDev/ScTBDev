@@ -21,8 +21,7 @@
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorrent.php');
 
-dbconn();
-loggedinorreturn();
+bt_loginout::db_connect(true);
 
 $userid = 0 + bt_user::$current['id'];
 $maxresults = 0 + (bt_user::$current['postsperpage'] > 0 ? bt_user::$current['postsperpage'] : 25);

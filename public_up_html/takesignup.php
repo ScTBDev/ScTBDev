@@ -23,7 +23,8 @@ const SALT_NEEDED = true;
 require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorrent.php');
 require_once(CLASS_PATH.'bt_hash.php');
 
-dbconn();
+bt_loginout::db_connect(true);
+
 function check_ban($ip) {
 	$sip = ip2long($ip);
 	$resip = bt_sql::query('SELECT COUNT(*) FROM `signupbans` WHERE `first` <= '.$sip.' AND `last` >= '.$sip) or bt_sql::err(__FILE__, __LINE__);

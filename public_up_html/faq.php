@@ -20,8 +20,7 @@
  */
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorrent.php');
-dbconn();
-//loggedinorreturn();
+bt_loginout::db_connect(false);
 
 bt_theme::head('Frequently Asked Questions');
 

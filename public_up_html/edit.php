@@ -28,8 +28,7 @@ $id = 0 + $id;
 if (!$id)
         die();
 
-dbconn();
-loggedinorreturn();
+bt_loginout::db_connect(true);
 
 $res = mysql_query("SELECT * FROM torrents WHERE id = $id");
 $row = mysql_fetch_assoc($res);

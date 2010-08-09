@@ -21,8 +21,8 @@
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorrent.php');
 
-dbconn();
-loggedinorreturn();
+bt_loginout::db_connect(true);
+
 $UPAPPFORUM  = 22;
 
 $mupspeed    = array(1 => 'Unknown',2=>'<= 5 Mbps',3=>'5+ Mbps - 10 Mbps',4=>'10+ Mbps - 20 Mbps',

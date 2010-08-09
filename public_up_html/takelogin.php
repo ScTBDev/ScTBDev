@@ -26,7 +26,7 @@ require_once(CLASS_PATH.'bt_hash.php');
 require_once(CLASS_PATH.'bt_security.php');
 require_once(CLASS_PATH.'bt_dns.php');
 
-dbconn();
+bt_loginout::db_connect(false);
 
 $username = trim($_POST['username']);
 $password = $_POST['password'];

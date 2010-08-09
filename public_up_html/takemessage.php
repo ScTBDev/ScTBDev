@@ -26,8 +26,7 @@ require_once(CLASS_PATH.'bt_session.php');
 if ($_SERVER['REQUEST_METHOD'] != 'POST')
 	bt_theme::error('Error', 'Method');
 
-dbconn();
-loggedinorreturn();
+bt_loginout::db_connect(true);
 
 $form_hash = isset($_POST['hash']) ? trim($_POST['hash']) : '';
 

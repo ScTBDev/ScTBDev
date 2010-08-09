@@ -40,20 +40,19 @@ define('_START_MICROTIME_', microtime(true));
 require_once(CLASS_PATH.'bt_config.php');
 
 // needed by bittorrent.php itself
+require_once(CLASS_PATH.'bt_loginout.php');
 require_once(CLASS_PATH.'bt_security.php');
-require_once(CLASS_PATH.'bt_user.php');
 require_once(CLASS_PATH.'bt_theme.php');
-require_once(CLASS_PATH.'bt_geoip.php');
 require_once(CLASS_PATH.'bt_bitmask.php');
 require_once(CLASS_PATH.'bt_mem_caching.php');
 require_once(CLASS_PATH.'bt_sql.php');
-require_once(CLASS_PATH.'bt_bans.php');
 require_once(CLASS_PATH.'bt_ip.php');
 require_once(CLASS_PATH.'bt_vars.php');
 
 // not needed by bittorrent.php, but in a lot of pages
 require_once(CLASS_PATH.'bt_time.php');
 require_once(CLASS_PATH.'bt_string.php');
+require_once(CLASS_PATH.'bt_user.php');
 
 
 
@@ -116,186 +115,8 @@ function getip() {
 }
 
 
-function dbconn($login = true) {
-	if (!bt_sql::connect($errno, $error)) {
-		if (!$login)
-			die;
-
-		switch ($errno) {
-			case 1040:
-			case 2002:
-				if ($_SERVER['REQUEST_METHOD'] == 'GET')
-					die('<html>
-<head>
-	<meta http-equiv=refresh content="'.rand(5, 15).';'.$_SERVER['REQUEST_URI'].'">
-</head>
-<body>
-	<table border=0 width=100% height=100%>
-		<tr>
-			<td>
-				<h3 align=center>The server load is very high at the moment. Retrying, please wait...</h3>
-			</td>
-		</tr>
-	</table>
-</body>
-</html>');
-				else
-					die('Too many users. Please press the Refresh button in your browser to retry.');
-			break;
-			default:
-				die('['.$errno.'] '.htmlentities($error));
-		}
-	}
-
-	if ($login)
-		userlogin();
-}
-
-function userlogin() {
-	$banned = false;
-
-    if (!bt_config::$conf['SITE_ONLINE'] || empty($_COOKIE['uid']) || empty($_COOKIE['pass']))
-        return;
-
-    $id = 0 + $_COOKIE['uid'];
-    if (!$id || strlen($_COOKIE['pass']) != 40)
-        return;
-
-	$sres = bt_sql::query('SELECT * FROM sessions WHERE sid = '.bt_sql::esc($_COOKIE['pass']).' AND uid = '.$id) or bt_sql::err(__FILE__, __LINE__);
-	$srow = $sres->fetch_assoc();
-	$sres->free();
-
-	$sip = (int)$srow['realip'];
-
-	if (!$srow || (bt_vars::$long_realip & 0xffff0000 != $sip & 0xffff0000) || bt_vars::$timestamp > ($srow['added'] + $srow['maxage']) ||
-		bt_vars::$timestamp > ($srow['lastaction'] + $srow['maxidle'])) {
-		logoutcookie();
-		loggedinorreturn();
-		die('Invalid Session');
-	}
-
-	$flags = bt_options::FLAGS_ENABLED | bt_options::FLAGS_CONFIRMED;
-    $res = bt_sql::query('SELECT *, CAST(flags AS SIGNED) AS flags_signed, CAST(chans AS SIGNED) AS chans_signed FROM users WHERE id = '.$id.' AND (flags & '.$flags.') = '.$flags)
-		or bt_sql::err(__FILE__, __LINE__);
-    $row = $res->fetch_assoc();
-	$res->free();
-    if (!$row)
-        return;
-
-	$updateuser = $updatesession = array();
-	bt_user::prepare_user($row, true);
-
-	if (!($row['flags'] & bt_options::FLAGS_BYPASS_BANS)) {
-		if (bt_bans::check(bt_vars::$realip, true, true, $reason)) {
-    	    $banned = true;
-			$geoip = bt_geoip::lookup_ip(bt_vars::$realip);
-		}
-	    else {
-			if (bt_vars::$ip != bt_vars::$realip) {
-				if (bt_bans::check(bt_vars::$ip, true, true, $reason)) {
-					$banned = true;
-					$geoip = bt_geoip::lookup_ip(bt_vars::$ip);
-				}
-			}
-		}
-		if ($banned) {
-			header('Content-Type: text/html; charset=utf-8');
-			echo <<<XML
-<?xml version="1.0" encoding="UTF-8" ?>
-
-XML;
-echo '<html>
-<head>
-	<title>IP Banned</title>
-</head>
-<body>
-Your IP address is currently banned for reason '.bt_security::html_safe($reason).'.'./*
-				(in_array($geoip['country_code'], array('RO')) ? ' If your ip '.
-				'is in Poland, Israel or Romania, this ban may be part of country wide bans. This is due to very high rate of cheating/hacking/invite '.
-				'trading/dupe accounts going on from these countries. This does not mean that we think you are doing any of those things, '.
-				'which is why it is relatively easy to get your account access back. All you have to do is connect to our irc network at '.
-				'<a href="irc://irc.scenetorrents.org">irc.scenetorrents.org</a> and join '.
-				'<a href="irc://irc.scenetorrents.org/sct.support">#sct.support</a>. Once in this irc channel, just wait around and '.
-				'idle, you will not be able to talk when first joining because of the +m channel mode, please do not PM staff members, a '.
-				'staff member will eventually get to you and give you a +v so you can talk while we review your account (this usually takes '.
-				'around a minute if all is well) and if everything seems to be in good order, that staff member will enable your account to '.
-				'bypass these ip bans. It does not matter if you have a dynamic ip or not, the ban bypass is based on your account, not your '.
-				'ip. If you have been cheating on your account, we will be able to tell, so please don\'t waste our time if you have been.'.
-				'<br /><br />Thanks,<br />ScT Staff'.($geoip['country_code'] == 'PL' ? '<br /><br />In Polish:<br />'.
-				'Twój adres IP został zabanowany. Jeżeli łączysz się z Polski bądź Izraela, prawdopodobnie jest to '.
-				'spowodowane blokadą na te dwa kraje. Blokada ta podyktowana jest ogromną ilością cheaterów/hackerów/handlarzy '.
-				'zaproszeń/posiadaczy wielu kont łączących się z tych dwóch krajów. To oczywiście nie oznacza, że podejrzewamy Ciebie o '.
-				'takie praktyki, dlatego też odzyskanie  dostępu do konta jest dosyć proste. Wszystko co musisz zrobić, to połączyć się z '.
-				'naszą siecią IRC, której adres to <a href="irc://irc.scenetorrents.org">irc.scenetorrents.org</a>, po czym wejść na kanał '.
-				'<a href="irc://irc.scenetorrents.org/sct.support">#sct.support</a>. Gdy już wejdziesz na ten '.
-				'kanał, zwyczajnie poczekaj - z powodu ustawień kanału i tak nikt nie będzie w stanie odczytać tego co napiszesz. Nie wysyłaj '.
-				'wiadomości do załogi - ktoś zajmie się Twoim problemem najszybciej jak to będzie możliwe. Gdy to nastąpi, zostanie Ci nadane '.
-				'prawo głosu (+v), co pozwoli Ci rozmawiać gdy my będziemy sprawdzać Twoje konto (Zwykle trwa to około minuty, jeżeli nie ma '.
-				'żadnych problemów z Twoim kontem). Jeżeli wszystko będzie w należytym porządku, Twoje konto zostanie odblokowane. Ponieważ '.
-				'usunięcie blokady dotyczy Twojego konta a nie adresu IP, nie ma znaczenia czy Twój adres IP jest stały czy zmienny. Jeżeli '.
-				'oszukiwałeś na swoim koncie, zauważymy to, więc prosimy, nie trać swojego i naszego czasu.<br /><br />Dziękujemy,<br />'.
-				'Załoga ScT.' : '') ($geoip['country_code'] == 'RO' ? '<br /><br />In Romanian:<br />
-Daca IP-ul dumneavoastra este din Polonia, Israel sau Romania, acest ban face parte din categoria celor ce afecteaza tarile intregi. Aceasta se datoreaza numarului mare de cheateri/fakeri/hackeri/traderilor/conturilor duble venind din aceasta tara. Asta nu inseamna ca noi credem ca dumneavoastra chiar ati facut aceste lucruri, de aceea fiind relativ usor sa va obtineti conturile inapoi. Tot ce trebuie sa faceti este sa va conectati pe serverul nostru de IRC - irc.scenetorrents.org si sa intrati pe canalul #sct.support . Odata intrat pe acest canal, asteptati pana primiti abilitatea de a conversa; va rugam nu trimiteti mesaje private membrilor staffului, eventual veti primi +v (voice) sa va expuneti problema cat timp va verificam contul (de obicei dureaza un minut), iar daca totul este in ordine, membrul staffului va va reda accesul la contul dumneavoastra si va face bypass la banul ip-ului dumneavoastra. Nu conteaza daca aveti sau nu ip dinamic, bypassul este pe contul dumneavoastra, nu pe ip. Daca ati facut fake, vom putea face diferenta, asa ca nu ne irositi timpul degeaba.' : '') : '').*/'
-</body>
-</html>';
-			die;
-//			header('HTTP/1.0 403 Forbidden');
-		}
-	}
-
-	$invalid_ip = false;
-	if (trim($row['ip_access']) != '') {
-		$ips = explode(';',trim($row['ip_access']));
-		if (!bt_ip::verify_ip($ips, bt_vars::$realip))
-			$invalid_ip = true;
-	}
-
-    if ($invalid_ip) {
-		logoutcookie();
-		loggedinorreturn();
-		die('ERROR');
-	}
-
-	if ($row)
-		define('USER_CLASS', $row['class']);
-
-	if (($row['flags'] & bt_options::FLAGS_SSL_SITE) && !bt_vars::$ssl) {
-		header('Location: '.bt_config::$conf['default_ssl_url'].$_SERVER['REQUEST_URI']);
-		die;
-	}
-
-	$hideip = ($row['flags'] & bt_options::FLAGS_PROTECT) || $row['class'] >= UC_VIP;
-    $newip = $hideip ? 0 : bt_vars::$long_ip;
-	$newrealip = $hideip ? 0 : bt_vars::$long_realip;
-
-	if ($newip != $row['ip']) {
-		$updateuser[] = 'ip = '.$newip;
-		$row['ip'] = $newip;
-	}
-	if ($newrealip != $row['realip']) {
-		$updateuser[] = 'realip = '.$newrealip;
-		$row['realip'] = $newrealip;
-	}
-	if ($row['last_access'] < (bt_vars::$timestamp - 300))
-		$updateuser[] = 'last_access = '.bt_vars::$timestamp;
-
-	if ($srow['ip'] != bt_vars::$long_ip)
-		$updatesession[] = 'ip = '.bt_vars::$long_ip;
-
-	if ($srow['realip'] != bt_vars::$long_realip)
-		$updatesession[] = 'realip = '.bt_vars::$long_realip;
-
-	if ($srow['lastaction'] < (bt_vars::$timestamp - 300))
-		$updatesession[] = 'lastaction = '.bt_vars::$timestamp;
-
-	if (count($updateuser))
-		bt_sql::query('UPDATE users SET '.implode(', ', $updateuser).' WHERE id = '.$row['id']) or bt_sql::err(__FILE__, __LINE__);
-
-	if (count($updatesession))
-		bt_sql::query('UPDATE sessions SET '.implode(', ', $updatesession).' WHERE sid = '.bt_sql::esc($srow['sid'])) or bt_sql::err(__FILE__, __LINE__);
-
-	bt_user::$current = $row;
-	bt_theme_engine::load();
+function dbconn() {
+	bt_loginout::db_connect(false);
 }
 
 function mksize($bytes) {
@@ -391,34 +212,21 @@ function httperr($code = 404, $msg = 'Not Found') {
     exit();
 }
 
-function logincookie($id, $ssl_only = false, $updatedb = 1, $maxage = 7776000) {
-	$id = 0 + $id;
-	$maxage = 0 + $maxage;
-	$secure = $ssl_only === true;
-	$passhash = sha1(mksecret());
-	bt_sql::query('INSERT INTO `sessions` (`sid`, `uid`, `ip`, `realip`, `added`, `lastaction`, `maxage`) '.
-		'VALUES ('.bt_sql::esc($passhash).', '.$id.', '.bt_vars::$long_ip.', '.bt_vars::$long_realip.', '.
-		bt_vars::$timestamp.', '.bt_vars::$timestamp.', '.$maxage.')') or bt_sql::err(__FILE__, __LINE__);
+function logincookie($id, $ssl_only = false, $updatedb = true, $maxage = 7776000) {
+	$options = 0;
+	if ($ssl_only)
+		$options |= bt_loginout::OPT_SECURE;
 
-	setcookie('uid', $id, bt_vars::$timestamp + $maxage, '/', '', $secure, true);
-	setcookie('pass', $passhash, bt_vars::$timestamp + $maxage, '/', '', $secure, true);
-
-	if ($updatedb)
-		bt_sql::query('UPDATE `users` SET `last_login` = '.bt_vars::$timestamp.' WHERE `id` = '.$id) or bt_sql::err(__FILE__, __LINE__);
+	bt_loginout::login($id, $options, $updatedb, $maxage);
 }
 
 
 function logoutcookie() {
-	bt_sql::query('DELETE FROM sessions WHERE sid = '.bt_sql::esc($_COOKIE['pass']));
-	setcookie('uid', '', 0x7fffffff, '/');
-	setcookie('pass', '', 0x7fffffff, '/');
+	bt_loginout::logout();
 }
 
 function loggedinorreturn() {
-	if (!bt_user::$current) {
-		header('Location: '.bt_vars::$base_url.'/login.php?returnto='.urlencode($_SERVER['REQUEST_URI']));
-		exit();
-	}
+	bt_loginout::or_return();
 }
 
 function deletetorrent($id) {

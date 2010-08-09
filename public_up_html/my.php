@@ -25,8 +25,7 @@ require_once(CLASS_PATH.'bt_forums.php');
 require_once(CLASS_PATH.'bt_chans.php');
 require_once(CLASS_PATH.'bt_location.php');
 
-dbconn();
-loggedinorreturn();
+bt_loginout::db_connect(true);
 
 $user = bt_user::$current;
 $pv = new bt_session(true, 1800);

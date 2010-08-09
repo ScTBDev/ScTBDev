@@ -24,8 +24,7 @@ require_once(CLASS_PATH.'bt_forums.php');
 require_once(CLASS_PATH.'bt_session.php');
 require_once(CLASS_PATH.'allowed_staff.php');
 
-dbconn();
-loggedinorreturn();
+bt_loginout::db_connect(true);
 
 if (!bt_user::required_class(UC_ADMINISTRATOR))
 	bt_theme::error('Error', 'Access Denied');

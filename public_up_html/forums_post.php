@@ -23,8 +23,8 @@ require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'bittorre
 require_once(CLASS_PATH.'bt_forums.php');
 require_once(CLASS_PATH.'bt_session.php');
 
-dbconn();
-loggedinorreturn();
+bt_loginout::db_connect(true);
+
 $tsettings = bt_theme::$settings['forums_post'];
 $psettings = bt_theme::$settings['forum_post'];
 

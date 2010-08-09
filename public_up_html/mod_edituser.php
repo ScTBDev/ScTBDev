@@ -28,8 +28,7 @@ require_once(CLASS_PATH.'bt_pm.php');
 require_once(CLASS_PATH.'bt_chans.php');
 require_once(CLASS_PATH.'bt_hash.php');
 
-dbconn();
-loggedinorreturn();
+bt_loginout::db_connect(true);
 
 if (!bt_user::required_class(UC_STAFF))
 	bt_theme::error('Error','Permission Denied');

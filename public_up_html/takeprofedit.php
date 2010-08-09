@@ -33,8 +33,8 @@ function bark($msg)
   {
    genbark($msg, 'Update failed!');
   }
-dbconn();
-loggedinorreturn();
+
+bt_loginout::db_connect(true);
 
 if (!mkglobal('email:oldpassword:chpassword:passagain'))
   bark('missing form data');

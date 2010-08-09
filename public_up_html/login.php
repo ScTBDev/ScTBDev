@@ -32,7 +32,9 @@ if (!bt_vars::$ssl) {
 	header('Location: '.$redirectbase.'/login.php?http=1'.($returnto ? '&returnto='.rawurlencode($returnto) : ''));
 	die();
 }
-dbconn();
+
+bt_loginout::db_connect(false);
+
 if (bt_user::$current) {
 	$redirectbase = bt_security::redirect_base(($use_ssl || (bt_user::$current['flags'] & bt_options::FLAGS_SSL_SITE)));
 	$url = $returnto ? $returnto : '/my.php';
