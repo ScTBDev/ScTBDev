@@ -274,7 +274,7 @@ class bt_ip {
 
 				// reserved/unroutable IANA IPv4 addresses
 				// http://www.iana.org/assignments/ipv4-address-space
-				// As of 2010-06-02
+				// As of 2010-08-05
 
 				$reserved_ips = array (
 					array(0x0			, 0xffffff),	// 0.0.0.0		- 0.255.255.255		0 - IANA - Local Identification [RFC1122]
@@ -317,9 +317,9 @@ class bt_ip {
 
 					array(0x2a000000	, 0x2affffff),	// 42.0.0.0		- 42.255.255.255	42 - IANA
 
-					array(0x2f000000	, 0x31ffffff),	// 47.0.0.0		- 49.255.255.255	47 - Bell-Northern Research
+					array(0x2f000000	, 0x30ffffff),	// 47.0.0.0		- 48.255.255.255	47 - Bell-Northern Research
 														//									48 - Prudential Securities Inc.
-														//									49 - IANA
+
 
 					array(0x33000000	, 0x39ffffff),	// 51.0.0.0		- 57.255.255.255	51 - UK Government Department for Work and Pensions
 														//									52 - E.I. duPont de Nemours and Co., Inc.
@@ -329,9 +329,9 @@ class bt_ip {
 														//									56 - US Postal Service
 														//									57 - SITA
 
-					array(0x64000000	, 0x6affffff),	// 100.0.0.0	- 106.255.255.255	100 - IANA
-														//									101 - IANA
-														//									102 - IANA
+					array(0x64000000	, 0x64ffffff),	// 100.0.0.0	- 106.255.255.255	100 - IANA
+
+					array(0x66000000	, 0x6affffff),	//									102 - IANA
 														//									103 - IANA
 														//									104 - IANA
 														//									105 - IANA
