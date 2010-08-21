@@ -49,6 +49,14 @@ class bt_dns {
 		'ANY'	=> DNS_ANY,
 	);
 
+	private static function to_idn($host) {
+		return idn_to_ascii($host, (IDNA_DEFAULT | IDNA_USE_STD3_RULES));
+	}
+
+	private static function to_utf8($host) {
+		return idn_to_utf8($host, (IDNA_DEFAULT | IDNA_USE_STD3_RULES));
+	}
+
 
 	private static function lookup_record($host, $type = 'ANY') {
 		if (!isset(self::$record_types[$type])) {
@@ -136,6 +144,10 @@ class bt_dns {
 		if (bt_ip::type($host, $iptype))
 			return false;
 
+		$host = self::to_idn($host);
+		if (!$host)
+			return false;
+
 		$ip6 = (bool)$ipv6;
 		$type = $ip6 ? 'AAAA' : 'A';
 		$records = self::lookup_record($host, $type);
@@ -179,15 +191,20 @@ class bt_dns {
 			return false;
 
 		if (count($records['record']) > 1) {
-			$name = array();
+			$names = array();
 			foreach ($records['record'] as $record) {
-				$name[] = $record['target'];
+				$name = self::to_utf8($record['target']);
+				if ($name)
+					$names[] = $name;
 			}
+			if (empty($names))
+				$names = false;;
 		}
 		else
-			$name = $records['record'][0]['target'];
+			$names = self::to_utf8($records['record'][0]['target']);
 
-		return $name;
+
+		return $names;
 	}
 
 	public static function check_dnsbl($dnsbl, $ip, $type = self::ADDR, $matchtypes = array(), &$matches = array()) {
