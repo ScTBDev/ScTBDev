@@ -31,10 +31,10 @@ class bt_bans {
 	public static $relakks_ranges = array('83.233.168.0/23','83.233.180.0/22');
 
 	private static function keys($ip, &$key) {
-        if (!bt_ip::type($ip, $type))
-            return false;
+        $hip = bt_ip::ip2hex6($ip);
+		if (!$hip)
+			return false;
 
-        $hip = bt_ip::ip2hex($ip);
         $key	= 'bt_bans::bans:::'.$hip;
 		return true;
 	}

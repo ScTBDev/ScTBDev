@@ -95,7 +95,7 @@ class bt_sql {
 	}
 
 	public static function binary_esc($string) {
-		return '0x'.bt_string::str2hex($string);
+		return 'UNHEX("'.self::$DB->escape_string(bt_string::str2hex($string)).'")';
 	}
 
 	public static function wildcard_esc($string) {

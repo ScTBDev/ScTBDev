@@ -33,7 +33,7 @@ class bt_ip {
 	private static $ip_cache = array();
 
 	public static function ip2hex($ip) {
-		$in_addr = self::type($ip, $type);
+		$in_addr = self::ip2addr($ip);
 		if (!$in_addr)
 			return false;
 
@@ -45,6 +45,14 @@ class bt_ip {
 		$ip = self::addr2ip($in_addr);
 
 		return $ip;
+	}
+
+	public static function ip2hex6($ip) {
+		$in_addr = self::ip2addr6($ip);
+		if (!$in_addr)
+			return false;
+
+		return bt_string::str2hex($in_addr);
 	}
 
 	public static function addr2ip($addr) {
