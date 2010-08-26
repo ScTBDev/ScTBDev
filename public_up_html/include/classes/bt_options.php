@@ -89,14 +89,14 @@ class bt_options {
 //	const USER_UNALLOCATED64		= BIT_64;	//
 
 
-	/* TORRENT FLAGA */
-	const TORRENT_VISIBLE			= BIT_1;
-	const TORRENT_MULTIFILE			= BIT_2;
-	const TORRENT_BANNED			= BIT_3;
-//	const TORRENT_UNALLOCATED4		= BIT_4;
-//	const TORRENT_UNALLOCATED5		= BIT_5;
-//	const TORRENT_UNALLOCATED6		= BIT_6;
-//	const TORRENT_UNALLOCATED7		= BIT_7;
-//	const TORRENT_UNALLOCATED8		= BIT_8;
+	/* TORRENT FLAGS */
+	const TORRENT_VISIBLE			= BIT_1;	// visible
+	const TORRENT_MULTIFILE			= BIT_2;	// type
+	const TORRENT_BANNED			= BIT_3;	// banned
+//	const TORRENT_UNALLOCATED4		= BIT_4;	//
+//	const TORRENT_UNALLOCATED5		= BIT_5;	//
+//	const TORRENT_UNALLOCATED6		= BIT_6;	//
+//	const TORRENT_UNALLOCATED7		= BIT_7;	//
+//	const TORRENT_UNALLOCATED8		= BIT_8;	//
 }
 ?>
