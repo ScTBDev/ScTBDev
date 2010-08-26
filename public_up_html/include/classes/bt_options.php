@@ -23,24 +23,24 @@ require_once(INCL_PATH.'define_bits.php');
 class bt_options {
 	/* USER FLAGS */
 	const USER_CONFIRMED			= BIT_1;	// status				confirmed account?
-	const USER_ANON				= BIT_2;	// privacy				hide seeding/leeching torrents (anonymous)
+	const USER_ANON					= BIT_2;	// privacy				hide seeding/leeching torrents (anonymous)
 	const USER_ACCEPT_PMS			= BIT_3;	// acceptpms			allow pms from everybody?
 	const USER_ACCEPT_FRIEND_PMS	= BIT_4;	// acceptfriendpms		allow pms from friends?
 	const USER_AVATAR_PO			= BIT_5;	// avatar_po			my avatar is potentially offensive
 //	const USER_DST					= BIT_6;	// dst					daylight savings
 	const USER_PM_NOTIFICATION		= BIT_7;	// pmnotif				email notification of pms
 	const USER_ENABLED				= BIT_8;	// enabled				enabled account?
-	const USER_SHOW_AVATARS		= BIT_9;	// avatars				show avatars
+	const USER_SHOW_AVATARS			= BIT_9;	// avatars				show avatars
 	const USER_SHOW_PO_AVATARS		= BIT_10;	// avatars_po			show potentially offensive avatars
 	const USER_DONOR				= BIT_11;	// donor				user has donated
 	const USER_WARNED				= BIT_12;	// warned				user is warned
 	const USER_DELETE_PMS			= BIT_13;	// deletepms			default to deleting pms from inbox on reply
-	const USER_SAVE_PMS			= BIT_14;	// savepms				default to saving sent pms to sentbox
-	const USER_SSL_SITE			= BIT_15;	// ssl_site				force use of ssl, redirect from http to https
+	const USER_SAVE_PMS				= BIT_14;	// savepms				default to saving sent pms to sentbox
+	const USER_SSL_SITE				= BIT_15;	// ssl_site				force use of ssl, redirect from http to https
 	const USER_PROTECT				= BIT_16;	// protect				protect users ip, don't store it in the database
 	const USER_HIDE_STATS			= BIT_17;	// hide_stats			hide upload/download/class/ratio
-	const USER_LOG_USER			= BIT_18;	// log					log everything the user does (really messy atm)
-	const USER_UPLOADER			= BIT_19;	// uploader				user is an uploader on the uploader list
+	const USER_LOG_USER				= BIT_18;	// log					log everything the user does (really messy atm)
+	const USER_UPLOADER				= BIT_19;	// uploader				user is an uploader on the uploader list
 	const USER_FIRST_LINE_SUPPORT	= BIT_20;	// fls					user is first line support
 	const USER_STATBAR				= BIT_21;	// statbar				show statbar
 	const USER_POST_ENABLE			= BIT_22;	// post_enable			enable forum posting
@@ -90,13 +90,13 @@ class bt_options {
 
 
 	/* TORRENT FLAGA */
-	const TORRENT_VISIBLE				= BIT_1;
-	const TORRENT_MULTIFILE				= BIT_2;
-	const TORRENT_BANNED				= BIT_3;
-//	const TORRENT_UNALLOCATED4			= BIT_4;
-//	const TORRENT_UNALLOCATED5			= BIT_5;
-//	const TORRENT_UNALLOCATED6			= BIT_6;
-//	const TORRENT_UNALLOCATED7			= BIT_7;
-//	const TORRENT_UNALLOCATED8			= BIT_8;
+	const TORRENT_VISIBLE			= BIT_1;
+	const TORRENT_MULTIFILE			= BIT_2;
+	const TORRENT_BANNED			= BIT_3;
+//	const TORRENT_UNALLOCATED4		= BIT_4;
+//	const TORRENT_UNALLOCATED5		= BIT_5;
+//	const TORRENT_UNALLOCATED6		= BIT_6;
+//	const TORRENT_UNALLOCATED7		= BIT_7;
+//	const TORRENT_UNALLOCATED8		= BIT_8;
 }
 ?>
