@@ -27,7 +27,7 @@ class bt_options {
 	const USER_ACCEPT_PMS			= BIT_3;	// acceptpms			allow pms from everybody?
 	const USER_ACCEPT_FRIEND_PMS	= BIT_4;	// acceptfriendpms		allow pms from friends?
 	const USER_AVATAR_PO			= BIT_5;	// avatar_po			my avatar is potentially offensive
-//	const USER_DST					= BIT_6;	// dst					daylight savings
+//	const USER_UNALLOCATED6			= BIT_6;	//
 	const USER_PM_NOTIFICATION		= BIT_7;	// pmnotif				email notification of pms
 	const USER_ENABLED				= BIT_8;	// enabled				enabled account?
 	const USER_SHOW_AVATARS			= BIT_9;	// avatars				show avatars
@@ -98,5 +98,16 @@ class bt_options {
 //	const TORRENT_UNALLOCATED6		= BIT_6;	//
 //	const TORRENT_UNALLOCATED7		= BIT_7;	//
 //	const TORRENT_UNALLOCATED8		= BIT_8;	//
+
+
+	/* PEER FLAGS */
+	const PEER_SEEDER				= BIT_1;	//
+	const PEER_PROBED4				= BIT_2;	//
+	const PEER_PROBED6				= BIT_3;	//
+	const PEER_CONN4				= BIT_4;	//
+	const PEER_CONN6				= BIT_5;	//
+	const PEER_SUPPORT_CRYPTO		= BIT_6;	//
+	const PEER_REQUIRE_CRYPTO		= BIT_7;	//
+//	const PEER_UNALLOCATED8			= BIT_8;	//
 }
 ?>

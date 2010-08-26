@@ -132,7 +132,7 @@ $seeder = $left == 0;
 
 // If peer is a seed, don't send peer list with seeders, save some bandwith.
 if ($seeder)
-	$selectnot_bits |= bt_tracker::OPT_SEEDER;
+	$selectnot_bits |= bt_options::PEER_SEEDER;
 
 $updatetorrent = array();
 $updateuser = array();
@@ -219,11 +219,11 @@ if ($self) {
 	$self['clientid']		= 0 + $self['clientid'];
 	$self['flags']			= (int)$self['flags'];
 
-	$seeding				= (bool)($self['flags'] & bt_tracker::OPT_SEEDER);
-	$probed4				= (bool)($self['flags'] & bt_tracker::OPT_PROBED4);
-	$probed6				= (bool)($self['flags'] & bt_tracker::OPT_PROBED6);
-	$connectable4			= $probed4 ? (($self['flags'] & bt_tracker::OPT_CONN4) ? bt_tracker::CONN_YES : bt_tracker::CONN_NO) : bt_tracker::CONN_CHECK;
-	$connectable6			= $probed6 ? (($self['flags'] & bt_tracker::OPT_CONN6) ? bt_tracker::CONN_YES : bt_tracker::CONN_NO) : bt_tracker::CONN_CHECK;
+	$seeding				= (bool)($self['flags'] & bt_options::PEER_SEEDER);
+	$probed4				= (bool)($self['flags'] & bt_options::PEER_PROBED4);
+	$probed6				= (bool)($self['flags'] & bt_options::PEER_PROBED6);
+	$connectable4			= $probed4 ? (($self['flags'] & bt_options::PEER_CONN4) ? bt_tracker::CONN_YES : bt_tracker::CONN_NO) : bt_tracker::CONN_CHECK;
+	$connectable6			= $probed6 ? (($self['flags'] & bt_options::PEER_CONN6) ? bt_tracker::CONN_YES : bt_tracker::CONN_NO) : bt_tracker::CONN_CHECK;
 
 	if (isset($self['started'])) {
 		$self['started']	= 0 + $self['started'];
@@ -348,9 +348,9 @@ else {
 
 		if ($seeding != $seeder) {
 			if ($seeder)
-				$set_bits = bt_tracker::OPT_SEEDER;
+				$set_bits = bt_options::PEER_SEEDER;
 			else
-				$clr_bits = bt_tracker::OPT_SEEDER;
+				$clr_bits = bt_options::PEER_SEEDER;
 		}
 
 		if ($completed)
@@ -441,7 +441,7 @@ else {
 	}
 	else {
 		if ($seeder)
-			$set_bits |= bt_tracker::OPT_SEEDER;
+			$set_bits |= bt_options::PEER_SEEDER;
 
 		$connectable4 = $connectable6 = bt_tracker::CONN_NO;
 		if ($ip4) {
@@ -455,12 +455,12 @@ else {
 
 					if (!$sockres) {
 						$connectable4 = bt_tracker::CONN_NO;
-						bt_sql::query('UPDATE peers SET flags = ((flags | '.bt_tracker::OPT_PROBED4.') & ~'.bt_tracker::OPT_CONN4.') WHERE ip = '.$ip4.' AND port = '.$port4.' AND (flags & '.bt_tracker::OPT_PROBED4.') = 0');
+						bt_sql::query('UPDATE peers SET flags = ((flags | '.bt_options::PEER_PROBED4.') & ~'.bt_options::PEER_CONN4.') WHERE ip = '.$ip4.' AND port = '.$port4.' AND (flags & '.bt_options::PEER_PROBED4.') = 0');
 					}
 					else {
 						fclose($sockres);
 						$connectable4 = bt_tracker::CONN_YES;
-						bt_sql::query('UPDATE peers SET flags = (flags | '.(bt_tracker::OPT_PROBED4 | bt_tracker::OPT_CONN4).') WHERE ip = '.$ip4.' AND port = '.$port4.' AND (flags & '.bt_tracker::OPT_PROBED4.') = 0');
+						bt_sql::query('UPDATE peers SET flags = (flags | '.(bt_options::PEER_PROBED4 | bt_options::PEER_CONN4).') WHERE ip = '.$ip4.' AND port = '.$port4.' AND (flags & '.bt_options::PEER_PROBED4.') = 0');
 					}
 
 					bt_memcache::set($connkey, $connectable4, ($connectable4 === bt_tracker::CONN_NO ? 900 : 21600));
@@ -482,12 +482,12 @@ else {
 
 					if (!$sockres) {
 						$connectable6 = bt_tracker::CONN_NO;
-						bt_sql::query('UPDATE peers SET flags = ((flags | '.bt_tracker::OPT_PROBED6.') & ~'.bt_tracker::OPT_CONN6.') WHERE ip6 = '.bt_sql::esc($ip6).' AND port6 = '.$port6.' AND (flags & '.bt_tracker::OPT_PROBED6.') = 0');
+						bt_sql::query('UPDATE peers SET flags = ((flags | '.bt_options::PEER_PROBED6.') & ~'.bt_options::PEER_CONN6.') WHERE ip6 = '.bt_sql::esc($ip6).' AND port6 = '.$port6.' AND (flags & '.bt_options::PEER_PROBED6.') = 0');
 					}
 					else {
 						fclose($sockres);
 						$connectable6 = bt_tracker::CONN_YES;
-						bt_sql::query('UPDATE peers SET flags = (flags | '.(bt_tracker::OPT_PROBED6 | bt_tracker::OPT_CONN6).') WHERE ip6 = '.bt_sql::esc($ip6).' AND port6 = '.$port6.' AND (flags & '.bt_tracker::OPT_PROBED6.') = 0');
+						bt_sql::query('UPDATE peers SET flags = (flags | '.(bt_options::PEER_PROBED6 | bt_options::PEER_CONN6).') WHERE ip6 = '.bt_sql::esc($ip6).' AND port6 = '.$port6.' AND (flags & '.bt_options::PEER_PROBED6.') = 0');
 					}
 
 					bt_memcache::set($connkey, $connectable6, ($connectable6 === bt_tracker::CONN_NO ? 900 : 21600));
@@ -500,14 +500,14 @@ else {
 		}
 
 		if ($connectable4 !== bt_tracker::CONN_CHECK)
-			$set_bits |= bt_tracker::OPT_PROBED4;
+			$set_bits |= bt_options::PEER_PROBED4;
 		if ($connectable6 !== bt_tracker::CONN_CHECK)
-			$set_bits |= bt_tracker::OPT_PROBED6;
+			$set_bits |= bt_options::PEER_PROBED6;
 
 		if ($connectable4 === bt_tracker::CONN_YES)
-			$set_bits |= bt_tracker::OPT_CONN4;
+			$set_bits |= bt_options::PEER_CONN4;
 		if ($connectable6 === bt_tracker::CONN_YES)
-			$set_bits |= bt_tracker::OPT_CONN6;
+			$set_bits |= bt_options::PEER_CONN6;
 
 
 		if ($connectable4 === bt_tracker::CONN_YES || $connectable6 === bt_tracker::CONN_YES)
@@ -613,10 +613,10 @@ if ($rsize) {
 
 	while ($row = $peers_res->fetch_assoc()) {
 		$row['flags'] = (int)$row['flags'];
-		if ($row['compact'] && ($row['flags'] & bt_tracker::OPT_CONN4))
+		if ($row['compact'] && ($row['flags'] & bt_options::PEER_CONN4))
 			$peers4 .= $row['compact'];
 
-		if ($row['compact6'] && ($row['flags'] & bt_tracker::OPT_CONN6))
+		if ($row['compact6'] && ($row['flags'] & bt_options::PEER_CONN6))
 			$peers6 .= $row['compact6'];
 	}
 	$peers_res->free();
