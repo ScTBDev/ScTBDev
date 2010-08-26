@@ -95,6 +95,11 @@ class bt_sql {
 	}
 
 	public static function binary_esc($string) {
+		if (!self::$connected) {
+			trigger_error('Not connected to SQL server in '.__METHOD__, E_USER_ERROR);
+			return false;
+		}
+
 		return 'UNHEX("'.self::$DB->escape_string(bt_string::str2hex($string)).'")';
 	}
 
