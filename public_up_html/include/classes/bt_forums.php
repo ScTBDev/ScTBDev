@@ -169,7 +169,7 @@ class bt_forums {
 
 	public static function get_formated_post($id, $text) {
 		$postid = 0 + $id;
-		$type = (bt_user::$current['flags'] & bt_options::FLAGS_AVATAR_PO) ? 'showpo' : 'hidepo';
+		$type = (bt_user::$current['flags'] & bt_options::USER_AVATAR_PO) ? 'showpo' : 'hidepo';
 		$key = 'post::'.$type.':::'.$postid;
 		bt_memcache::connect();
 		$formated = bt_memcache::get($key);
@@ -183,11 +183,11 @@ class bt_forums {
 
 	public static function avatar(&$url, &$text, $is_po) {
 		$url = trim($url);
-		if ($url == '' || !(bt_user::$current['flags'] & bt_options::FLAGS_SHOW_AVATARS)) {
+		if ($url == '' || !(bt_user::$current['flags'] & bt_options::USER_SHOW_AVATARS)) {
 			$url = bt_theme_engine::$theme_pic_dir.'avatar_default.png';
 			$text = '';
 		}
-		elseif ((bt_user::$current['flags'] & bt_options::FLAGS_SHOW_PO_AVATARS) || !$is_po)
+		elseif ((bt_user::$current['flags'] & bt_options::USER_SHOW_PO_AVATARS) || !$is_po)
 			$text = '';
 		else {
 			$url = bt_theme_engine::$theme_pic_dir.'avatar_disabled.png';
@@ -217,14 +217,14 @@ class bt_forums {
 	public static function user_stars($flags) {
 		$flags = (int)$flags;
 		$stars = '';
-		if ($flags & bt_options::FLAGS_DONOR)
+		if ($flags & bt_options::USER_DONOR)
 			$stars .= ' <img src="'.bt_theme_engine::$theme_pic_dir.'donor_small.png" alt="Donor" title="Donor" />';
 
-		if ($flags & bt_options::FLAGS_WARNED)
+		if ($flags & bt_options::USER_WARNED)
 			$stars .= ' <a href="/rules.php#warning"><img src="'.bt_theme_engine::$theme_pic_dir.'warning_small.png" alt="Warned" '.
 				'title="Warned" style="border: none" /></a>';
 
-		if (!($flags & bt_options::FLAGS_ENABLED))
+		if (!($flags & bt_options::USER_ENABLED))
 			$stars .= '';
 
 		return $stars;
@@ -232,13 +232,13 @@ class bt_forums {
 
 	public static function settings_to_forum_theme($flags) {
 		$theme = 0;
-		if ($flags & bt_options::FLAGS_FORUM_ICONS_1)
+		if ($flags & bt_options::USER_FORUM_ICONS_1)
 			$theme |= BIT_1;
-		if ($flags & bt_options::FLAGS_FORUM_ICONS_2)
+		if ($flags & bt_options::USER_FORUM_ICONS_2)
 			$theme |= BIT_2;
-		if ($flags & bt_options::FLAGS_FORUM_ICONS_3)
+		if ($flags & bt_options::USER_FORUM_ICONS_3)
 			$theme |= BIT_3;
-		if ($flags & bt_options::FLAGS_FORUM_ICONS_4)
+		if ($flags & bt_options::USER_FORUM_ICONS_4)
 			$theme |= BIT_4;
 
 		return (int)$theme;

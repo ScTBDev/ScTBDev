@@ -31,7 +31,7 @@ bt_theme::head('Staff');
 
 
 // Search User Database for Staff and display in alphabetical order
-$reqflags = bt_options::FLAGS_CONFIRMED | bt_options::FLAGS_ENABLED;
+$reqflags = bt_options::USER_CONFIRMED | bt_options::USER_ENABLED;
 $res = bt_sql::query('SELECT u.id, u.username, u.class, u.last_access, u.country, f.lang, f.helpwith '.
 	'FROM users AS u LEFT JOIN firstline AS f ON (f.id = u.id) WHERE u.class >= '.UC_STAFF.' AND '.
 	'(u.flags & '.$reqflags.') = '.$reqflags.' ORDER BY u.class DESC, u.username ASC') or bt_sql::err(__FILE__,__LINE__);

@@ -158,7 +158,7 @@ else {
 }
 
 $maypost = (bt_user::required_class($forum['minclassread']) && bt_user::required_class($forum['minclasswrite']) && bt_user::required_class($forum['minclasscreate']));
-if (!(bt_user::$current['flags'] & bt_options::FLAGS_POST_ENABLE) && !bt_user::required_class(UC_FORUM_MODERATOR))
+if (!(bt_user::$current['flags'] & bt_options::USER_POST_ENABLE) && !bt_user::required_class(UC_FORUM_MODERATOR))
 	$maypost = false;
 
 $new_topic = $maypost ? sprintf($fsettings['newtopic'], $forumid) : $fsettings['no_posts'];

@@ -166,7 +166,7 @@ class bt_mem_caching {
 		$user = bt_memcache::get($key);
 		if ($user === false) {
 			bt_sql::connect();
-			$reqflags = bt_options::FLAGS_ENABLED | bt_options::FLAGS_CONFIRMED;
+			$reqflags = bt_options::USER_ENABLED | bt_options::USER_CONFIRMED;
 			$usersql = 'SELECT id, class, CAST(flags AS SIGNED) AS flags FROM users WHERE passkey = '.bt_sql::esc($passkey).' AND (flags & '.$reqflags.') = '.$reqflags;
 			$userq = bt_sql::query($usersql) or bt_sql::err(__FILE__, __LINE__);
 			if (!$userq->num_rows) {

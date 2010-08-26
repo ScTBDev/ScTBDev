@@ -171,7 +171,7 @@ bt_sql::query('UPDATE torrents SET visible = "no" WHERE visible = "yes" AND last
 
 // remove incomplete singups
 $deadtime = time() - bt_config::$conf['signup_timeout'];
-$res = bt_sql::query('SELECT `id`, `invitedby` FROM `users` WHERE !(`flags` & '.bt_options::FLAGS_CONFIRMED.') AND `added` < '.$deadtime.' AND `last_login` < '.$deadtime.' AND `last_access` < '.$deadtime);
+$res = bt_sql::query('SELECT `id`, `invitedby` FROM `users` WHERE !(`flags` & '.bt_options::USER_CONFIRMED.') AND `added` < '.$deadtime.' AND `last_login` < '.$deadtime.' AND `last_access` < '.$deadtime);
 while ($row = $res->fetch_assoc()) {
 	// delete the user
 	bt_sql::query('DELETE FROM `users` WHERE `id` = '.$row['id']);
@@ -183,14 +183,14 @@ $res->free();
 
 
 //remove expired warnings
-$res = bt_sql::query('SELECT `id` FROM `users` WHERE (`flags` & '.bt_options::FLAGS_WARNED.')  AND `warneduntil` < '.$time.
+$res = bt_sql::query('SELECT `id` FROM `users` WHERE (`flags` & '.bt_options::USER_WARNED.')  AND `warneduntil` < '.$time.
 	' AND `warneduntil` != 0') or bt_sql::err(__FILE__, __LINE__);
 if ($res->num_rows > 0) {
 	$msg = 'Your warning has been removed. Please keep in your best behaviour from now on.';
 	$subject = 'Warning removed';
 	while ($arr = $res->fetch_row()) {
 		$id = $arr[0];
-		bt_sql::query('UPDATE `users` SET `flags` = (`flags` & ~'.bt_options::FLAGS_WARNED.'), `warneduntil` = 0 '.
+		bt_sql::query('UPDATE `users` SET `flags` = (`flags` & ~'.bt_options::USER_WARNED.'), `warneduntil` = 0 '.
 			'WHERE `id` = '.$id) or bt_sql::err(__FILE__, __LINE__);
 		bt_pm::send(0, $id, $msg, $subject, bt_pm::PM_INBOX);
 	}
@@ -243,7 +243,7 @@ bt_user::auto_promote(UC_SEED_WHORE, UC_OVERSEEDER, $minratio, $limit, $regtime,
 bt_user::auto_demote(UC_OVERSEEDER, UC_SEED_WHORE, 1.09);
 bt_user::auto_demote(UC_SEED_WHORE, UC_SUPER_WHORE, 3.9);		// demote sct seed whore's
 bt_user::auto_demote(UC_SUPER_WHORE, UC_WHORE, 2.9);			// demote sct super whore's
-$remove_flags = bt_options::FLAGS_ANON;
+$remove_flags = bt_options::USER_ANON;
 $remove_chans = bt_bitmask::chans('invite_pre','allow_pre');
 bt_user::auto_demote(UC_WHORE, UC_LOVER, 1.9, $remove_flags, $remove_chans);	// demote sct whore's
 $remove_chans = bt_bitmask::chans('invite_tracers','allow_tracers');
@@ -265,12 +265,12 @@ function autowarn($length, $limit, $minratio) {
 		'low after these '.$length.' days you will be banned permanently!';
 	$until = time() + (($length+0.1)*86400);
 	$limit = $limit * 1024 * 1024 * 1024;
-	$res = bt_sql::query('SELECT id FROM users WHERE class = '.UC_USER.' AND (flags & '.bt_options::FLAGS_ENABLED.') AND downloaded >= '.$limit.
-		' AND (uploaded / downloaded) < '.$minratio.' AND (flags & '.bt_options::FLAGS_WARNED.') = 0') or bt_sql::err(__FILE__, __LINE__);
+	$res = bt_sql::query('SELECT id FROM users WHERE class = '.UC_USER.' AND (flags & '.bt_options::USER_ENABLED.') AND downloaded >= '.$limit.
+		' AND (uploaded / downloaded) < '.$minratio.' AND (flags & '.bt_options::USER_WARNED.') = 0') or bt_sql::err(__FILE__, __LINE__);
 	while ($arr = $res->fetch_row()) {
 		$id = $arr[0];
 		bt_user::init_mod_comment($id);
-		bt_sql::query('UPDATE users SET flags = (flags | '.bt_options::FLAGS_WARNED.'), warneduntil = '.$until.' '.
+		bt_sql::query('UPDATE users SET flags = (flags | '.bt_options::USER_WARNED.'), warneduntil = '.$until.' '.
 			'WHERE id = '.$id) or bt_sql::err(__FILE__, __LINE__);
 		bt_user::mod_comment($id, 'Auto-warned for low ratio');
 		bt_pm::send(0, $id, $msg, 'Warning received', bt_pm::PM_INBOX);
@@ -289,7 +289,7 @@ function autoban($length, $limit, $minratio) {
 	$secs = $length*86400; // 1 day
 	$length = time() + $secs; // less than 1 day of warning left
 	$limit = $limit*1024*1024*1024;
-	$reqflags = bt_options::FLAGS_ENABLED | bt_options::FLAGS_WARNED;
+	$reqflags = bt_options::USER_ENABLED | bt_options::USER_WARNED;
 	$res = bt_sql::query('SELECT id, ip, username, passkey FROM users WHERE class = '.UC_USER.' AND '.
 		'(flags & '.$reqflags.') = '.$reqflags.' AND warneduntil < '.$length.' AND downloaded > '.$limit.' AND '.
 		'(uploaded / downloaded) < '.$minratio) or bt_sql::err(__FILE__,__LINE__);
@@ -297,7 +297,7 @@ function autoban($length, $limit, $minratio) {
 		$id = 0 + $arr['id'];
 		bt_user::init_mod_comment($id);
 
-		bt_sql::query('UPDATE users SET flags = (flags & ~'.bt_options::FLAGS_ENABLED.') WHERE `id` = '.$id) or bt_sql::err(__FILE__, __LINE__);
+		bt_sql::query('UPDATE users SET flags = (flags & ~'.bt_options::USER_ENABLED.') WHERE `id` = '.$id) or bt_sql::err(__FILE__, __LINE__);
 		bt_mem_caching::remove_passkey($arr['passkey'], true);
 		bt_user::mod_comment($id, 'Auto-banned for low ratio');
 		$ip = ip2long($arr['ip']);

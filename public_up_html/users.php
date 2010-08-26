@@ -35,7 +35,7 @@ if ($class < 0 || !is_valid_user_class($class))
   $class = -1;
 
 if ($search != '' || $class >= 0 || $country > 0) {
-	$query = 'username LIKE '.sqlesc('%'.$search.'%').(!bt_user::required_class(UC_STAFF) ? ' AND (flags & '.bt_options::FLAGS_CONFIRMED.')' : '');
+	$query = 'username LIKE '.sqlesc('%'.$search.'%').(!bt_user::required_class(UC_STAFF) ? ' AND (flags & '.bt_options::USER_CONFIRMED.')' : '');
 	if ($search)
 		$q = 'search='.htmlentities($search);
 }
@@ -46,7 +46,7 @@ else {
 
 	if ($letter == '' || strpos($lowchars, $letter) === false)
 		$letter = '1';
-	$query = 'username LIKE "'.$letter.'%"'.(!bt_user::required_class(UC_STAFF) ? ' AND (flags & '.bt_options::FLAGS_CONFIRMED.')' : '');
+	$query = 'username LIKE "'.$letter.'%"'.(!bt_user::required_class(UC_STAFF) ? ' AND (flags & '.bt_options::USER_CONFIRMED.')' : '');
 	$q = 'letter='.$letter;
 }
 

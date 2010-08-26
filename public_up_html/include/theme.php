@@ -213,21 +213,21 @@ function commenttable($rows) {
 				$title = bt_security::html_safe($title);
 
 			echo '<a name="comm'.$row['id'].'" href="/userdetails.php?id='.$row['user'].'"><b>'.
-				bt_security::html_safe($row['username']).'</b></a>'.(($row['flags'] & bt_options::FLAGS_DONOR) ?
+				bt_security::html_safe($row['username']).'</b></a>'.(($row['flags'] & bt_options::USER_DONOR) ?
 				'<img src="'.bt_config::$conf['pic_base_url'].'star.gif" alt="Donor">' : '').
-				(($row['flags'] & bt_options::FLAGS_WARNED) ? '<img src="'.bt_config::$conf['pic_base_url'].'warned.gif" alt="Warned">' : '').' ('.$title.')'."\n";
+				(($row['flags'] & bt_options::USER_WARNED) ? '<img src="'.bt_config::$conf['pic_base_url'].'warned.gif" alt="Warned">' : '').' ('.$title.')'."\n";
 		}
 		else
 			echo '<a name="comm'.$row['id'].'"><i>(orphaned)</i></a>'."\n";
 
-		echo ' at '.format_time($row['added']).(($row['user'] == bt_user::$current['id'] && (bt_user::$current['flags'] & bt_options::FLAGS_POST_ENABLE))
+		echo ' at '.format_time($row['added']).(($row['user'] == bt_user::$current['id'] && (bt_user::$current['flags'] & bt_options::USER_POST_ENABLE))
 			|| get_user_class() >= UC_FORUM_MODERATOR ? '- [<a href="/comment.php?action=edit&amp;cid='.$row['id'].'">Edit</a>]' : '').
 			(get_user_class() >= UC_FORUM_MODERATOR ? '- [<a href="/comment.php?action=delete&amp;cid='.$row['id'].'">Delete</a>]' : '').
 			($row['editedby'] && get_user_class() >= UC_FORUM_MODERATOR ?
 			'- [<a href="/comment.php?action=vieworiginal&amp;cid='.$row['id'].'">View original</a>]' : '').'</p>'."\n";
 
 		$avatar = $row['avatar'];
-		bt_forums::avatar($avatar, $avtext, ((bool)($row['flags'] & bt_options::FLAGS_AVATAR_PO)));
+		bt_forums::avatar($avatar, $avtext, ((bool)($row['flags'] & bt_options::USER_AVATAR_PO)));
 
 		$text = format_comment($row['text']);
 		if ($row["editedby"])

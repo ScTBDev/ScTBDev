@@ -83,7 +83,7 @@ ERROR;
 		if (!$session)
 			return false;
 
-		$req_flags = bt_options::FLAGS_ENABLED | bt_options::FLAGS_CONFIRMED;
+		$req_flags = bt_options::USER_ENABLED | bt_options::USER_CONFIRMED;
 		$res = bt_sql::query('SELECT '.self::USER_FIELDS.' FROM users '.
 			'WHERE id = '.$id.' AND (flags & '.$req_flags.') = '.$req_flags) or bt_sql::err(__FILE__, __LINE__);
 
@@ -98,7 +98,7 @@ ERROR;
 		$updateuser = array();
 		bt_user::prepare_user($user);
 
-		if (!($row['flags'] & bt_options::FLAGS_BYPASS_BANS)) {
+		if (!($row['flags'] & bt_options::USER_BYPASS_BANS)) {
 			$banned = false;
 			if (bt_bans::check(bt_vars::$realip, true, true, $reason)) {
 				$banned = true;
@@ -151,14 +151,14 @@ BADIP;
 			}
 		}
 
-		if (($user['flags'] & bt_options::FLAGS_SSL_SITE) && !bt_vars::$ssl) {
+		if (($user['flags'] & bt_options::USER_SSL_SITE) && !bt_vars::$ssl) {
 			header('Location: '.bt_config::$conf['default_ssl_url'].$_SERVER['REQUEST_URI']);
 			die;
 		}
 
 		define('USER_CLASS', $user['class']);
 
-		$hideip = ($user['flags'] & bt_options::FLAGS_PROTECT) || $user['class'] >= UC_VIP;
+		$hideip = ($user['flags'] & bt_options::USER_PROTECT) || $user['class'] >= UC_VIP;
 		$ip = $hideip ? bt_ip::NOIP6 : bt_vars::$packed6_ip;
 		$realip = $hideip ? bt_ip::NOIP6 : bt_vars::$packed6_realip;
 

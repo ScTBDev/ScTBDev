@@ -106,7 +106,7 @@ $user = bt_mem_caching::get_user_from_passkey($passkey);
 if (!$user || !count($torrents))
 	die(SCRAPE_ERR);
 
-if (!($user['flags'] & bt_options::FLAGS_BYPASS_BANS)) {
+if (!($user['flags'] & bt_options::USER_BYPASS_BANS)) {
 	$rip = bt_vars::$realip;
 	$ip = bt_vars::$ip;
 	if (bt_bans::check($rip, false))

@@ -60,11 +60,12 @@ class bt_sql {
 
 			self::$connected = true;
 
-//			if ($utf8)
+			if ($utf8)
 				self::utf8_on();
-//			else
-//				self::utf8_off();
+			else
+				self::utf8_off();
 		}
+
 
 		self::$errno 				=& self::$DB->errno;
 		self::$error				=& self::$DB->error;
@@ -108,6 +109,10 @@ class bt_sql {
 	}
 
 	public static function wildcard_escape($string) {
+		if (!self::$connected) {
+			trigger_error('Not connected to SQL server in '.__METHOD__, E_USER_ERROR);
+			return false;
+		}
 		return str_replace(array('%', '_'), array('\%','\_'), self::$DB->escape_string($string));
 	}
 
@@ -140,8 +145,8 @@ class bt_sql {
 			return false;
 		}
 
-//		if (self::$DB->character_set_name != 'binary')
-//			return self::$DB->set_charset('binary');
+		if (self::$DB->character_set_name != 'binary')
+			return self::$DB->set_charset('binary');
 	}
 
 	public static function query($sql, $buffered = true) {

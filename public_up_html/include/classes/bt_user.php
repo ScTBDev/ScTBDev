@@ -235,7 +235,7 @@ class bt_user {
 		if (!empty(self::$_users_cache))
 			return;
 
-		$res = bt_sql::query('SELECT id, uploaded, payed_uploaded, downloaded, added, class FROM users WHERE (flags & '.bt_options::FLAGS_ENABLED.')');
+		$res = bt_sql::query('SELECT id, uploaded, payed_uploaded, downloaded, added, class FROM users WHERE (flags & '.bt_options::USER_ENABLED.')');
 		while ($arr = $res->fetch_assoc()) {
 			$class = (int)$arr['class'];
 

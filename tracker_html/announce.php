@@ -149,7 +149,7 @@ if (!$user)
 
 $userid = $user['id'];
 
-if (!($user['flags'] & bt_options::FLAGS_BYPASS_BANS)) {
+if (!($user['flags'] & bt_options::USER_BYPASS_BANS)) {
 	if (bt_bans::check($realip, false))
 		bt_tracker::err('IP Banned');
 	elseif ($ip != $realip) {

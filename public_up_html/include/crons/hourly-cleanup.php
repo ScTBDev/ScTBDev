@@ -41,7 +41,7 @@ while ($cheater = $anti_cheatq->fetch_assoc()) {
 	$userq->free();
 	if ($user) {
 		bt_user::init_mod_comment($cheaterid);
-		bt_sql::query('UPDATE users SET flags = (flags & ~'.bt_options::FLAGS_ENABLED.') WHERE `id` = '.$cheaterid);
+		bt_sql::query('UPDATE users SET flags = (flags & ~'.bt_options::USER_ENABLED.') WHERE `id` = '.$cheaterid);
 		bt_mem_caching::remove_passkey($user['passkey']);
 		bt_user::mod_comment($cheaterid, 'Auto-disabled for cheating');
 
@@ -242,7 +242,7 @@ $delete_users = array();
 $secs = 42*86400;
 $dt = time() - $secs;
 $maxclass = UC_USER;
-$delusersql = 'SELECT id, passkey FROM users WHERE (flags & '.bt_options::FLAGS_CONFIRMED.') AND class <= '.$maxclass.' '.'AND last_access < '.$dt;
+$delusersql = 'SELECT id, passkey FROM users WHERE (flags & '.bt_options::USER_CONFIRMED.') AND class <= '.$maxclass.' '.'AND last_access < '.$dt;
 $deluserq = bt_sql::query($delusersql);
 while ($user = $deluserq->fetch_assoc())
 	$delete_users[$user['passkey']] = $user['id'];
@@ -251,7 +251,7 @@ while ($user = $deluserq->fetch_assoc())
 $secs2 = 16*86400;
 $dt2 = time() - $secs2;
 $maxclass2 = UC_POWER_USER;
-$delusersql = 'SELECT id, passkey FROM users WHERE (flags & '.bt_options::FLAGS_CONFIRMED.') AND (flags & '.bt_options::FLAGS_ENABLED.') = 0 AND class <= '.$maxclass2.' AND last_access < '.$dt;
+$delusersql = 'SELECT id, passkey FROM users WHERE (flags & '.bt_options::USER_CONFIRMED.') AND (flags & '.bt_options::USER_ENABLED.') = 0 AND class <= '.$maxclass2.' AND last_access < '.$dt;
 $deluserq = bt_sql::query($delusersql);
 while ($user = $deluserq->fetch_assoc())
 	$delete_users[$user['passkey']] = $user['id'];
@@ -261,7 +261,7 @@ while ($user = $deluserq->fetch_assoc())
 $secs = 100*86400;
 $dt = time() - $secs;
 $maxclass = UC_LOVER;
-$delusersql = 'SELECT id, passkey FROM users WHERE (flags & '.bt_options::FLAGS_CONFIRMED.') AND class <= '.$maxclass.' AND last_access < '.$dt;
+$delusersql = 'SELECT id, passkey FROM users WHERE (flags & '.bt_options::USER_CONFIRMED.') AND class <= '.$maxclass.' AND last_access < '.$dt;
 $deluserq = bt_sql::query($delusersql);
 while ($user = $deluserq->fetch_assoc())
 	$delete_users[$user['passkey']] = $user['id'];
@@ -270,7 +270,7 @@ while ($user = $deluserq->fetch_assoc())
 $secs2 = 30*86400;
 $dt2 = time() - $secs2;
 $maxclass2 = UC_LOVER;
-$delusersql = 'SELECT id, passkey FROM users WHERE (flags & '.bt_options::FLAGS_CONFIRMED.') AND (flags & '.bt_options::FLAGS_ENABLED.') = 0 AND class <= '.$maxclass2.' AND last_access < '.$dt2;
+$delusersql = 'SELECT id, passkey FROM users WHERE (flags & '.bt_options::USER_CONFIRMED.') AND (flags & '.bt_options::USER_ENABLED.') = 0 AND class <= '.$maxclass2.' AND last_access < '.$dt2;
 $deluserq = bt_sql::query($delusersql);
 while ($user = $deluserq->fetch_assoc())
 	$delete_users[$user['passkey']] = $user['id'];
@@ -280,7 +280,7 @@ while ($user = $deluserq->fetch_assoc())
 $secs = 180*86400;
 $dt = time() - $secs;
 $maxclass = UC_SEED_WHORE;
-$delusersql = 'SELECT id, passkey FROM users WHERE (flags & '.bt_options::FLAGS_CONFIRMED.') AND class <= '.$maxclass.' AND last_access < '.$dt;
+$delusersql = 'SELECT id, passkey FROM users WHERE (flags & '.bt_options::USER_CONFIRMED.') AND class <= '.$maxclass.' AND last_access < '.$dt;
 $deluserq = bt_sql::query($delusersql);
 while ($user = $deluserq->fetch_assoc())
 	$delete_users[$user['passkey']] = $user['id'];
@@ -289,7 +289,7 @@ while ($user = $deluserq->fetch_assoc())
 $secs3 = 60*86400;
 $dt3 = time() - $secs3;
 $maxclass3 = UC_SEED_WHORE;
-$delusersql = 'SELECT id, passkey FROM users WHERE (flags & '.bt_options::FLAGS_CONFIRMED.') AND (flags & '.bt_options::FLAGS_ENABLED.') = 0 AND class <= '.$maxclass3.' AND last_access < '.$dt3;
+$delusersql = 'SELECT id, passkey FROM users WHERE (flags & '.bt_options::USER_CONFIRMED.') AND (flags & '.bt_options::USER_ENABLED.') = 0 AND class <= '.$maxclass3.' AND last_access < '.$dt3;
 $deluserq = bt_sql::query($delusersql);
 while ($user = $deluserq->fetch_assoc())
 	$delete_users[$user['passkey']] = $user['id'];
@@ -328,8 +328,8 @@ $lt = time() - $maxage;
 bt_sql::query('DELETE FROM `email_changes` WHERE `time` < '.$lt);
 
 
-bt_sql::query('UPDATE `users` SET `flags` = (`flags` & ~'.bt_options::FLAGS_UPLOADER.') WHERE '.
-	'(`flags` & '.bt_options::FLAGS_UPLOADER.') AND `class` < '.UC_UPLOADER);
+bt_sql::query('UPDATE `users` SET `flags` = (`flags` & ~'.bt_options::USER_UPLOADER.') WHERE '.
+	'(`flags` & '.bt_options::USER_UPLOADER.') AND `class` < '.UC_UPLOADER);
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////

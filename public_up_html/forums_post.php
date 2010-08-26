@@ -137,7 +137,7 @@ if (!bt_user::required_class($forum['minclassread']) || !bt_user::required_class
 	bt_theme::error('Error', 'Permission denied');
 
 if (!bt_user::required_class(UC_FORUM_MODERATOR)) {
-	if (!(bt_user::$current['flags'] & bt_options::FLAGS_POST_ENABLE))
+	if (!(bt_user::$current['flags'] & bt_options::USER_POST_ENABLE))
 		bt_theme::error('Error', 'Your posting rights have been revoked');
 
 	if ($type == 'reply') {
@@ -212,7 +212,7 @@ if ($method == 'post') {
 		$post_time = bt_time::format($preview_data['time']);
 		$ago_time = bt_time::ago_time($preview_data['ago']);
 		$avatar = $preview_data['avatar'];
-		$avatar_po = (bool)($preview_data['flags'] & bt_options::FLAGS_AVATAR_PO);
+		$avatar_po = (bool)($preview_data['flags'] & bt_options::USER_AVATAR_PO);
 		bt_forums::avatar($avatar, $avtext, $avatar_po);		
 
 		$postprevvars = array(
@@ -307,7 +307,7 @@ if ($type == 'reply') {
 		$post_time = bt_time::format($post['added']);
 		$post_ago = bt_time::ago_time($post['added']);
 		$avatar = $post['avatar'];
-		$avatar_po = (bool)($post['flags'] & bt_options::FLAGS_AVATAR_PO);
+		$avatar_po = (bool)($post['flags'] & bt_options::USER_AVATAR_PO);
 		bt_forums::avatar($avatar, $avtext, $avatar_po);
 
 		$prevpostvars = array(

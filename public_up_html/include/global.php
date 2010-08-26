@@ -382,11 +382,11 @@ function format_comment($text, $strip_html = true) {
 		$s = preg_replace('/\[img=(https?:\/\/[^\s\'\"<>]+(\.gif|\.jpg|\.png))\]/i', '<img alt="user posted image" src="\\1" style="border: none; max-width: 500px" />', $s);
 
 		// [imgpo]http://www/image.gif[/imgpo]
-		$s = preg_replace('/\[imgpo\](https?:\/\/[^\s\'\"<>]+(\.gif|\.jpg|\.png))\[\/imgpo\]/i', (!(bt_user::$current['flags'] & bt_options::FLAGS_SHOW_PO_AVATARS) ?
+		$s = preg_replace('/\[imgpo\](https?:\/\/[^\s\'\"<>]+(\.gif|\.jpg|\.png))\[\/imgpo\]/i', (!(bt_user::$current['flags'] & bt_options::USER_SHOW_PO_AVATARS) ?
 			'<a href="\\1"'.$link.'>(potentially offensive picture, click here to view)</a>' :
 			'<img alt="user posted image" src="\\1" style="border: none; max-width: 500px" />'), $s);
 		// [imgpo=http://www/image.gif]
-		$s = preg_replace('/\[imgpo=(https?:\/\/[^\s\'\"<>]+(\.gif|\.jpg|\.png))\]/i',  (!(bt_user::$current['flags'] & bt_options::FLAGS_SHOW_PO_AVATARS) ?
+		$s = preg_replace('/\[imgpo=(https?:\/\/[^\s\'\"<>]+(\.gif|\.jpg|\.png))\]/i',  (!(bt_user::$current['flags'] & bt_options::USER_SHOW_PO_AVATARS) ?
 			'<a href="\\1"'.$link.'>(potentially offensive picture, click here to view)</a>' :
 			'<img alt="user posted image" src="\\1" style="border: none; max-width: 500px" />'), $s);
 
@@ -403,7 +403,7 @@ function format_comment($text, $strip_html = true) {
 
 		// [imgpow]http://www/image.gif[/imgpow]
 		$s = preg_replace('/\[imgpow\](https?:\/\/[^\s\'\"<>]+(\.gif|\.jpg|\.png))\[\/imgpow\]/i',
-			(!(bt_user::$current['flags'] & bt_options::FLAGS_SHOW_PO_AVATARS) ?
+			(!(bt_user::$current['flags'] & bt_options::USER_SHOW_PO_AVATARS) ?
 			'<a href="\\1"'.$link.'>(potentially offensive picture, click here to view)</a>' :
 			'<img alt="user posted image" src="\\1" style="border: none; max-width: 500px" />'.
 			'<br /><span style="font-size: 7pt">This image has been resized, click '.
@@ -411,7 +411,7 @@ function format_comment($text, $strip_html = true) {
 			'the full-sized image.</span><br />'), $s);
 		// [imgpow=http://www/image.gif]
 		$s = preg_replace('/\[imgpow=(https?:\/\/[^\s\'\"<>]+(\.gif|\.jpg|\.png))\]/i',
-			(!(bt_user::$current['flags'] & bt_options::FLAGS_SHOW_PO_AVATARS) ?
+			(!(bt_user::$current['flags'] & bt_options::USER_SHOW_PO_AVATARS) ?
 			'<a href="\\1"'.$link.'>(potentially offensive picture, click here to view)</a>' :
 			'<img alt="user posted image" src="\\1" style="border: none; max-width: 500px" />'.
 			'<br /><span style="font-size: 7pt">This image has been resized, click '.

@@ -62,18 +62,21 @@ if ($desc_nfo && $nfo)
 	$descr = $nfo;
 
 if (!$descr)
-  bark('You must enter a description!');
+	bark('You must enter a description!');
 elseif (isset($_POST['strip']) && $_POST['strip'] == 1)
-  $descr = bt_nfo::strip($descr, true);
+	$descr = bt_nfo::strip($descr, true);
+
+$descr = bt_utf8::to_utf8($descr);
+
 
 $catid = (0 + $_POST['type']);
 if (!is_valid_id($catid))
-  bark('You must select a category to put the torrent in!');
+	bark('You must select a category to put the torrent in!');
 
 if (!validfilename($fname))
-  bark('Invalid filename!');
+	bark('Invalid filename!');
 if (!preg_match('/^(.+)\.torrent$/si', $fname, $matches))
-        bark('Invalid filename (not a .torrent).');
+	bark('Invalid filename (not a .torrent).');
 
 $shortfname = $torrent = $matches[1];
 if (!empty($_POST['name']))
@@ -100,6 +103,7 @@ if (!isset($dict['info']))
 
 $info = &$dict['info'];
 $infohash = sha1(bencdec::encode($info));
+$hinfohash = bt_string::str2hex($infohash);
 
 if (bencdec::get_type($info) != 'dictionary')
 	bark('invalid torrent, info is not a dictionary');
@@ -191,13 +195,11 @@ if ($catid == $mp3cat && isset($precheck['genre']))
 else
 	$preg = '';
 
-$nfoe = sqlesc($nfo);
-$url = $_POST['url'];
+$search_text = searchfield("$shortfname $dname $torrent");
 
-$q = 'INSERT INTO `torrents` (`search_text`, `filename`, `owner`, `visible`, `info_hash`, `name`, `size`, `numfiles`, `piece_length`, `type`, '.
-	'`url`, `descr`, `category`, `genre`, `added`, `last_action`, `nfo`, `pretime`) VALUES ('.implode(',', array_map('sqlesc',
-	array(searchfield("$shortfname $dname $torrent"), $fname, $owner, 'no', $infohash, $torrent, $totallen,	count($filelist), $plen, $type,
-	$url, $descr, 0 + $_POST['type'], $preg))).', '.time().', '.time().', '.$nfoe.', '.$pretime.')';
+$q = 'INSERT INTO torrents (info_hash, nfo, added, last_action, pretime, category, owner, size, numfiles, piece_length, name, filename, search_text, descr, type, visible, genre) '.
+	'VALUES ('.implode(', ', array_map('bt_sql::binary_esc', array($infohash, $nfo))).', 'implode(', ', array(bt_vars::$timestamp, bt_vars::$timestamp, $pretime, $catid, $owner,
+	$totallen, count($filelist), $plen)).', '.implode(', ', array_map('bt_sql::esc', array($torrent, $fname, $search_text, $descr, $type, 'no', $preg))).')';
 
 $ret = mysql_query($q);
 if (!$ret) {
@@ -207,7 +209,7 @@ if (!$ret) {
 }
 else {
 	bt_memcache::connect();
-	bt_mem_caching::remove_torrent($infohash);
+	bt_mem_caching::remove_torrent($hinfohash);
 	$id = mysql_insert_id();
 	bt_mem_caching::remove_last_torrents();
 	$cat = mysql_query("SELECT name FROM categories WHERE id = \"" . (0 + $_POST["type"]) . "\"");

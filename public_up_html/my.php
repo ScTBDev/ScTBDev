@@ -56,7 +56,7 @@ $username = bt_security::html_safe($user['username']);
 
 $themesl = bt_theme_engine::$themes;
 $themes = array();
-$donor = (bool)(bt_user::$current['flags'] & bt_options::FLAGS_DONOR);
+$donor = (bool)(bt_user::$current['flags'] & bt_options::USER_DONOR);
 foreach ($themesl as $tid => $theme) {
 	if ((!$theme['donor'] || ($theme['donor'] && !$donor)) && !bt_user::required_class($theme['class']))
 		continue;

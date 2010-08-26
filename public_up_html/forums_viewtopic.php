@@ -42,7 +42,7 @@ if (!$topic)
 	bt_theme::error('Forum error', 'Topic not found');
 
 
-$post_enable = (bool)(bt_user::$current['flags'] & bt_options::FLAGS_POST_ENABLE);
+$post_enable = (bool)(bt_user::$current['flags'] & bt_options::USER_POST_ENABLE);
 $subject = $topic['en_subject'];
 $nsubject = $topic['subject'];
 $forumid = $topic['forumid'];
@@ -124,7 +124,7 @@ while ($post = $postsq->fetch_assoc()) {
 	$post_time = bt_time::format($post['added']);
 	$post_ago = bt_time::ago_time($post['added']);
 	$avatar = $post['avatar'];
-	$avatar_po = (bool)($post['flags'] & bt_options::FLAGS_AVATAR_PO);
+	$avatar_po = (bool)($post['flags'] & bt_options::USER_AVATAR_PO);
 	bt_forums::avatar($avatar, $avtext, $avatar_po);
 
 	if ($post['editedby'] && $post['eusername']) {

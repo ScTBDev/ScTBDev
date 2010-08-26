@@ -134,13 +134,13 @@ if (isset($_POST['n_pms'])) {
           //Make sure recipient wants this message
 			if (!bt_user::required_class(UC_STAFF))
                 {
-            if ($user['flags'] & bt_options::FLAGS_ACCEPT_PMS)
+            if ($user['flags'] & bt_options::USER_ACCEPT_PMS)
             {
               $res2 = mysql_query("SELECT * FROM blocks WHERE userid=$receiver AND blockid=" . bt_user::$current["id"]) or sqlerr(__FILE__, __LINE__);
               if (mysql_num_rows($res2) == 1)
                 bt_theme::error("Refused", "This user has blocked PMs from you.");
             }
-            elseif ($user['flags'] & bt_options::FLAGS_ACCEPT_FRIEND_PMS)
+            elseif ($user['flags'] & bt_options::USER_ACCEPT_FRIEND_PMS)
             {
               $res2 = mysql_query("SELECT * FROM friends WHERE userid=$receiver AND friendid=" . bt_user::$current["id"]) or sqlerr(__FILE__, __LINE__);
               if (mysql_num_rows($res2) != 1)
@@ -154,7 +154,7 @@ if (isset($_POST['n_pms'])) {
           if (!$sent)
             bt_theme::error('Error', 'Error sending PM');
 
-           if ($user['flags'] & bt_options::FLAGS_PM_NOTIFICATION)
+           if ($user['flags'] & bt_options::USER_PM_NOTIFICATION)
           {
 
             if (time() - $user["la"] >= 300)

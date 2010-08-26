@@ -169,17 +169,17 @@ $fb = 0 + $_POST['forum_buttons'];
 $hide_stats = (bool)0 + $_POST['hide_stats'];
 
 if (bt_user::required_class(UC_WHORE)) {
-	if ($privacy != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_ANON))) {
+	if ($privacy != ((bool)(bt_user::$current['flags'] & bt_options::USER_ANON))) {
 		if ($privacy)
-			$setflags |= bt_options::FLAGS_ANON;
+			$setflags |= bt_options::USER_ANON;
 		else
-			$clrflags |= bt_options::FLAGS_ANON;
+			$clrflags |= bt_options::USER_ANON;
 	}
-	if ($hide_stats != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_HIDE_STATS))) {
+	if ($hide_stats != ((bool)(bt_user::$current['flags'] & bt_options::USER_HIDE_STATS))) {
 		if ($hide_stats)
-			$setflags |= bt_options::FLAGS_HIDE_STATS;
+			$setflags |= bt_options::USER_HIDE_STATS;
 		else
-			$clrflags |= bt_options::FLAGS_HIDE_STATS;
+			$clrflags |= bt_options::USER_HIDE_STATS;
 	}
 }
 
@@ -194,95 +194,95 @@ if (bt_user::required_class(UC_STAFF)) {
 		$updateset[] = 'ip_access = '.sqlesc($ip_access);
 }
 
-if (bt_user::required_class(UC_WHORE) || (bt_user::$current['flags'] & bt_options::FLAGS_DONOR)) {
+if (bt_user::required_class(UC_WHORE) || (bt_user::$current['flags'] & bt_options::USER_DONOR)) {
 	$title = sqlesc((trim($_POST['title']) != '') ? trim($_POST['title']) : '');
 	$updateset[] = 'title = '.$title;
 }
 
-if ($acceptpms != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_ACCEPT_PMS))) {
+if ($acceptpms != ((bool)(bt_user::$current['flags'] & bt_options::USER_ACCEPT_PMS))) {
 	if ($acceptpms)
-		$setflags |= bt_options::FLAGS_ACCEPT_PMS;
+		$setflags |= bt_options::USER_ACCEPT_PMS;
 	else
-		$clrflags |= bt_options::FLAGS_ACCEPT_PMS;
+		$clrflags |= bt_options::USER_ACCEPT_PMS;
 }
 
-if ($acceptfriendpms != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_ACCEPT_FRIEND_PMS))) {
+if ($acceptfriendpms != ((bool)(bt_user::$current['flags'] & bt_options::USER_ACCEPT_FRIEND_PMS))) {
 	if ($acceptfriendpms)
-		$setflags |= bt_options::FLAGS_ACCEPT_FRIEND_PMS;
+		$setflags |= bt_options::USER_ACCEPT_FRIEND_PMS;
 	else
-		$clrflags |= bt_options::FLAGS_ACCEPT_FRIEND_PMS;
+		$clrflags |= bt_options::USER_ACCEPT_FRIEND_PMS;
 }
 
-if ($pmnotif != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_PM_NOTIFICATION))) {
+if ($pmnotif != ((bool)(bt_user::$current['flags'] & bt_options::USER_PM_NOTIFICATION))) {
 	if ($pmnotif)
-		$setflags |= bt_options::FLAGS_PM_NOTIFICATION;
+		$setflags |= bt_options::USER_PM_NOTIFICATION;
 	else
-		$clrflags |= bt_options::FLAGS_PM_NOTIFICATION;
+		$clrflags |= bt_options::USER_PM_NOTIFICATION;
 }
 
-if ($statbar != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_STATBAR))) {
+if ($statbar != ((bool)(bt_user::$current['flags'] & bt_options::USER_STATBAR))) {
 	if ($statbar)
-		$setflags |= bt_options::FLAGS_STATBAR;
+		$setflags |= bt_options::USER_STATBAR;
 	else
-		$clrflags |= bt_options::FLAGS_STATBAR;
+		$clrflags |= bt_options::USER_STATBAR;
 }
 
-if ($proxy != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_PROXY_TRACKER))) {
+if ($proxy != ((bool)(bt_user::$current['flags'] & bt_options::USER_PROXY_TRACKER))) {
 	if ($proxy)
-		$setflags |= bt_options::FLAGS_PROXY_TRACKER;
+		$setflags |= bt_options::USER_PROXY_TRACKER;
 	else
-		$clrflags |= bt_options::FLAGS_PROXY_TRACKER;
+		$clrflags |= bt_options::USER_PROXY_TRACKER;
 }
 
-if ($ssl_tracker != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_SSL_TRACKER))) {
+if ($ssl_tracker != ((bool)(bt_user::$current['flags'] & bt_options::USER_SSL_TRACKER))) {
 	if ($ssl_tracker)
-		$setflags |= bt_options::FLAGS_SSL_TRACKER;
+		$setflags |= bt_options::USER_SSL_TRACKER;
 	else
-		$clrflags |= bt_options::FLAGS_SSL_TRACKER;
+		$clrflags |= bt_options::USER_SSL_TRACKER;
 }
 
-if ($ssl_site != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_SSL_SITE))) {
+if ($ssl_site != ((bool)(bt_user::$current['flags'] & bt_options::USER_SSL_SITE))) {
 	if ($ssl_site)
-		$setflags |= bt_options::FLAGS_SSL_SITE;
+		$setflags |= bt_options::USER_SSL_SITE;
 	else
-		$clrflags |= bt_options::FLAGS_SSL_SITE;
+		$clrflags |= bt_options::USER_SSL_SITE;
 }
 
-if ($deletepms != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_DELETE_PMS))) {
+if ($deletepms != ((bool)(bt_user::$current['flags'] & bt_options::USER_DELETE_PMS))) {
 	if ($deletepms)
-		$setflags |= bt_options::FLAGS_DELETE_PMS;
+		$setflags |= bt_options::USER_DELETE_PMS;
 	else
-		$clrflags |= bt_options::FLAGS_DELETE_PMS;
+		$clrflags |= bt_options::USER_DELETE_PMS;
 }
 
-$cursavepms = (bool)(bt_user::$current['flags'] & bt_options::FLAGS_SAVE_PMS);
+$cursavepms = (bool)(bt_user::$current['flags'] & bt_options::USER_SAVE_PMS);
 if ($savepms != $cursavepms) {
 	if ($savepms)
-		$setflags |= bt_options::FLAGS_SAVE_PMS;
+		$setflags |= bt_options::USER_SAVE_PMS;
 	else
-		$clrflags |= bt_options::FLAGS_SAVE_PMS;
+		$clrflags |= bt_options::USER_SAVE_PMS;
 }
 
-$curavatar_po = (bool)(bt_user::$current['flags'] & bt_options::FLAGS_AVATAR_PO);
+$curavatar_po = (bool)(bt_user::$current['flags'] & bt_options::USER_AVATAR_PO);
 if ($avatar_po != $curavatar_po) {
 	if ($avatar_po)
-		$setflags |= bt_options::FLAGS_AVATAR_PO;
+		$setflags |= bt_options::USER_AVATAR_PO;
 	else
-		$clrflags |= bt_options::FLAGS_AVATAR_PO;
+		$clrflags |= bt_options::USER_AVATAR_PO;
 }
 
-if ($avatars != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_SHOW_AVATARS))) {
+if ($avatars != ((bool)(bt_user::$current['flags'] & bt_options::USER_SHOW_AVATARS))) {
 	if ($avatars)
-		$setflags |= bt_options::FLAGS_SHOW_AVATARS;
+		$setflags |= bt_options::USER_SHOW_AVATARS;
 	else
-		$clrflags |= bt_options::FLAGS_SHOW_AVATARS;
+		$clrflags |= bt_options::USER_SHOW_AVATARS;
 }
 
-if ($avatars_po != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_SHOW_PO_AVATARS))) {
+if ($avatars_po != ((bool)(bt_user::$current['flags'] & bt_options::USER_SHOW_PO_AVATARS))) {
 	if ($avatars_po)
-		$setflags |= bt_options::FLAGS_SHOW_PO_AVATARS;
+		$setflags |= bt_options::USER_SHOW_PO_AVATARS;
 	else
-		$clrflags |= bt_options::FLAGS_SHOW_PO_AVATARS;
+		$clrflags |= bt_options::USER_SHOW_PO_AVATARS;
 }
 $cur_fb = bt_forums::settings_to_forum_theme(bt_user::$current['flags']);
 if ($fb != $cur_fb) {
@@ -294,29 +294,29 @@ if ($fb != $cur_fb) {
 	$forum_3 = (bool)($fb & BIT_3);
 	$forum_4 = (bool)($fb & BIT_4);
 
-	if ($forum_1 != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_FORUM_ICONS_1))) {
+	if ($forum_1 != ((bool)(bt_user::$current['flags'] & bt_options::USER_FORUM_ICONS_1))) {
 		if ($forum_1)
-			$setflags |= bt_options::FLAGS_FORUM_ICONS_1;
+			$setflags |= bt_options::USER_FORUM_ICONS_1;
 		else
-			$clrflags |= bt_options::FLAGS_FORUM_ICONS_1;
+			$clrflags |= bt_options::USER_FORUM_ICONS_1;
 	}
-	if ($forum_2 != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_FORUM_ICONS_2))) {
+	if ($forum_2 != ((bool)(bt_user::$current['flags'] & bt_options::USER_FORUM_ICONS_2))) {
 		if ($forum_2)
-			$setflags |= bt_options::FLAGS_FORUM_ICONS_2;
+			$setflags |= bt_options::USER_FORUM_ICONS_2;
 		else
-			$clrflags |= bt_options::FLAGS_FORUM_ICONS_2;
+			$clrflags |= bt_options::USER_FORUM_ICONS_2;
 	}
-	if ($forum_3 != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_FORUM_ICONS_3))) {
+	if ($forum_3 != ((bool)(bt_user::$current['flags'] & bt_options::USER_FORUM_ICONS_3))) {
 		if ($forum_3)
-			$setflags |= bt_options::FLAGS_FORUM_ICONS_3;
+			$setflags |= bt_options::USER_FORUM_ICONS_3;
 		else
-			$clrflags |= bt_options::FLAGS_FORUM_ICONS_3;
+			$clrflags |= bt_options::USER_FORUM_ICONS_3;
 	}
-	if ($forum_4 != ((bool)(bt_user::$current['flags'] & bt_options::FLAGS_FORUM_ICONS_4))) {
+	if ($forum_4 != ((bool)(bt_user::$current['flags'] & bt_options::USER_FORUM_ICONS_4))) {
 		if ($forum_4)
-			$setflags |= bt_options::FLAGS_FORUM_ICONS_4;
+			$setflags |= bt_options::USER_FORUM_ICONS_4;
 		else
-			$clrflags |= bt_options::FLAGS_FORUM_ICONS_4;
+			$clrflags |= bt_options::USER_FORUM_ICONS_4;
 	}
 }
 

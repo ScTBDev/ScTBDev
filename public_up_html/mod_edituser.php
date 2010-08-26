@@ -139,22 +139,22 @@ $curusername		= trim($arr['username']);
 $curpasskey			= trim($arr['passkey']);
 $curtitle			= trim($arr['title']);
 $curavatar			= trim($arr['avatar']);
-$curenabled			= (bool)($arr['flags'] & bt_options::FLAGS_ENABLED);
-$curdonor			= (bool)($arr['flags'] & bt_options::FLAGS_DONOR);
+$curenabled			= (bool)($arr['flags'] & bt_options::USER_ENABLED);
+$curdonor			= (bool)($arr['flags'] & bt_options::USER_DONOR);
 $curclass			= 0 + $arr['class'];
-$curwarned			= (bool)($arr['flags'] & bt_options::FLAGS_WARNED);
-$curprotect			= (bool)($arr['flags'] & bt_options::FLAGS_PROTECT);
-//$curlog				= (bool)($arr['flags'] & bt_options::FLAGS_LOG_USER);
-//$curupld			= (bool)($arr['flags'] & bt_options::FLAGS_UPLOADER);
-$curfls				= (bool)($arr['flags'] & bt_options::FLAGS_FIRST_LINE_SUPPORT);
+$curwarned			= (bool)($arr['flags'] & bt_options::USER_WARNED);
+$curprotect			= (bool)($arr['flags'] & bt_options::USER_PROTECT);
+//$curlog				= (bool)($arr['flags'] & bt_options::USER_LOG_USER);
+//$curupld			= (bool)($arr['flags'] & bt_options::USER_UPLOADER);
+$curfls				= (bool)($arr['flags'] & bt_options::USER_FIRST_LINE_SUPPORT);
 $curuploaded		= 0 + $arr['uploaded'];
 $curdownloaded		= 0 + $arr['downloaded'];
 $curemail			= trim($arr['email']);
-$curavatar_po		= (bool)($arr['flags'] & bt_options::FLAGS_AVATAR_PO);
-$curanon			= (bool)($arr['flags'] & bt_options::FLAGS_ANON);
-$curpost_en			= (bool)($arr['flags'] & bt_options::FLAGS_POST_ENABLE);
-$curirc_en			= (bool)($arr['flags'] & bt_options::FLAGS_IRC_ENABLE);
-$curstatus			= (bool)($arr['flags'] & bt_options::FLAGS_CONFIRMED);
+$curavatar_po		= (bool)($arr['flags'] & bt_options::USER_AVATAR_PO);
+$curanon			= (bool)($arr['flags'] & bt_options::USER_ANON);
+$curpost_en			= (bool)($arr['flags'] & bt_options::USER_POST_ENABLE);
+$curirc_en			= (bool)($arr['flags'] & bt_options::USER_IRC_ENABLE);
+$curstatus			= (bool)($arr['flags'] & bt_options::USER_CONFIRMED);
 $curinvites			= 0 + $arr['invites'];
 $curinfo			= trim($arr['info']);
 $curip_access		= trim($arr['ip_access']);
@@ -167,9 +167,9 @@ $currealip6			= $arr['realip6'];
 
 $curmodcomment		= trim($arr['modcomment']);
 $curchannels		= bt_bitmask::fetch_all($arr['chans'], true);
-$curhide_stats		= (bool)($arr['flags'] & bt_options::FLAGS_HIDE_STATS);
-$curbypass_ban		= (bool)($arr['flags'] & bt_options::FLAGS_BYPASS_BANS);
-$curdisable_invites	= (bool)($arr['flags'] & bt_options::FLAGS_DISABLE_INVITE_BUY);
+$curhide_stats		= (bool)($arr['flags'] & bt_options::USER_HIDE_STATS);
+$curbypass_ban		= (bool)($arr['flags'] & bt_options::USER_BYPASS_BANS);
+$curdisable_invites	= (bool)($arr['flags'] & bt_options::USER_DISABLE_INVITE_BUY);
 
 if ($curfls) {
 	$flsq = bt_sql::query('SELECT lang, helpwith FROM firstline WHERE id = '.$userid);
@@ -252,7 +252,7 @@ if (bt_user::required_class(UC_MODERATOR) && $curclass != $class) {
 if (bt_user::required_class(UC_FORUM_MODERATOR)) {
 	if ($curwarned != $warned) {
 		if (!$warned) {
-			$clrflags |= bt_options::FLAGS_WARNED;
+			$clrflags |= bt_options::USER_WARNED;
 			$updateset[] = 'warneduntil = 0';
 			bt_user::mod_comment($userid, 'Warning removed by ' . $modname);
 			$msg = 'Your warning has been removed by '.$modname.'.';
@@ -265,7 +265,7 @@ if (bt_user::required_class(UC_FORUM_MODERATOR)) {
 			if ($reason == '')
 				bt_theme::error('Error', 'You must enter a reason before giving a warning');
 
-			$setflags |= bt_options::FLAGS_WARNED;
+			$setflags |= bt_options::USER_WARNED;
 			if ($warnlength == 255) {
 				bt_user::mod_comment($userid, 'Warned by '.$modname.'.'."\n".'Reason: '.$reason);
 				$msg = 'You have received a [url='.bt_vars::$base_url.'/rules.php#warning]warning[/url] from '.$modname.
@@ -294,7 +294,7 @@ if (bt_user::required_class(UC_FORUM_MODERATOR)) {
 
 	if ($post_en != $curpost_en) {
 		if ($post_en) {
-			$setflags |= bt_options::FLAGS_POST_ENABLE;
+			$setflags |= bt_options::USER_POST_ENABLE;
 			bt_user::mod_comment($userid, 'Posting rights allowed by '.$modname);
 			if ($stafflog)
 				write_staff_log('User '.$userid.' ('.$username.') got posting rights allowed by '.$modname,'UBAN');
@@ -302,7 +302,7 @@ if (bt_user::required_class(UC_FORUM_MODERATOR)) {
 		else {
 			if ($reason == '')
 				bt_theme::error('Error', 'You must enter a reason before revoking posting rights');
-			$clrflags |= bt_options::FLAGS_POST_ENABLE;
+			$clrflags |= bt_options::USER_POST_ENABLE;
 			bt_user::mod_comment($userid, 'Posting rights revoked by ' . $modname.' ('.$reason.')');
 			if ($stafflog)
 				write_staff_log('User '.$userid.' ('.$username.') got posting rights revoked by '.$modname.' ('.$reason.')','BAN');
@@ -311,7 +311,7 @@ if (bt_user::required_class(UC_FORUM_MODERATOR)) {
 
 	if ($irc_en != $curirc_en) {
 		if ($irc_en) {
-			$setflags |= bt_options::FLAGS_IRC_ENABLE;
+			$setflags |= bt_options::USER_IRC_ENABLE;
 			bt_user::mod_comment($userid, 'IRC channel access allowed by '.$modname);
 			if ($stafflog)
 				write_staff_log('User '.$userid.' ('.$username.') got IRC access allowed by '.$modname,'UBAN');
@@ -319,7 +319,7 @@ if (bt_user::required_class(UC_FORUM_MODERATOR)) {
 		else {
 			if ($reason == '')
 				bt_theme::error('Error', 'You must enter a reason before revoking IRC access');
-			$clrflags |= bt_options::FLAGS_IRC_ENABLE;
+			$clrflags |= bt_options::USER_IRC_ENABLE;
 			bt_user::mod_comment($userid, 'IRC channel access revoked by '.$modname.' ('.$reason.')');
 			if ($stafflog)
 				write_staff_log('User '.$userid.' ('.$username.') got IRC access revoked by '.$modname.' ('.$reason.')','BAN');
@@ -330,7 +330,7 @@ if (bt_user::required_class(UC_FORUM_MODERATOR)) {
 if (bt_user::required_class(UC_MODERATOR)) {
 	if ($enabled != $curenabled) {
 		if ($enabled) {
-			$setflags |= bt_options::FLAGS_ENABLED;
+			$setflags |= bt_options::USER_ENABLED;
 			bt_mem_caching::remove_passkey($curpasskey, true);
 			bt_user::mod_comment($userid, 'Enabled by '.$modname);
 			if ($stafflog)
@@ -340,7 +340,7 @@ if (bt_user::required_class(UC_MODERATOR)) {
 			if ($reason == '')
 				bt_theme::error('Error', 'You must enter a reason before disabling');
 
-			$clrflags |= bt_options::FLAGS_ENABLED;
+			$clrflags |= bt_options::USER_ENABLED;
 			bt_mem_caching::remove_passkey($curpasskey);
 			bt_user::mod_comment($userid, 'Disabled by '.$modname.' ('.$reason.')');
 			if ($stafflog)
@@ -382,11 +382,11 @@ if (bt_user::required_class(UC_FORUM_MODERATOR)) {
 
 	if ($avatar_po != $curavatar_po) {
 		if ($avatar_po) {
-			$setflags |= bt_options::FLAGS_AVATAR_PO;
+			$setflags |= bt_options::USER_AVATAR_PO;
 			bt_user::mod_comment($userid, 'Avatar tagged as potentially offensive by '.$modname);
 		}
 		else {
-			$clrflags |= bt_options::FLAGS_AVATAR_PO;
+			$clrflags |= bt_options::USER_AVATAR_PO;
 			bt_user::mod_comment($userid, 'Avatar untagged as potentially offensive by '.$modname);
 		}
 	}
@@ -396,12 +396,12 @@ if (bt_user::required_class(UC_FORUM_MODERATOR)) {
 if (bt_user::required_class(UC_MODERATOR)) {
 	if ($protect != $curprotect) {
 		if ($protect) {
-			$setflags |= bt_options::FLAGS_PROTECT;
+			$setflags |= bt_options::USER_PROTECT;
 			$updateset[] = 'ip = 0, realip = 0, ip6 = "", realip6 = ""';
 			bt_user::mod_comment($userid, 'IP Protection enabled by '.$modname);
 		}
 		else {
-			$clrflags |= bt_options::FLAGS_PROTECT;
+			$clrflags |= bt_options::USER_PROTECT;
 			bt_user::mod_comment($userid, 'IP Protection disabled by '.$modname);
 		}
 	}
@@ -439,11 +439,11 @@ if (bt_user::required_class(UC_MODERATOR)) {
 
 	if ($bypass_ban != $curbypass_ban) {
 		if ($bypass_ban) {
-			$setflags |= bt_options::FLAGS_BYPASS_BANS;
+			$setflags |= bt_options::USER_BYPASS_BANS;
 			bt_user::mod_comment($userid, 'IP Ban Bypass enabled by '.$modname);
 		}
 		else {
-			$clrflags |= bt_options::FLAGS_BYPASS_BANS;
+			$clrflags |= bt_options::USER_BYPASS_BANS;
 			bt_user::mod_comment($userid, 'IP Ban Bypass disabled by '.$modname);
 		}
 	}
@@ -472,25 +472,25 @@ if (bt_user::required_class(UC_MODERATOR)) {
 
 /*	if ($log != $curlog) {
 		if ($log) {
-			$setflags |= bt_options::FLAGS_LOG_USER;
+			$setflags |= bt_options::USER_LOG_USER;
 			bt_user::mod_comment($userid, 'Account loging enabled by '.$modname);
 		}
 		else {
-			$clrflags |= bt_options::FLAGS_LOG_USER;
+			$clrflags |= bt_options::USER_LOG_USER;
 			bt_user::mod_comment($userid, 'Account loging disabled by '.$modname);
 		}
 	}*/
 
 	if ($fls != $curfls) {
 		if ($fls) {
-			$setflags |= bt_options::FLAGS_FIRST_LINE_SUPPORT;
+			$setflags |= bt_options::USER_FIRST_LINE_SUPPORT;
 			$helpwith = bt_sql::esc($flshelpwith);
 			$lang = bt_sql::esc($flslang);
 			bt_user::mod_comment($userid, 'User added to first line support by '.$modname);
 			bt_sql::query('INSERT INTO firstline (id, lang, helpwith) VALUES ('.$userid.', '.$lang.', '.$helpwith.')');
 		}
 	    else {
-			$clrflags |= bt_options::FLAGS_FIRST_LINE_SUPPORT;
+			$clrflags |= bt_options::USER_FIRST_LINE_SUPPORT;
 			bt_user::mod_comment($userid, 'User removed form first line support by '.$modname);
 			bt_sql::query('DELETE FROM firstline WHERE id = '.$userid);
 		}
@@ -550,55 +550,55 @@ if (bt_user::required_class(UC_MODERATOR)) {
 if (bt_user::required_class(UC_ADMINISTRATOR)) {
 	if ($donor != $curdonor) {
 		if ($donor) {
-			$setflags |= bt_options::FLAGS_DONOR;
+			$setflags |= bt_options::USER_DONOR;
 			bt_user::mod_comment($userid, 'Given donor star by '.$modname);
 		}
 		else {
-			$clrflags |= bt_options::FLAGS_DONOR;
+			$clrflags |= bt_options::USER_DONOR;
 			bt_user::mod_comment($userid, 'Taken donor star by '.$modname);
 		}
 	}
 
 	if ($disable_invites != $curdisable_invites) {
 		if ($disable_invites) {
-			$setflags |= bt_options::FLAGS_DISABLE_INVITE_BUY;
+			$setflags |= bt_options::USER_DISABLE_INVITE_BUY;
 			bt_user::mod_comment($userid, 'Invite buying disabled by '.$modname);
 		}
 		else {
-			$clrflags |= bt_options::FLAGS_DISABLE_INVITE_BUY;
+			$clrflags |= bt_options::USER_DISABLE_INVITE_BUY;
 			bt_user::mod_comment($userid, 'Invite buying enabled by '.$modname);
 		}
 	}
 
 	if ($anon != $curanon) {
 		if ($anon) {
-			$setflags |= bt_options::FLAGS_ANON;
+			$setflags |= bt_options::USER_ANON;
 			bt_user::mod_comment($userid, 'Set to appear as Anonymous by '.$modname);
 		}
 		else {
-			$clrflags |= bt_options::FLAGS_ANON;
+			$clrflags |= bt_options::USER_ANON;
 			bt_user::mod_comment($userid, 'Set to appear as '.$username.' by '.$modname);
 		}
 	}
 
 	if ($hide_stats != $curhide_stats) {
 		if ($hide_stats) {
-			$setflags |= bt_options::FLAGS_HIDE_STATS;
+			$setflags |= bt_options::USER_HIDE_STATS;
 			bt_user::mod_comment($userid, 'Hidden Stats enabled by '.$modname);
 		}
 		else {
-			$clrflags |= bt_options::FLAGS_HIDE_STATS;
+			$clrflags |= bt_options::USER_HIDE_STATS;
 			bt_user::mod_comment($userid, 'Hidden Stats disabled by '.$modname);
 		}
 	}
 
 /*	if ($upld != $curupld) {
 		if ($upld) {
-			$setflags |= bt_options::FLAGS_UPLOADER;
+			$setflags |= bt_options::USER_UPLOADER;
 			bt_user::mod_comment($userid, 'User added to uploader list by '.$modname);
 		}
 		else {
-			$clrflags |= bt_options::FLAGS_UPLOADER;
+			$clrflags |= bt_options::USER_UPLOADER;
 			bt_user::mod_comment($userid, 'User removed from uploader list by '.$modname);
 		}
 	}*/
@@ -637,11 +637,11 @@ if (bt_user::required_class(UC_ADMINISTRATOR)) {
 
 	if ($curstatus != $status) {
 		if ($status) {
-			$setflags |= bt_options::FLAGS_CONFIRMED;
+			$setflags |= bt_options::USER_CONFIRMED;
 			bt_user::mod_comment($userid, 'User confirmed manually by '.$modname);
 		}
 		else {
-			$clrflags |= bt_options::FLAGS_CONFIRMED;
+			$clrflags |= bt_options::USER_CONFIRMED;
 			bt_user::mod_comment($userid, 'User unconfirmed by '.$modname);
 		}
 	}

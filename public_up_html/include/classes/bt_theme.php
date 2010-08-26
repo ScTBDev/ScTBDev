@@ -92,7 +92,7 @@ class bt_theme {
 		$rss_feed = bt_user::$current ? "\n".'	<link rel="alternate" title="SceneTorrents RSS Feed" href="/rss.php?passkey='.urlencode(bt_user::$current['passkey']).'" type="application/rss+xml" />' : '';
 
 
-		if (bt_user::$current && (bt_user::$current['flags'] & bt_options::FLAGS_STATBAR)) {
+		if (bt_user::$current && (bt_user::$current['flags'] & bt_options::USER_STATBAR)) {
 			$uped = self::mksize(bt_user::$current['uploaded']);
 			$downed = self::mksize(bt_user::$current['downloaded']);
 

@@ -45,7 +45,7 @@ if ($id && $invid) {
 	$inv = bt_sql::query('SELECT i.inviteid, i.userid, u.class '.
 		'FROM invites AS i '.
 		'JOIN users AS u ON (u.id = i.userid) '.
-		'WHERE i.id = '.$id.' AND (u.flags & '.bt_options::FLAGS_ENABLED.')') or bt_sql::err(__FILE__,__LINE__);
+		'WHERE i.id = '.$id.' AND (u.flags & '.bt_options::USER_ENABLED.')') or bt_sql::err(__FILE__,__LINE__);
 
 	if ($inv->num_rows) {
 		$invite = $inv->fetch_assoc();

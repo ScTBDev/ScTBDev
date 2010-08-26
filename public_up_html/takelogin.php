@@ -72,7 +72,7 @@ $rip = bt_vars::$realip;
 
 
 $res = bt_sql::query('SELECT id, password, CAST(flags AS SIGNED) AS flags FROM users WHERE username = '. bt_sql::esc($username).
-                   ' AND (flags & '.bt_options::FLAGS_CONFIRMED.')') or bt_sql::err(__FILE__,__LINE__);
+                   ' AND (flags & '.bt_options::USER_CONFIRMED.')') or bt_sql::err(__FILE__,__LINE__);
 $row = $res->fetch_assoc();
 $res->free();
 
@@ -83,7 +83,7 @@ $row['flags'] = (int)$row['flags'];
 
 $userid = (int)$row['id'];
 
-if (!($row['flags'] & bt_options::FLAGS_BYPASS_BANS)) {
+if (!($row['flags'] & bt_options::USER_BYPASS_BANS)) {
 	if (bt_bans::dnsbl_check($rip, $matches))
 		$proxy = true;
 	elseif ($ip != $rip) {
@@ -158,10 +158,10 @@ else {
 	}
 }
 
-if (!($row['flags'] & bt_options::FLAGS_ENABLED))
+if (!($row['flags'] & bt_options::USER_ENABLED))
 	bark('This account has been disabled.');
 
-$ssl_site = (bool)($row['flags'] & bt_options::FLAGS_SSL_SITE);
+$ssl_site = (bool)($row['flags'] & bt_options::USER_SSL_SITE);
 logincookie($userid, $ssl_site);
 
 $redirectbase = bt_security::redirect_base(($use_ssl || $ssl_site));

@@ -84,7 +84,7 @@ if ($count) {
 				$user_title = $system_message ? 'System Message' : ($has_name ? bt_user::get_class_name($arr['class']) : 'Deleted User');
 
             $stars = bt_forums::user_stars($arr['flags']);
-			$avatar_po = (bool)($arr['flags'] & bt_options::FLAGS_AVATAR_PO);
+			$avatar_po = (bool)($arr['flags'] & bt_options::USER_AVATAR_PO);
 			bt_forums::avatar($avatar_url, $avtext, $avatar_po);
 			$avatar_txt = $avtext ? ' title="'.$avtext.'"' : '';
 
