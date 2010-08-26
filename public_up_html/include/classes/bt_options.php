@@ -93,7 +93,7 @@ class bt_options {
 	const TORRENT_VISIBLE			= BIT_1;	// visible
 	const TORRENT_MULTIFILE			= BIT_2;	// type
 	const TORRENT_BANNED			= BIT_3;	// banned
-//	const TORRENT_UNALLOCATED4		= BIT_4;	//
+	const TORRENT_BACKED_UP			= BIT_4;	// backed_up
 //	const TORRENT_UNALLOCATED5		= BIT_5;	//
 //	const TORRENT_UNALLOCATED6		= BIT_6;	//
 //	const TORRENT_UNALLOCATED7		= BIT_7;	//
