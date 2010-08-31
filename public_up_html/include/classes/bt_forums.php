@@ -25,7 +25,7 @@ require_once(CLASS_PATH.'bt_memcache.php');
 require_once(CLASS_PATH.'bt_security.php');
 
 class bt_forums {
-	const MAX_SUBJECT_LENGTH = 50;
+	const MAX_SUBJECT_LENGTH = 64;
 	const MAX_BLOCK_TAGS = 100;
 
 	public static $buttons = array('black','darkblue','gradient','th0r','old');
@@ -245,21 +245,21 @@ class bt_forums {
 	}
 
 	public static function format_block_tag($text, $name, $prefix, $suffix, $strip_br = false, $strip_tags = false) {
-		$namelen = strlen($name);
+		$namelen = bt_utf8::strlen($name);
 		$pos = 0;
 		$i = 0;
-		while (($pos = @stripos($text, '['.$name.']', $pos)) !== false && $i < self::MAX_BLOCK_TAGS) {
+		while (($pos = @bt_utf8::stripos($text, '['.$name.']', $pos)) !== false && $i < self::MAX_BLOCK_TAGS) {
 			$i++;
-			$startstr = substr($text, 0, $pos);
+			$startstr = bt_utf8::substr($text, 0, $pos);
 			$pos += $namelen + 2;
-			$endpos = stripos($text, '[/'.$name.']', $pos);
+			$endpos = bt_utf8::stripos($text, '[/'.$name.']', $pos);
 			if ($endpos === false)
 				break;
 
 			$strlen = $endpos - $pos;
-			$str = substr($text, $pos, $strlen);
+			$str = bt_utf8::substr($text, $pos, $strlen);
 			$pos = $endpos + $namelen + 3;
-			$endstr = @substr($text, $pos);
+			$endstr = @bt_utf8::substr($text, $pos);
 			if ($strip_tags)
 				$str = strip_tags($str, '<br>');
 			if ($strip_br)

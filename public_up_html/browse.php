@@ -36,7 +36,7 @@ $genre = isset($_GET['genre']) ? trim($_GET['genre']) : false;
 if (isset($_GET['type']))
 	$type = (int)$_GET['type'];
 
-if (strlen($searchstr) > 255)
+if (bt_utf8::strlen($searchstr) > 255)
 	bt_theme::error('Error','Search string longer than 255 chars, please refine your search');
 
 $cleansearchstr = searchfield($searchstr);

@@ -33,7 +33,7 @@ class bt_loginout {
 	const TTL_TIME				= 3600;
 	const BAD_TTL_TIME			= 10800;
 	const UPDATE_TIME			= 300;
-	const USER_FIELDS			= 'id, username, password, email, last_access, theme, info, ip, realip, ip_access, class, avatar, uploaded, downloaded, seeding, leeching, title, country, timezone, notifs, torrentsperpage, topicsperpage, postsperpage, last_browse, inbox_new, inbox, sentbox, comments, posts, last_forum_visit, passkey, invites, CAST(flags AS SIGNED) AS flags, CAST(chans AS SIGNED) AS chans';
+	const USER_FIELDS			= 'id, username, password, email, last_access, theme, info, HEX(ip) AS ip, HEX(realip) AS realip, ip_access, class, avatar, uploaded, downloaded, seeding, leeching, title, country, timezone, notifs, torrentsperpage, topicsperpage, postsperpage, last_browse, inbox_new, inbox, sentbox, comments, posts, last_forum_visit, passkey, invites, CAST(flags AS SIGNED) AS flags, CAST(chans AS SIGNED) AS chans';
 
 
 	public static function db_connect($require_login = false) {
@@ -159,14 +159,14 @@ BADIP;
 		define('USER_CLASS', $user['class']);
 
 		$hideip = ($user['flags'] & bt_options::USER_PROTECT) || $user['class'] >= UC_VIP;
-		$ip = $hideip ? bt_ip::NOIP6 : bt_vars::$packed6_ip;
-		$realip = $hideip ? bt_ip::NOIP6 : bt_vars::$packed6_realip;
+		$ip = $hideip ? NULL : bt_vars::$packed6_ip;
+		$realip = $hideip ? NULL : bt_vars::$packed6_realip;
 
 		if ($user['ip'] !== $ip)
-			$updateuser[] = 'ip = '.bt_sql::esc($ip);
+			$updateuser[] = 'ip = '.bt_sql::binary_esc($ip);
 
 		if ($user['realip'] !== $realip)
-			$updateuser[] = 'realip = '.bt_sql::esc($realip);
+			$updateuser[] = 'realip = '.bt_sql::binary_esc($realip);
 
 		if ($user['last_access'] < (bt_vars::$timestamp - 300))
 			$updateuser[] = 'last_access = '.bt_vars::$timestamp
@@ -209,8 +209,8 @@ BADIP;
 		$session = bt_memcache::get(self::SESSION_KEY_PREFIX.$session_id, $cas);
 		if ($session === false) {
 			$cas = false;
-			$res = bt_sql::query('SELECT user, ip, realip, time, lastaction, maxage, maxidle, CAST(flags AS SIGNED) AS flags '.
-				'FROM sessions WHERE id = '.bt_sql::esc($session_id)) or bt_sql::err(__FILE__, __LINE__);
+			$res = bt_sql::query('SELECT user, HEX(ip) AS ip, HEX(realip) as realip, time, lastaction, maxage, maxidle, '.
+				'CAST(flags AS SIGNED) AS flags FROM sessions WHERE id = '.bt_sql::esc($session_id)) or bt_sql::err(__FILE__, __LINE__);
 
 			if (!$res->num_rows) {
 				bt_memcache::add(self::SESSION_KEY_PREFIX.$session_id, 0, self::BAD_TTL_TIME);
@@ -221,8 +221,8 @@ BADIP;
 			$res->free();
 			$session = array(
 				'user'			=> (int)$row['user'],
-				'ip'			=> bt_ip::addr2ip($row['ip']),
-				'realip'		=> bt_ip::addr2ip($row['realip']),
+				'ip'			=> bt_ip::hex2ip($row['ip']),
+				'realip'		=> bt_ip::hex2ip($row['realip']),
 				'time'			=> (int)$row['time'],
 				'last_action'	=> (int)$row['lastaction'],
 				'max_age'		=> (int)$row['maxage'],
@@ -254,11 +254,11 @@ BADIP;
 
 			if ($session['ip'] !== bt_vars::$ip) {
 				$newsession['ip'] = bt_vars::$ip;
-				$updates[] = 'ip = '.bt_sql::esc(bt_vars::$packed6_ip);
+				$updates[] = 'ip = '.bt_sql::binary_esc(bt_vars::$packed6_ip);
 			}
 			if ($session['realip'] !== bt_vars::$realip) {
 				$newsession['realip'] = bt_vars::$realip;
-				$updates[] = 'realip = '.bt_sql::esc(bt_vars::$packed6_realip);
+				$updates[] = 'realip = '.bt_sql::binary_esc(bt_vars::$packed6_realip);
 			}
 		}
 

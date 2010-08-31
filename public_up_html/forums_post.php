@@ -161,7 +161,7 @@ if ($method == 'post') {
 		if ($subject == '')
 			bt_theme::error('Error', 'You must enter a subject');
 
-		if (strlen($subject) > bt_forums::MAX_SUBJECT_LENGTH)
+		if (bt_utf8::strlen($subject) > bt_forums::MAX_SUBJECT_LENGTH)
 			bt_theme::error('Error', 'Subject is limited to '.bt_forums::MAX_SUBJECT_LENGTH.' characters');
 	}
 }

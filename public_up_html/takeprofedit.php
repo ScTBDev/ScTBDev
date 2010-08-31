@@ -57,7 +57,7 @@ $ip = bt_vars::$ip;
 $rip = bt_vars::$realip;
 
 if ($chpassword != '') {
-   if (strlen($chpassword) > 40)
+   if (bt_utf8::strlen($chpassword) > 40)
 		bark('Sorry, password is too long (max is 40 chars)');
 
 	if (!bt_hash::verify_hash($oldpassword, bt_user::$current['password'], $SECRETS['salt1'], $SECRETS['salt2']))

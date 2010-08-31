@@ -99,7 +99,7 @@ function validusername($username) {
 	$allowedchars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
 	for ($i = 0; $i < strlen($username); ++$i)
-		if (strpos($allowedchars, $username[$i]) === false)
+		if (bt_utf8::strpos($allowedchars, $username[$i]) === false)
 			return false;
 
 	return true;
@@ -118,16 +118,16 @@ $ares->free();
 if ($a[0] != 0)
 	bark('The ip is already in use.');
 
-if (strlen($wantusername) > 12)
+if (bt_utf8::strlen($wantusername) > 12)
 	bark('Sorry, username is too long (max is 12 chars)');
 
 if ($wantpassword != $passagain)
 	bark('The passwords didn\'t match! Must\'ve typoed. Try again.');
 
-if (strlen($wantpassword) < 10)
+if (bt_utf8::strlen($wantpassword) < 10)
 	bark('Sorry, password is too short (min is 10 chars)');
 
-if (strlen($wantpassword) > 40)
+if (bt_utf8::strlen($wantpassword) > 40)
 	bark('Sorry, password is too long (max is 40 chars)');
 
 if ($wantpassword == $wantusername || $wantpassword == strrev($wantusername))

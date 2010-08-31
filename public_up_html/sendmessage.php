@@ -142,7 +142,7 @@ else {
 
 		$body .= "\n\n\n".'-------- '.$msga['username'].' wrote: --------'."\n".$msga['msg']."\n";
 		$subject = trim($msga['subject']);
-		$subject = (substr($subject, 0,3) != 'RE:' ? 'RE: '.$subject : $subject);
+		$subject = (bt_utf8::substr($subject, 0,3) != 'RE:' ? 'RE: '.$subject : $subject);
 		$save = (bt_user::$current['flags'] & bt_options::USER_SAVE_PMS) ? ' checked="checked"' : '';
 		$delete = '<input type="hidden" name="origmsg" value="'.$replyto.'" /><input type="checkbox" name="delete" value="1" '.
 			((bt_user::$current['flags'] & bt_options::USER_DELETE_PMS) ? 'checked="checked"' : '').'/> Delete message you are replying to';

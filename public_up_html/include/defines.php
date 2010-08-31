@@ -27,11 +27,14 @@ if (!defined('PHP_VERSION_ID') || PHP_VERSION_ID < REQUIRED_PHP)
 if (PHP_INT_SIZE < 8)
 	die('A 64bit or higher OS + Processor is required.');
 
-if (get_magic_quotes_gpc() || get_magic_quotes_runtime() || get_cfg_var('magic_quotes_sybase'))
+if (get_magic_quotes_gpc() || get_magic_quotes_runtime() || ini_get('magic_quotes_sybase'))
 	die('PHP is configured incorrectly. Turn off magic quotes.');
 
-if (get_cfg_var('register_long_arrays') || get_cfg_var('register_globals') || get_cfg_var('safe_mode'))
+if (ini_get('register_long_arrays') || ini_get('register_globals') || ini_get('safe_mode'))
 	die('PHP is configured incorrectly. Turn off safe_mode, register_globals and register_long_arrays.');
+
+if (ini_get('mbstring.func_overload') || ini_get('mbstring.encoding_translation'))
+	die('PHP is configured incorrectly. Turn off mbstring.func_overload and mbstring.encoding_translation, mult-byte function overloading, ScTBDev is fully multi-byte aware.');
 
 if (!defined('PHP_INT_MIN'))
 	define('PHP_INT_MIN', ~PHP_INT_MAX);

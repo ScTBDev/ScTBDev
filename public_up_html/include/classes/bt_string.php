@@ -21,6 +21,7 @@
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'class_config.php');
 require_once(CLASS_PATH.'bt_memcache.php');
+require_once(CLASS_PATH.'bt_utf8.php');
 
 bt_string::init();
 class bt_string {

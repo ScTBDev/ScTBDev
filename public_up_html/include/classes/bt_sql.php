@@ -33,6 +33,7 @@ class bt_sql {
 	public static $error				= '';
 	public static $character_set_name	= '';
 
+
 	public static function connect(&$errno = 0, &$error = '', $utf8 = true) {
 		global $SECRETS;
 		if (self::$connected)
@@ -59,13 +60,8 @@ class bt_sql {
 			}
 
 			self::$connected = true;
-
-			if ($utf8)
-				self::utf8_on();
-			else
-				self::utf8_off();
+			self::$DB->set_charset('utf8');
 		}
-
 
 		self::$errno 				=& self::$DB->errno;
 		self::$error				=& self::$DB->error;
@@ -82,6 +78,9 @@ class bt_sql {
 			trigger_error('Not connected to SQL server in '.__METHOD__, E_USER_ERROR);
 			return false;
 		}
+
+		if ($string === NULL)
+			return 'NULL';
 		
 		return '"'.self::$DB->escape_string($string).'"';
 	}
@@ -92,6 +91,9 @@ class bt_sql {
 			return false;
 		}
 
+		if ($string === NULL)
+			return 'NULL';
+
 		return self::$DB->escape_string($string);
 	}
 
@@ -101,7 +103,10 @@ class bt_sql {
 			return false;
 		}
 
-		return 'UNHEX("'.self::$DB->escape_string(bt_string::str2hex($string)).'")';
+		if ($string === NULL)
+			return 'NULL';
+
+		return 'UNHEX("'.bt_string::str2hex($string).'")';
 	}
 
 	public static function wildcard_esc($string) {
@@ -127,26 +132,6 @@ class bt_sql {
 	</tr>
 </table>';
 		die;
-	}
-
-	public static function utf8_on() {
-		if (!self::$connected) {
-			trigger_error('Not connected to SQL server in '.__METHOD__, E_USER_ERROR);
-			return false;
-		}
-
-		if (self::$DB->character_set_name != 'utf8')
-			return self::$DB->set_charset('utf8');
-	}
-
-	public static function utf8_off() {
-		if (!self::$connected) {
-			trigger_error('Not connected to SQL server in '.__METHOD__, E_USER_ERROR);
-			return false;
-		}
-
-		if (self::$DB->character_set_name != 'binary')
-			return self::$DB->set_charset('binary');
 	}
 
 	public static function query($sql, $buffered = true) {

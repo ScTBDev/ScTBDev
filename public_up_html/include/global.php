@@ -21,6 +21,7 @@
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'bittorrent.php');
 require_once(CLASS_PATH.'bt_user.php');
+require_once(CLASS_PATH.'bt_utf8.php');
 
 $smilies = array(
   ':-)' => 'smile1.gif',
@@ -309,17 +310,17 @@ function format_quotes($s) {
 		$old_s = $s;
 
 		//find first occurrence of [/quote]
-		$close = stripos($s, '[/quote]');
+		$close = bt_utf8::stripos($s, '[/quote]');
 		if ($close === false)
 			return $s;
 
 		// find last [quote] before first [/quote]
 		// note that there is no check for correct syntax
-		$open = strripos(substr($s,0,$close), '[quote');
+		$open = bt_utf8::strripos(bt_utf8::substr($s,0,$close), '[quote');
 		if ($open === false)
 			return $s;
 
-		$quote = substr($s,$open,$close - $open + 8);
+		$quote = bt_utf8::substr($s,$open,$close - $open + 8);
 
 		 //[quote]Text[/quote]
 		$quote = preg_replace(
@@ -331,7 +332,7 @@ function format_quotes($s) {
             '/\[quote=([ \S]+?)\]\s*(.+?)\s*\[\/quote\]\s*/is',
             $bbcode['quote'][0].'$1 wrote:'.$bbcode['quote'][1].$bbcode['quote'][2].'$2'.$bbcode['quote'][3], $quote);
 
-          $s = substr($s,0,$open) . $quote . substr($s,$close + 8);
+          $s = bt_utf8::substr($s,0,$open) . $quote . bt_utf8::substr($s,$close + 8);
   }
 
         return $s;
@@ -348,34 +349,29 @@ function format_comment($text, $strip_html = true) {
 	if ($strip_html)
 		$s = bt_security::html_safe($s);
 
-	//[color=#ffdf00][size=40].[/size][/color][color=#fe992d]   lush    [/color][color=#ffdf00]edit[/color]
-	// [lush]text[/lush]
-	if (stripos($s, '[lush]') !== false)
-		$s = preg_replace('/\[lush\](.+?)\[\/lush\]/is', '[color=#ffdf00][size=40].[/size][/color][b][color=#fe992d]lush[/color][/b][color=#ffdf00]edit[/color] \\1', $s);
-
 	// [*]
-	if (stripos($s, '[*]') !== false) {
+	if (bt_utf8::stripos($s, '[*]') !== false) {
 		for ($i = true, $n = 0; $i && $n < 5; $n++)
 			$s = preg_replace('/\[\*\](.+?)(?:[\r\n]+|\[\/\*\]|\Z|\s*(\[\*\]))/i', $bbcode['*'][0].'$1'.$bbcode['*'][1].'$2'.$bbcode['b'][2], $s, -1, $i);
 	}
 
 	// [center]Center text[/center]
-	if (stripos($s, '[center]') !== false)
+	if (bt_utf8::stripos($s, '[center]') !== false)
 		$s = preg_replace('/\[center\](.+?)\[\/center\]/is', $bbcode['center'][0].'$1'.$bbcode['center'][1], $s);
 
 	// [b]Bold[/b]
-	if (stripos($s, '[b]') !== false)
+	if (bt_utf8::stripos($s, '[b]') !== false)
 		$s = preg_replace('/\[b\](.+?)\[\/b\]/is', $bbcode['b'][0].'$1'.$bbcode['b'][1], $s);
 
 	// [i]Italic[/i]
-	if (stripos($s, '[i]') !== false)
+	if (bt_utf8::stripos($s, '[i]') !== false)
 		$s = preg_replace('/\[i\](.+?)\[\/i\]/is', $bbcode['i'][0].'$1'.$bbcode['i'][1], $s);
 
 	// [u]Underline[/u]
-	if (stripos($s, '[u]') !== false)
+	if (bt_utf8::stripos($s, '[u]') !== false)
 		$s = preg_replace('/\[u\](.+?)\[\/u\]/is', $bbcode['u'][0].'$1'.$bbcode['u'][1], $s);
 
-	if (stripos($s, '[img') !== false) {
+	if (bt_utf8::stripos($s, '[img') !== false) {
 		// [img]http://www/image.gif[/img]
 		$s = preg_replace('/\[img\](https?:\/\/[^\s\'\"<>]+(\.gif|\.jpg|\.png))\[\/img\]/i', '<img alt="user posted image" src="\\1" style="border: none; max-width: 500px" />', $s);
 		// [img=http://www/image.gif]
@@ -419,7 +415,7 @@ function format_comment($text, $strip_html = true) {
 			'the full-sized image.</span><br />'), $s);
 	}
 
-	if (stripos($s, '[color=') !== false) {
+	if (bt_utf8::stripos($s, '[color=') !== false) {
 		// [color=blue]Text[/color]
 		$s = preg_replace(
 			'/\[color=([a-zA-Z]+)\](.+?)\[\/color\]/is',
@@ -431,11 +427,11 @@ function format_comment($text, $strip_html = true) {
 			'<span style="color: \\1">\\2</span>', $s);
 	}
 
-	if (stripos($s, 'hxxp') !== false)
+	if (bt_utf8::stripos($s, 'hxxp') !== false)
 		$s = preg_replace('/hxxp(s?)\:/i','http\\1:',$s);
 
 
-	if (stripos($s, '[url') !== false) {
+	if (bt_utf8::stripos($s, '[url') !== false) {
 		// [url=http://www.example.com]Text[/url]
 		$s = preg_replace(
 			'/\[url=((?:(?:http|ftp|https|ftps|irc):\/\/|www\.)[^()<>\s]+?)\](.+?)\[\/url\]/is',
@@ -448,11 +444,11 @@ function format_comment($text, $strip_html = true) {
 	}
 
 	// [size=4]Text[/size]
-	if (stripos($s, '[size=') !== false)
+	if (bt_utf8::stripos($s, '[size=') !== false)
 		$s = preg_replace('/\[size=([0-9]+)\](.+?)\[\/size\]/is','<span style="font-size: \\1pt">\\2</span>', $s);
 
 	// [font=Arial]Text[/font]
-	if (stripos($s, '[font=') !== false)
+	if (bt_utf8::stripos($s, '[font=') !== false)
 		$s = preg_replace('/\[font=([a-zA-Z ,]+)\](.+?)\[\/font\]/is','<span style="font-family: \\1">\\2</span>', $s);
 
 	// Quotes
@@ -659,27 +655,27 @@ function format_log($text) {
 	$s = bt_security::html_safe($s);
 
 	// [center]Center text[/center]
-	if (stripos($s, '[center]') !== false)
+	if (bt_utf8::stripos($s, '[center]') !== false)
 		$s = preg_replace('/\[center\](.+?)\[\/center\]/is', $bbcode['center'][0].'$1'.$bbcode['center'][1], $s);
 
 	// [anon]anon username[/anon]
-	if (stripos($s, '[anon]') !== false)
+	if (bt_utf8::stripos($s, '[anon]') !== false)
 		$s = preg_replace('/\[anon\](.+?)\[\/anon\]/is', $bbcode['i'][0].(bt_user::required_class(UC_MODERATOR) ? '$1' : 'Anonymous').
 			$bbcode['i'][1], $s);
 
 	// [b]Bold[/b]
-	if (stripos($s, '[b]') !== false)
+	if (bt_utf8::stripos($s, '[b]') !== false)
 		$s = preg_replace('/\[b\](.+?)\[\/b\]/is', $bbcode['b'][0].'$1'.$bbcode['b'][1], $s);
 
 	// [i]Italic[/i]
-	if (stripos($s, '[i]') !== false)
+	if (bt_utf8::stripos($s, '[i]') !== false)
 		$s = preg_replace('/\[i\](.+?)\[\/i\]/is', $bbcode['i'][0].'$1'.$bbcode['i'][1], $s);
 
 	// [u]Underline[/u]
-	if (stripos($s, '[u]') !== false)
+	if (bt_utf8::stripos($s, '[u]') !== false)
 		$s = preg_replace('/\[u\](.+?)\[\/u\]/is', $bbcode['u'][0].'$1'.$bbcode['u'][1], $s);
 
-	if (stripos($s, '[color=') !== false) {
+	if (bt_utf8::stripos($s, '[color=') !== false) {
 		// [color=blue]Text[/color]
 		$s = preg_replace(
 			'/\[color=([a-zA-Z]+)\](.+?)\[\/color\]/is',
@@ -693,7 +689,7 @@ function format_log($text) {
 
 	$s = preg_replace('/hxxp(s?)\:/i','http\\1:',$s);
 
-	if (stripos($s, '[url') !== false) {
+	if (bt_utf8::stripos($s, '[url') !== false) {
 		// [url=http://www.example.com]Text[/url]
 		$s = preg_replace(
 			'/\[url=((?:(?:http|ftp|https|ftps|irc):\/\/|www\.)[^()<>\s]+?)\](.+?)\[\/url\]/is',

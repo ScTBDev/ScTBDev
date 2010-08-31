@@ -24,6 +24,9 @@ require_once(CLASS_PATH.'bt_pm.php');
 require_once(CLASS_PATH.'bt_sql.php');
 
 class bt_user {
+	const MAX_USERNAME_LENGTH	= 16;
+	const MAX_EMAIL_LENGTH		= 128;
+
 	private static $_users_cache = array();
 	private static $_mod_comments = array();
 	private static $_mod_comments_del = array();
@@ -104,6 +107,20 @@ class bt_user {
 			$user['donations'] = (float)$user['donations'];
 		if (isset($user['irc_time']))
 			$user['irc_time'] = (int)$user['irc_time'];
+
+		if (isset($user['ip'])) {
+			if ($user['ip'] !== NULL) {
+				if (strlen($user['ip']) === 32 && bt_string::is_hex($user['ip']))
+					$user['ip'] = bt_string::hex2str($user['ip']);
+			}
+		}
+
+		if (isset($user['realip'])) {
+			if ($user['realip'] !== NULL) {
+				if (strlen($user['realip']) === 32 && bt_string::is_hex($user['realip']))
+					$user['realip'] = bt_string::hex2str($user['ip']);
+			}
+		}
 
 		if (isset($user['flags_signed'])) {
 			$user['flags'] = (int)$user['flags_signed'];
