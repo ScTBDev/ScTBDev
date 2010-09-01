@@ -285,7 +285,7 @@ CREATE TABLE IF NOT EXISTS `invites` (
   `inviteid` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
   `email` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `inviteid` (`inviteid`) USING HASH,
+  UNIQUE KEY `inviteid` (`inviteid`),
   KEY `userid` (`userid`),
   KEY `added` (`added`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
