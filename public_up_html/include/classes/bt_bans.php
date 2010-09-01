@@ -60,11 +60,11 @@ class bt_bans {
 	}
 
 	public static function check($ip, $dnsbl = false, $addgood = true, &$reason = '') {
-		$packed_ip = bt_ip::type($ip, $type);
-		if (!$packed_ip) {
+		if (!bt_ip::type($ip, $type)) {
 			$reason = 'Invalid IP';
 			return true;
 		}
+		$packed_ip = bt_ip::ip2addr6($ip);
 
 		bt_memcache::connect();
 
@@ -83,49 +83,31 @@ class bt_bans {
 			}
 
 			bt_sql::connect();
-			if ($type === bt_ip::IP4) {
-				$nip = ip2long($ip);
-				$banq = bt_sql::query('SELECT comment FROM bans WHERE '.$nip.' BETWEEN first AND last LIMIT 1');
-				if ($banq->num_rows) {
-					$comment = $banq->fetch_row();
-					$banq->free();
-					$reason = 'Manual Ban ('.$comment[0].')';
-					self::add($ip, $reason);
-					return true;
-				}
+			$banq = bt_sql::query('SELECT comment FROM bans WHERE '.bt_sql::binary_esc($packed_ip).' BETWEEN first AND last LIMIT 1');
+			if ($banq->num_rows) {
+				$comment = $banq->fetch_row();
 				$banq->free();
+				$reason = 'Manual Ban ('.$comment[0].')';
+				self::add($ip, $reason);
+				return true;
+			}
+			$banq->free();
 
+			if ($type === bt_ip::IP4) {
 				if ($dnsbl && self::dnsbl_check($ip, $matches, $rbl)) {
 					$reason = 'Listed in DNS BlackList '.$rbl.' ('.implode(', ', $matches).')';
 					self::add($ip, $reason);
 					return true;
 				}
-
-				if ($addgood)
-					bt_memcache::add($key, 0, 86400);
-			
-				return false;
 			}
 			elseif ($type === bt_ip::IP6) {
-				$banq = bt_sql::query('SELECT comment FROM bans6 WHERE '.bt_sql::esc($packed_ip).' BETWEEN first AND last LIMIT 1');
-				if ($banq->num_rows) {
-					$comment = $banq->fetch_row();
-					$banq->free();
-					$reason = 'Manual Ban ('.$comment[0].')';
-					self::add($ip, $reason);
-					return true;
-				}
-				$banq->free();
-
-				if ($addgood)
-					bt_memcache::add($key, 0, 86400);
-
-				return false;
+				/* May add IPv6 DNS Blacklist here later */
 			}
-			else {
-				$reason = 'Invalid IP Type';
-				return true;
-			}
+
+			if ($addgood)
+				bt_memcache::add($key, 0, 86400);
+
+			return false;
 		}
 		elseif (!$ban)
 			return false;

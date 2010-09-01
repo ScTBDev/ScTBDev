@@ -22,6 +22,7 @@
 require_once(__DIR__.DIRECTORY_SEPARATOR.'class_config.php');
 require_once(CLASS_PATH.'bt_string.php');
 require_once(CLASS_PATH.'bt_security.php');
+require_once(CLASS_PATH.'bt_utf8.php');
 
 class bt_sql {
 	private static $connected = false;
@@ -34,7 +35,7 @@ class bt_sql {
 	public static $character_set_name	= '';
 
 
-	public static function connect(&$errno = 0, &$error = '', $utf8 = true) {
+	public static function connect(&$errno = 0, &$error = '') {
 		global $SECRETS;
 		if (self::$connected)
 			return true;
@@ -81,6 +82,12 @@ class bt_sql {
 
 		if ($string === NULL)
 			return 'NULL';
+
+		// This code is more for development purposes
+		if (!bt_utf8::is_utf8($string)) {
+			trigger_error('Non UTF-8 string "'.bt_string::b64_encode($string).'" (base64 encoded) given in '.__METHOD__.', please use binary_esc instead', E_USER_WARNING);
+			return self::binary_esc($string);
+		}
 		
 		return '"'.self::$DB->escape_string($string).'"';
 	}
@@ -90,9 +97,6 @@ class bt_sql {
 			trigger_error('Not connected to SQL server in '.__METHOD__, E_USER_ERROR);
 			return false;
 		}
-
-		if ($string === NULL)
-			return 'NULL';
 
 		return self::$DB->escape_string($string);
 	}
