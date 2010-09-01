@@ -387,7 +387,7 @@ CREATE TABLE IF NOT EXISTS `peers` (
   `compact4` binary(6) DEFAULT NULL,
   `compact6` binary(18) DEFAULT NULL,
   PRIMARY KEY (`torrent`,`peer_id`) USING HASH,
-  UNIQUE KEY `torrent_flags` (`torrent`,`flags`) USING BTREE,
+  KEY `torrent_flags` (`torrent`,`flags`) USING BTREE,
   KEY `userid` (`userid`),
   KEY `last_action` (`last_action`) USING BTREE,
   KEY `flags` (`flags`) USING BTREE,
