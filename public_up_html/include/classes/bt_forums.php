@@ -57,7 +57,7 @@ class bt_forums {
 		bt_memcache::connect();
 		$key = 'forums::list';
 		$forums = bt_memcache::get($key);
-		if (!$forums) {
+		if ($forums === bt_memcache::NO_RESULT) {
 			$forums = array();
 			$forumsq = bt_sql::query('SELECT id, name, minclassread, minclasswrite, minclasscreate FROM forums ORDER BY name ASC')
 				or bt_sql::err(__FILE__, __LINE__);
@@ -68,7 +68,7 @@ class bt_forums {
 					$forum['minclassread'] = 0 + $forum['minclassread'];
 					$forum['minclasswrite'] = 0 + $forum['minclasswrite'];
 					$forum['minclasscreate'] = 0 + $forum['minclasscreate'];
-					$forum['name'] = bt_security::html_safe($forum['name']);
+					$forum['name'] = bt_security::html_safe(bt_utf8::trim($forum['name']));
 					$forums[] = $forum;
 				}
 			}
@@ -84,7 +84,7 @@ class bt_forums {
 		$key = 'forum::id:::'.$forumid;
 
 		$forum = bt_memcache::get($key);
-		if ($forum === false) {
+		if ($forum === bt_memcache::NO_RESULT) {
 			$forumq = bt_sql::query('SELECT name, description, minclassread, minclasswrite, minclasscreate, topiccount, '.
 				'postcount, sort, lasttopic FROM forums WHERE id = '.$forumid) or bt_sql::err(__FILE__, __LINE__);
 
@@ -95,7 +95,9 @@ class bt_forums {
 
 			$forum = $forumq->fetch_assoc();
 			$forumq->free();
+			$forum['name']				= bt_utf8::trim($forum['name']);
 			$forum['en_name']			= bt_security::html_safe($forum['name']);
+			$forum['description']		= bt_utf8::trim($forum['description']);
 			$forum['en_description']	= bt_security::html_safe($forum['description']);
 			$forum['minclassread']		= 0 + $forum['minclassread'];
 			$forum['minclasswrite']		= 0 + $forum['minclasswrite'];
@@ -144,7 +146,7 @@ class bt_forums {
 		$key = 'topic::id:::'.$topicid;
 
 		$topic = bt_memcache::get($key);
-		if ($topic === false) {
+		if ($topic === bt_memcache::NO_RESULT) {
 			$topicq = bt_sql::query('SELECT subject, locked, forumid, sticky, posts, lastpost FROM topics WHERE id = '.$topicid) or bt_sql::err(__FILE__, __LINE__);
 
 			if (!$topicq->num_rows) {
@@ -154,12 +156,13 @@ class bt_forums {
 
 			$topic = $topicq->fetch_assoc();
 			$topicq->free();
-			$topic['en_subject'] = bt_security::html_safe(trim($topic['subject']));
+			$topic['subject'] = bt_utf8::trim($topic['subject']);
+			$topic['en_subject'] = bt_security::html_safe($topic['subject']);
 			$topic['locked'] = (bool)($topic['locked'] == 'yes');
-			$topic['forumid'] = 0 + $topic['forumid'];
+			$topic['forumid'] =(int)$topic['forumid'];
 			$topic['sticky'] = (bool)($topic['sticky'] == 'yes');
-			$topic['posts'] = 0 + $topic['posts'];
-			$topic['lastpost'] = 0 + $topic['lastpost'];
+			$topic['posts'] = (int)$topic['posts'];
+			$topic['lastpost'] = (int)$topic['lastpost'];
 
 			bt_memcache::add($key, $topic, 10800);
 		}
@@ -173,7 +176,7 @@ class bt_forums {
 		$key = 'post::'.$type.':::'.$postid;
 		bt_memcache::connect();
 		$formated = bt_memcache::get($key);
-		if (!$formated) {
+		if ($formated === bt_memcache::NO_RESULT) {
 			$formated = format_comment($text);
 			$compress = strlen($text) > 1024;
 			bt_memcache::add($key, $formated, 604800, $compress);

@@ -35,7 +35,6 @@ $load = sys_getloadavg();
 if ($load[0] > 16)
   die('Load is too high, DO NOT continuously refresh, or you will just make the problem last longer');
 
-define('_START_MICROTIME_', microtime(true));
 
 require_once(CLASS_PATH.'bt_config.php');
 

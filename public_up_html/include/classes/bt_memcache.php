@@ -23,6 +23,9 @@ require_once(__DIR__.DIRECTORY_SEPARATOR.'class_config.php');
 require_once(CLASS_PATH.'bt_config.php');
 
 class bt_memcache {
+	const NO_RESULT = NULL;
+	const ERROR_RESULT = false;
+
 	public static $connected = false;
 	private static $servers = array();
 	private static $link = NULL;
@@ -149,20 +152,24 @@ class bt_memcache {
 			$gets = self::$link->getMulti($key, $casp);
 			$get = $cas = array();
 			foreach($key as $k) {
-				$get[$k] = isset($gets[$k]) ? $gets[$k] : false;
-				$cas[$k] = isset($gets[$k]) ? $casp[$k] : false;
+				$get[$k] = isset($gets[$k]) ? $gets[$k] : self::NO_RESULT;
+				$cas[$k] = isset($gets[$k]) ? $casp[$k] : self::NO_RESULT;
 			}
 			unset($gets, $casp);
 			self::$time += (microtime(true) - $time);
 		}
 		else
-			return false;
+			return self::ERROR_RESULT;
 
 		self::set_error(__METHOD__, $key);
 
 		// New Memcached 2.0.0 PHP Module returns NULL on non-existant key.
-		if ($get === NULL)
-			return false;
+		if ($get === NULL || $get === false) {
+			if (self::$errno === Memcached::RES_NOTFOUND)
+				return self::NO_RESULT;
+
+			return self::ERROR_RESULT;
+		}
 
 		return $get;
 	}

@@ -30,12 +30,20 @@ class sql_database_mysqli extends sql_database {
 		if ($this->db)
 			$this->close();
 
-		$this->db = new mysqli($this->_host, $this->_user, $this->_pass, $this->db);
+		$this->db = new mysqli;
+		$flags = 0;
+		if ($this->_compress)
+			$flags |= MYSQLI_CLIENT_COMPRESS;
+		if ($this->_ssl)
+			$flags |= MYSQLI_CLIENT_SSL;
+
+		$this->db->options(MYSQLI_OPT_CONNECT_TIMEOUT, 1);
+		$this->db->real_connect($this->_host, $this->_user, $this->_pass, $this->db, NULL, NULL, $flags);
 
 		$this->errno = (int)$this->db->connect_errno;
 		if ($this->errno) {
 			$this->error = $this->db->connect_error;
-			trigger_error('Error connecting to MySQL Server in '.__CLASS__.'::'.__METHOD__.
+			trigger_error('Error connecting to MySQL Server in '.__METHOD__.
 				': '.$this->errno.' ('.$this->error.')', E_USER_WARNING);
 			return false;
 		}
@@ -56,9 +64,9 @@ class sql_database_mysqli extends sql_database {
 		$ping = @$this->db->ping();
 
 		if (!$ping) {
-			trigger_error('Database link did not reply to ping in '.__CLASS__.'::'.__METHOD__.
+			trigger_error('Database link did not reply to ping in '.__METHOD__.
 				($this->errno ? ': '.$this->errno.' ('.$this->error.')' : '').' attempting to reconnect', E_USER_WARNING);
-			$this->connect;
+			$this->connect();
 		}
 		return $ping;
 	}
@@ -75,10 +83,19 @@ class sql_database_mysqli extends sql_database {
 		$this->query_time += (microtime(true) - $nowtime);
 
 		if (!$result) {
-			if ($this->errno) {
-				trigger_error('SQL ERROR in '.__CLASS__.'::'.__METHOD__.' '.$this->errno.' ('.$this->error.'): '.$sql, E_USER_WARNING);
-				$this->ping();
+			switch ($this->errno) {
+				case 0:
+					// no error
+					break;
+				case 1062:
+					// Not an important error, duplicate key
+					trigger_error('SQL ERROR in '.__METHOD__.' '.$this->errno.' ('.$this->error.'): '.$sql, E_USER_NOTICE);
+					break;
+				default:
+					trigger_error('SQL ERROR in '.__METHOD__.' '.$this->errno.' ('.$this->error.'): '.$sql, E_USER_WARNING);
+					break;
 			}
+
 			return false;
 		}
 
@@ -92,13 +109,21 @@ class sql_database_mysqli extends sql_database {
 		return $this->db->real_escape_string($string);
 	}
 
-	public function set_charset($charset) {
+	public function set_charset($charset, $collation) {
 		$char_set = $this->db->set_charset($charset);
 		if (!$char_set)
-			trigger_error('Unable to set character set to "'.$charset.'" in '.__CLASS__.'::'.__METHOD__.
+			trigger_error('Unable to set character set to "'.$charset.'" in '.__METHOD__.
 				($this->errno ? ': '.$this->errno.' ('.$this->error.')' : ''), E_USER_WARNING);
-		else
+		else {
 			$this->character_set_name = $this->db->character_set_name();
+			if ($collation) {
+				$collation = $this->character_set_name.'_'.$collation;
+				$collate = $this->query('SET NAMES '.$this->character_set_name.' COLLATE '.$this->db->real_escape_string($collation));
+				if (!$collate)
+					trigger_error('Unable to set character set collation to "'.$collation.'" in '.__METHOD__.
+						($this->errno ? ': '.$this->errno.' ('.$this->error.')' : ''), E_USER_WARNING);
+			}
+		}
 
 		return $char_set;
 	}

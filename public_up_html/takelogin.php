@@ -105,10 +105,10 @@ if (!bt_hash::verify_hash($password, $row['password'], $SECRETS['salt1'], $SECRE
 
 	$login = bt_memcache::get($key);
 
-	if ($login === false) {
+	if ($login === bt_memcache::NO_RESULT) {
 		$pass_key	= 'bad_logins:passwords';
 		$passes = bt_memcache::get($pass_key);
-		if ($passes === false) {
+		if ($passes === bt_memcache::NO_RESULT {
 			$passes = igbinary_unserialize(file_get_contents('badpasses.bin'));
 			bt_memcache::set($pass_key, $passes, 86400);
 		}

@@ -24,7 +24,9 @@ require_once(CLASS_PATH.'bt_memcache.php');
 
 bt_utf8::init();
 class bt_utf8 {
-	const TRANSKEY = 'bt_utf8:::utf8_win_iso::translation_table';
+	const TRANSKEY		= 'bt_utf8:::utf8_win_iso::translation_table';
+	const NBSP			= "\xC2\xA0";
+	const TRIM_CHARLIST	= "\x00..\x20\xC2\xA0";
 
 	private static $trans_table = array();
 
@@ -37,7 +39,7 @@ class bt_utf8 {
 
 		bt_memcache::connect();
 		$trans = bt_memcache::get(self::TRANSKEY);
-		if (!$trans) {
+		if ($trans === bt_memcache::NO_RESULT) {
 			$win		= "\x80".implode('', range("\x82", "\x8c"))."\x8e".implode('', range("\x91", "\x9c")).implode('', range("\x9e", "\xff"));
 			$win_iso	= "\x81\x8d\x8f\x90\x9d";
 			$iso		= implode('', range("\x80", "\xff"));
@@ -139,6 +141,30 @@ class bt_utf8 {
 
 	public static function strtolower($str) {
 		return mb_strtolower($str, 'UTF-8');
+	}
+
+	public static function ltrim($str, $charlist = self::TRIM_CHARLIST) {
+		if (!is_string($str) || !is_string($charlist))
+			return false;
+
+		$charlist = preg_quote($charlist, '#');
+		$charlist = strtr($charlist, array('\\.\\.' => '-'));
+
+		return preg_replace('#^['.$charlist.']+#Dsu', '', $str);
+	}
+
+	public static function rtrim($str, $charlist = self::TRIM_CHARLIST) {
+		if (!is_string($str) || !is_string($charlist))
+			return false;
+
+		$charlist = preg_quote($charlist, '#');
+		$charlist = strtr($charlist, array('\\.\\.' => '-'));
+
+		return preg_replace('#['.$charlist.']+$#Dsu', '', $str);
+	}
+
+	public static function trim($str, $charlist = self::TRIM_CHARLIST) {
+		return self::ltrim(self::rtrim($str, $charlist), $charlist);
 	}
 }
 ?>

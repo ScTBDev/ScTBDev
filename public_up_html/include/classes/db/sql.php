@@ -29,6 +29,8 @@ abstract class sql_database {
 	protected $_pass = '';
 	protected $_db = '';
 	protected $_persistent = false;
+	protected $_compress = false;
+	protected $_ssl = false;
 
 	public $errno				= 0;
 	public $affected_rows		= 0;
@@ -36,12 +38,14 @@ abstract class sql_database {
 	public $error				= '';
 	public $character_set_name	= '';
 
-	final public function __construct($server, $user, $pass, $db, $persistent = false) {
+	final public function __construct($server, $user, $pass, $db, $persistent = false, $compress = false, $ssl = false) {
 		$this->_host		= $server;
 		$this->_user		= $user;
 		$this->_pass		= $pass;
 		$this->_db			= $db;
-		$this->_persistent	= $persistent;
+		$this->_persistent	= (bool)$persistent;
+		$this->_compress	= (bool)$compress;
+		$this->_ssl			= (bool)$ssl;
     }
 
 	// function to shutdown result

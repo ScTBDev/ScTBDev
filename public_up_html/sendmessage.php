@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && (isset($_POST['n_pms']) || isset($_P
 
 	$key = 'usersearchs:'.$pmees;
 	$query = bt_memcache::get($key);
-	if (!$query)
+	if ($query === bt_memcache::NO_RESULT)
 		bt_theme::error('Error', 'Bad SQL Query, please go back and redo the user search');
 
 	$body = '';

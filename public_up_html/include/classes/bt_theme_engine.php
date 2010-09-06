@@ -124,7 +124,7 @@ class bt_theme_engine {
 		else {
 			$key = 'themes::'.self::$theme.'::'.$name;
 			$tpl = bt_memcache::get($key);
-			if ($tpl === false) {
+			if ($tpl === bt_memcache::NO_RESULT) {
 				$file = self::$theme_dir.$name.'.tpl';
 				$tpl = file_get_contents($file);
 				bt_memcache::add($key, $tpl, self::TPL_CACHE_TIME);

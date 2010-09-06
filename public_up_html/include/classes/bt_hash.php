@@ -32,9 +32,9 @@ class bt_hash {
 	private static $_last_hash = false;
 	private static $_last_read_hash = false;
 
-	const MIN_SALT_LEN = 8;
-	const MAX_SALT_LEN = 36;
-	const DEF_SALT_LEN = 20;
+	const MIN_SALT_LEN = 16;
+	const MAX_SALT_LEN = 64;
+	const DEF_SALT_LEN = 32;
 	const BEGND = '$';
 	const SEP = '#';
 	const HSEP = '@';

@@ -36,7 +36,7 @@ class bt_geoip {
 			bt_memcache::connect();
 			$key = 'geoip_db_info';
 			$geodb = bt_memcache::get($key);
-			if ($geodb === false) {
+			if ($geodb === bt_memcache::NO_RESULT) {
 				$geodb = geoip_db_get_all_info();
 				bt_memcache::add($key, $geodb, 900);
 			}
@@ -55,14 +55,14 @@ class bt_geoip {
 		if (!bt_ip::valid_ip($ip))
 			return false;
 
-		if (!$hip = bt_ip::ip2hex($ip))
+		if (!$hip = bt_ip::ip2hex6($ip))
 			return false;
 
 		bt_memcache::connect();
 		$key = 'geoip_'.$hip;
 
 		$lookup = bt_memcache::get($key);
-		if ($lookup === false) {
+		if ($lookup === bt_memcache::NO_RESULT) {
 			$lookup = self::geodb_lookup($ip);
 			bt_memcache::add($key, $lookup, 604800);
 		}
@@ -120,21 +120,6 @@ class bt_geoip {
 			$organization = @geoip_org_by_name($ip);
 		}
 
-		if (self::$dbinfo[GEOIP_NETSPEED_EDITION]['available']) {
-			$speed = @geoip_id_by_name($ip);
-			if ($speed !== false) {
-				switch ($speed) {
-					case GEOIP_DIALUP_SPEED: $netspeed = "Dial-up"; break;
-					case GEOIP_CABLEDSL_SPEED: $netspeed = "Cable/DSL Broadband"; break;
-					case GEOIP_CORPORATE_SPEED: $netspeed = "Corporate Broadband"; break;
-					case GEOIP_UNKNOWN_SPEED:
-					default:
-						$netspeed = "Unknown";
-					break;
-				}
-			}
-		}
-
 		if (self::$dbinfo[GEOIP_ISP_EDITION]['available']) {
 			if (function_exists('geoip_isp_by_name'))
 				$isp = @geoip_isp_by_name($ip);
@@ -171,8 +156,6 @@ class bt_geoip {
 			$geoip_details['dma_code']			= (int)$dma_code;
 		if ($area_code)
 			$geoip_details['area_code']			= (int)$area_code;
-		if ($netspeed)
-			$geoip_details['netspeed']			= $netspeed;
 		if ($asn)
 			$geoip_details['asn']				= (string)$asn;
 

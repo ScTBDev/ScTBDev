@@ -33,6 +33,7 @@ class bt_loginout {
 	const TTL_TIME				= 3600;
 	const BAD_TTL_TIME			= 10800;
 	const UPDATE_TIME			= 300;
+	const RANDOM_LENGTH			= 512;
 	const USER_FIELDS			= 'id, username, password, email, last_access, theme, info, HEX(ip) AS ip, HEX(realip) AS realip, ip_access, class, avatar, uploaded, downloaded, seeding, leeching, title, country, timezone, notifs, torrentsperpage, topicsperpage, postsperpage, last_browse, inbox_new, inbox, sentbox, comments, posts, last_forum_visit, passkey, invites, CAST(flags AS SIGNED) AS flags, CAST(chans AS SIGNED) AS chans';
 
 
@@ -85,7 +86,7 @@ ERROR;
 
 		$req_flags = bt_options::USER_ENABLED | bt_options::USER_CONFIRMED;
 		$res = bt_sql::query('SELECT '.self::USER_FIELDS.' FROM users '.
-			'WHERE id = '.$id.' AND (flags & '.$req_flags.') = '.$req_flags) or bt_sql::err(__FILE__, __LINE__);
+			'WHERE id = '.$session['user']) or bt_sql::err(__FILE__, __LINE__);
 
 		if (!$res->num_rows) {
 			self::logout();
@@ -97,6 +98,9 @@ ERROR;
 
 		$updateuser = array();
 		bt_user::prepare_user($user);
+
+		if (($user['flags'] & $req_flags) != $req_flags)
+			return false;
 
 		if (!($row['flags'] & bt_options::USER_BYPASS_BANS)) {
 			$banned = false;
@@ -207,7 +211,7 @@ BADIP;
 			return false;
 
 		$session = bt_memcache::get(self::SESSION_KEY_PREFIX.$session_id, $cas);
-		if ($session === false) {
+		if ($session === bt_memcache::NO_RESULT) {
 			$cas = false;
 			$res = bt_sql::query('SELECT user, HEX(ip) AS ip, HEX(realip) as realip, time, lastaction, maxage, maxidle, '.
 				'CAST(flags AS SIGNED) AS flags FROM sessions WHERE id = '.bt_sql::esc($session_id)) or bt_sql::err(__FILE__, __LINE__);
@@ -288,7 +292,7 @@ BADIP;
 		$options = (int)$options;
 		$maxage = (int)$maxage;
 		$maxidle = (int)$maxidle;
-		$session_id = hash('ripemd160', bt_string::random(100));
+		$session_id = hash('ripemd160', bt_string::random(self::RANDOM_LENGTH));
 		$session = array(
 			'user'			=> $id,
 			'ip'			=> bt_vars::$ip,
@@ -301,8 +305,9 @@ BADIP;
 		);
 		bt_memcache::add(self::SESSION_KEY_PREFIX.$session_id, $session, self::TTL_TIME);
 		bt_sql::query('INSERT INTO sessions (id, user, ip, realip, time, lastaction, maxage, maxidle, flags) '.
-			'VALUES('.bt_sql::esc($session_id).', '.$id.', '.bt_sql::esc(bt_vars::$packed6_ip).', '.bt_sql::esc(bt_vars::$packed6_realip).
-			', '.bt_vars::$timestamp.', '.bt_vars::$timestamp.', '.$maxage.', '.$maxidle.', '.$options.')') or bt_sql::err(__FILE__, __LINE__);
+			'VALUES('.bt_sql::esc($session_id).', '.$id.', '.bt_sql::binary_esc(bt_vars::$packed6_ip).', '.
+			bt_sql::binary_esc(bt_vars::$packed6_realip).', '.bt_vars::$timestamp.', '.bt_vars::$timestamp.', '.$maxage.', '.
+			$maxidle.', '.$options.')') or bt_sql::err(__FILE__, __LINE__);
 
 		if (!bt_sql::$affected_rows)
 			return false;
@@ -317,7 +322,7 @@ BADIP;
 	}
 
 	public static function logout() {
-		if (isset($_COOKIE['id']) && strlen($_COOKIE['id']) == 40 && bt_string::is_hex($_COOKIE['id'])) {
+		if (isset($_COOKIE['id']) && strlen($_COOKIE['id']) === 40 && bt_string::is_hex($_COOKIE['id'])) {
 			$session_id = $_COOKIE['id'];
 			bt_memcache::del(self::SESSION_KEY_PREFIX.$session_id);
 			bt_sql::query('DELETE FROM sessions WHERE id = '.bt_sql::esc($session_id)) or bt_sql::err(__FILE__, __LINE__);
@@ -329,7 +334,7 @@ BADIP;
 	public static function or_return() {
 		if (!bt_user::$current) {
 			self::logout();
-			header('Location: '.bt_vars::$base_url.'/login.php?returnto='.urlencode($_SERVER['REQUEST_URI']));
+			header('Location: '.bt_vars::$base_url.'/login.php?returnto='.rawurlencode($_SERVER['REQUEST_URI']));
 			exit();
 		}
 	}

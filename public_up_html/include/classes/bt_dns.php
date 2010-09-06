@@ -70,7 +70,7 @@ class bt_dns {
 		bt_memcache::connect();
 
 		$records = bt_memcache::get($key);
-		if ($records === false) {
+		if ($records === bt_memcache::NO_RESULT) {
 			$record = @dns_get_record($host, $record_type, $authns, $addtl);
 			$records = array(
 				'record'	=> $record,

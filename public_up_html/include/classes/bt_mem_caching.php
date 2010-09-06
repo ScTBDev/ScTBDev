@@ -29,31 +29,32 @@ class bt_mem_caching {
 	const TTL_TIME = 21600;
 	const BAD_TTL_TIME = 86400;
 
-	public static function get_torrent_from_hash($info_hash) {
-		if (strlen($info_hash) != 40 || !bt_string::is_hex($info_hash))
+	public static function get_torrent_from_hash($hinfo_hash) {
+		if (strlen($hinfo_hash) !== 40 || !bt_string::is_hex($hinfo_hash))
 			return false;
+		$info_hash = bt_string::hex2str($hinfo_hash);
 
-		$key = 'torrents::hash:::'.$info_hash;
+		$key = 'torrents::hash:::'.$hinfo_hash;
 		bt_memcache::connect();
 
 		$torrent = bt_memcache::get($key);
-		if ($torrent === false) {
+		if ($torrent === bt_memcache::NO_RESULT) {
 			bt_sql::connect();
-			$res = bt_sql::query('SELECT id, seeders, leechers, size, piece_length, pretime, times_completed FROM torrents WHERE info_hash = '.bt_sql::esc($info_hash));
+			$res = bt_sql::query('SELECT id, seeders, leechers, size, piece_length, pretime, times_completed FROM torrents WHERE info_hash = '.bt_sql::binary_esc($info_hash));
 			if ($res->num_rows) {
 				$torrentq = $res->fetch_assoc();
 				$res->free();
 
-				$torrent['id']				= 0 + $torrentq['id'];
-				$torrent['size']			= 0 + $torrentq['size'];
-				$torrent['piece_length']	= 0 + $torrentq['piece_length'];
-				$torrent['pretime']			= 0 + $torrentq['pretime'];
+				$torrent['id']				= (int)$torrentq['id'];
+				$torrent['size']			= (int)$torrentq['size'];
+				$torrent['piece_length']	= (int)$torrentq['piece_length'];
+				$torrent['pretime']			= (int)$torrentq['pretime'];
 
 				bt_memcache::add($key, $torrent, self::TTL_TIME);
 
-				$torrent['seeders']			= 0 + $torrentq['seeders'];
-				$torrent['leechers']		= 0 + $torrentq['leechers'];
-				$torrent['times_completed']	= 0 + $torrentq['times_completed'];
+				$torrent['seeders']			= (int)$torrentq['seeders'];
+				$torrent['leechers']		= (int)$torrentq['leechers'];
+				$torrent['times_completed']	= (int)$torrentq['times_completed'];
 
 				$seed_key = 'torrents::seeds:::'.$torrent['id']; $leech_key = 'torrents::leechs:::'.$torrent['id']; $comp_key = 'torrents::comps:::'.$torrent['id'];
 				bt_memcache::add($seed_key, $torrent['seeders'], self::TTL_TIME);
@@ -69,19 +70,20 @@ class bt_mem_caching {
 			return false;
 		else {
 			$seed_key = 'torrents::seeds:::'.$torrent['id']; $leech_key = 'torrents::leechs:::'.$torrent['id']; $comp_key = 'torrents::comps:::'.$torrent['id'];
-			$torrent['seeders']			= bt_memcache::get($seed_key);
-			$torrent['leechers']		= bt_memcache::get($leech_key);
-			$torrent['times_completed']	= bt_memcache::get($comp_key);
+			$peers = bt_memcache::get(array($seed_key, $leech_key, $comp_key));
+			$torrent['seeders']			= $peers[$seed_key];
+			$torrent['leechers']		= $peers[$leech_key];
+			$torrent['times_completed']	= $peers[$comp_key];
 
-			if ($torrent['seeders'] === false || $torrent['leechers'] === false || $torrent['times_completed'] === false) {
+			if ($torrent['seeders'] === bt_memcache::NO_RESULT || $torrent['leechers'] === bt_memcache::NO_RESULT || $torrent['times_completed'] === bt_memcache::NO_RESULT) {
 				bt_sql::connect();
 				$res = bt_sql::query('SELECT seeders, leechers, times_completed FROM torrents WHERE id = '.$torrent['id']);
 				if ($res->num_rows) {
 					$torrentq = $res->fetch_assoc();
 
-					$torrent['seeders']			= 0 + $torrentq['seeders'];
-					$torrent['leechers']		= 0 + $torrentq['leechers'];
-					$torrent['times_completed']	= 0 + $torrentq['times_completed'];
+					$torrent['seeders']			= (int)$torrentq['seeders'];
+					$torrent['leechers']		= (int)$torrentq['leechers'];
+					$torrent['times_completed']	= (int)$torrentq['times_completed'];
 
 					bt_memcache::add($seed_key, $torrent['seeders'], self::TTL_TIME);
 					bt_memcache::add($leech_key, $torrent['leechers'], self::TTL_TIME);
@@ -125,14 +127,14 @@ class bt_mem_caching {
 		return (bool)$adjust;
 	}
 
-	public static function remove_torrent($info_hash) {
-		if (strlen($info_hash) != 40 || !bt_string::is_hex($info_hash))
+	public static function remove_torrent($hinfo_hash) {
+		if (strlen($hinfo_hash) != 40 || !bt_string::is_hex($hinfo_hash))
 			return false;
 
 		bt_memcache::connect();
-		$key = 'torrents::hash:::'.$info_hash;
+		$key = 'torrents::hash:::'.$hinfo_hash;
 		$torrent = bt_memcache::get($key);
-		if ($torrent === false)
+		if ($torrent === bt_memcache::NO_RESULT)
 			return false;
 
 		bt_memcache::del($key);
@@ -164,7 +166,7 @@ class bt_mem_caching {
 
 		$key = 'user::passkey:::'.$passkey;
 		$user = bt_memcache::get($key);
-		if ($user === false) {
+		if ($user === bt_memcache::NO_RESULT) {
 			bt_sql::connect();
 			$reqflags = bt_options::USER_ENABLED | bt_options::USER_CONFIRMED;
 			$usersql = 'SELECT id, class, CAST(flags AS SIGNED) AS flags FROM users WHERE passkey = '.bt_sql::esc($passkey).' AND (flags & '.$reqflags.') = '.$reqflags;
@@ -207,7 +209,7 @@ class bt_mem_caching {
 		bt_memcache::connect();
 		$cats = bt_memcache::get($key);
 
-		if (!$cats) {
+		if ($cats === bt_memcache::NO_RESULT) {
 			$cats = array();
 
 			bt_sql::connect();
@@ -216,7 +218,7 @@ class bt_mem_caching {
 			while ($row = $res->fetch_assoc()) {
 				$catid = (int)$row['id'];
 				$cat = array();
-				$cat['name'] = trim($row['name']);
+				$cat['name'] = bt_utf8::trim($row['name']);
 				$cat['image'] = bt_security::html_safe(trim($row['image']));
 				$cat['ename'] = bt_security::html_safe($cat['name']);
 				$cats[$catid] = $cat;
@@ -230,10 +232,31 @@ class bt_mem_caching {
 		return $cats;
 	}
 
+	public static function get_genre_list() {
+		$key = 'genres::cache';
+		bt_memcache::connect();
+		$genres = bt_memcache::get($key);
+
+		if ($genres === bt_memcache::NO_RESULT) {
+			$genres = array();
+
+			bt_sql::connect();
+			$res = bt_sql::query('SELECT * FROM genres ORDER BY name ASC') or bt_sql::err(__FILE__, __LINE__);
+
+			while ($row = $res->fetch_assoc()) {
+				$genreid = (int)$row['id'];
+				$genre = array();
+				$genre['id3'] = (int)$row['id3'];
+				$genre['name'] = trim($row['name']);
+				$genre['ename'] = bt_security::html_safe($genre['name']);				
+			}
+		}
+	}
+
 	public static function get_last_torrents() {
 		bt_memcache::connect();
 		$last_torrents = bt_memcache::get('last_torrents');
-		if (!$last_torrents) {
+		if ($last_torrents === bt_memcache::NO_RESULT) {
 			$last_torrents = array();
 			bt_sql::connect();
 			$ltorrentsq = bt_sql::query('SELECT category, MAX(id) FROM torrents GROUP BY category') or bt_sql::err(__FILE__, __LINE__);

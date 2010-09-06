@@ -39,6 +39,8 @@ if (ini_get('mbstring.func_overload') || ini_get('mbstring.encoding_translation'
 if (!defined('PHP_INT_MIN'))
 	define('PHP_INT_MIN', ~PHP_INT_MAX);
 
+define('_START_MICROTIME_', microtime(true));
+
 // Site Paths
 define('BASE_PATH', realpath(__DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR);
 define('ROOT_PATH', BASE_PATH.'public_up_html'.DIRECTORY_SEPARATOR);

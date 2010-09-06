@@ -85,7 +85,7 @@ class bt_session {
 		bt_memcache::connect();
 		$key = 'bt_session::sessions:::'.$form_hash;
 		$task = bt_memcache::get($key);
-		if (!$task) {
+		if ($task === bt_memcache::NO_RESULT) {
 			$this->remove(NULL, 'Invalid Session');
 			return false;
 		}

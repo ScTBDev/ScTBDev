@@ -37,7 +37,7 @@ class bt_donations {
 	public static function get_donations($day) {
 		bt_memcache::connect();
 		$donations = bt_memcache::get('stats:donations');
-		if (!$donations) {
+		if ($donations === bt_memcache::NO_RESULT) {
 			self::days($fromdt, $todt, $day);
 			$emails = implode(', ', array_map(array('bt_sql', 'esc'), self::$emails));
 			$sql = 'SELECT (SUM(`payment_amount`) - SUM(`payment_fee`)) AS `donations` FROM `don_attempt` WHERE `receiver_email` IN ('.$emails.') AND `payment_status` IN ("Completed", "Refunded", "Reversed") AND `verified` != "fake" AND `item_name` IN ("Order") AND `payment_date` BETWEEN '.$fromdt.' AND '.$todt;

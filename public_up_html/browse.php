@@ -194,9 +194,10 @@ $where = count($wherea) ? 'WHERE '.implode(' AND ', $wherea) : '';
 
 $where_key = 'browse_where:'.sha1($where);
 $count = bt_memcache::get($where_key);
-if ($count === false) {
-	$res = mysql_counted_query('SELECT COUNT(*) FROM torrents '.$where) or sqlerr(__FILE__,__LINE__);
-	$row = mysql_fetch_row($res);
+if ($count === bt_memcache::NO_RESULT) {
+	$res = bt_sql::query('SELECT COUNT(*) FROM torrents '.$where) or bt_sql::err(__FILE__,__LINE__);
+	$row = $res->fetch_row();
+	$res->free();
 	$count = 0 + $row[0];
 
 	bt_memcache::set($where_key, $count, 60);

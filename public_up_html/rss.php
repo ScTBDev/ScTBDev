@@ -76,10 +76,10 @@ ksort($last_torrent, SORT_NUMERIC);
 
 $where = count($whereq) ? ' WHERE '.implode(' AND ', $whereq) : '';
 
-$key = 'rss::cache:::'.sha1($where);
+$key = 'rss::cache:::'.hash('ripemd160', $where);
 $torrents = bt_memcache::get($key, $cas);
 
-if (!$torrents || $torrents['last'] != $last_torrent) {
+if ($torrents === bt_memcache::NO_RESULT || $torrents['last'] != $last_torrent) {
 	$torrents = array();
 	$torrents['last'] = $last_torrent;
 	$torrents['list'] = array();

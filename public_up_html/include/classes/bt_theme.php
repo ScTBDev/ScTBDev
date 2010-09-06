@@ -42,6 +42,9 @@ class bt_theme {
 	public static $browser = 0;
 	public static $browser_version = 0.0;
 
+	private static $header_done = false;
+	private static $footer_done = false;
+
 	public static function identify_browser() {
 		if (preg_match('/Opera(?:\\/([0-9]+)\\.([0-9]+))?/', $_SERVER['HTTP_USER_AGENT'], $opv)) {
 			self::$browser = self::BROWSER_OPERA;
@@ -58,13 +61,16 @@ class bt_theme {
 			if (isset($ffv[1]))
 				self::$browser_version = (float)$ffv[1].'.'.$ffv[2].$ffv[3].$ffv[4];
 		}
+		else {
+			self::$browser = self::BROWSER_FIREFOX;
+		}
 	}
 
 	public static function head($page_title = '', $show_alerts = true, $reload = false, $return = false) {
-		if (defined('BT_HEADER_DONE'))
+		if (self::$header_done)
 			return;
 
-		define('BT_HEADER_DONE', true);
+		self::$header_done = true;
 
 		bt_theme_engine::load();
 		self::identify_browser();
@@ -253,17 +259,17 @@ class bt_theme {
 	}
 
 	public static function foot($return = false) {
-		global $TIMES, $numusers_first, $MySQL_NUM_QUERIES, $MySQL_LEN_QUERIES;
-		if (defined('BT_FOOTER_DONE'))
+		global $MySQL_NUM_QUERIES, $MySQL_LEN_QUERIES;
+		if (self::$footer_done)
 			return;
 
-		define('BT_FOOTER_DONE', true);
+		self::$footer_done = true;
 		$tsettings = bt_theme::$settings['foot'];
 
 		$now = microtime(true);
 		$extime = $now - _START_MICROTIME_;
-		$qnum = $MySQL_NUM_QUERIES + (is_object(bt_sql::$DB) ? bt_sql::$DB->query_count : 0);
-		$qtime = $MySQL_LEN_QUERIES + (is_object(bt_sql::$DB) ? bt_sql::$DB->query_time : 0);
+		$qnum = $MySQL_NUM_QUERIES + bt_sql::$query_count;
+		$qtime = $MySQL_LEN_QUERIES + bt_sql::$query_time;
 		$phpt = $extime - $qtime - bt_memcache::$time;
 		$max_mem = memory_get_peak_usage();
 

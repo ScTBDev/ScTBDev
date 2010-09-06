@@ -280,15 +280,14 @@ $smilies = array(
 function get_row_count($table, $suffix = '') {
 	if ($suffix)
 		$suffix = ' '.$suffix;
-	($r = bt_sql::query('SELECT COUNT(*) FROM '.bt_sql::$DB->escape_string($table).$suffix)) or bt_sql::err(__FILE__,__LINE__);
-	($a = $r->fetch_row()) or bt_sql::err(__FILE__,__LINE__);
+	($r = bt_sql::query('SELECT COUNT(*) FROM '.bt_sql::escape($table).$suffix)) or bt_sql::err(__FILE__,__LINE__);
+	($a = $r->fetch_row()) or bt_sql::err(__FILE__,__LINE__)
 	$r->free();
 	return $a[0];
 }
 
 
 function sqlerr($file = '', $line = '') {
-	bt_sql::$DB->set_error();
 	bt_sql::err($file, (int)$line);
 }
 
@@ -345,7 +344,7 @@ function format_comment($text, $strip_html = true) {
 
 	$s = $text;
 	// the requested [you] tag
-	$s = str_replace ('[youtagchanged]', bt_user::$current['username'], $s);
+	$s = str_replace ('[you]', bt_user::$current['username'], $s);
 	if ($strip_html)
 		$s = bt_security::html_safe($s);
 
@@ -471,13 +470,13 @@ function format_comment($text, $strip_html = true) {
 	$s = preg_replace('/(&[a-z]+;)(-?\))/i', '$1 $2', $s);
 
 	// Maintain spacing
-//	$s = str_replace('  ', ' &nbsp;', $s);
+	$s = str_replace('  ', ' '.bt_utf8::NBSP, $s);
 
 	reset($smilies);
 	$sms = $smr = array();
 	foreach ($smilies as $code => $url) {
 		$sms[] = $code;
-		$smr[] = '<img src="'.bt_config::$conf['pic_base_url'].'smilies/'.$url.'" alt="'.htmlentities($code).'" style="border: none" />';
+		$smr[] = '<img src="'.bt_config::$conf['pic_base_url'].'smilies/'.$url.'" alt="'.bt_utf8::html_safe($code).'" style="border: none" />';
 	}
 
 	$s = str_replace($sms, $smr, $s);

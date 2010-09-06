@@ -26,11 +26,13 @@ require_once(CLASS_PATH.'bt_utf8.php');
 
 class bt_sql {
 	private static $connected = false;
-	public static $DB = NULL;
+	private static $DB = NULL;
 
 	public static $errno				= 0;
 	public static $affected_rows		= 0;
 	public static $insert_id			= 0;
+	public static $query_count			= 0;
+	public static $query_time			= 0.0;
 	public static $error				= '';
 	public static $character_set_name	= '';
 
@@ -61,7 +63,7 @@ class bt_sql {
 			}
 
 			self::$connected = true;
-			self::$DB->set_charset('utf8');
+			self::$DB->set_charset('utf8', 'unicode_ci');
 		}
 
 		self::$errno 				=& self::$DB->errno;
@@ -69,6 +71,8 @@ class bt_sql {
 		self::$affected_rows		=& self::$DB->affected_rows;
 		self::$insert_id			=& self::$DB->insert_id;
 		self::$character_set_name	=& self::$DB->character_set_name;
+		self::$query_count			=& self::$DB->query_count;
+		self::$query_time			=& self::$DB->query_time;
 
 		unset($SECRETS['mysql']);
 		return true;
@@ -125,16 +129,17 @@ class bt_sql {
 		return str_replace(array('%', '_'), array('\%','\_'), self::$DB->escape_string($string));
 	}
 
-	public static function err($file = '', $line = 0) {
+	public static function err($file = '', $line = 0, $html = true) {
 		$line = (int)$line;
-		echo '<table border="0" bgcolor="blue" align="left" cellspacing="0" cellpadding="10" style="background: blue">
-	<tr>
-		<td class="embedded">
-			<font color="white"><h1>SQL Error</h1>
-			<b>['.self::$DB->errno.']'.self::$DB->error.($file && $line ? '<p>in '.bt_security::html_safe($file).', line '.$line.'</p>' : '').'</b></font>
-		</td>
-	</tr>
-</table>';
+		if ($html) {
+			$error = 'SQL Error'.($file ? ' in <b>'.bt_security::html_safe($file).'</b>'.($line ? ', line <b>'.$line.'</b>' : '') : '').'.<br /><br />'."\n".
+				'<b>['.self::$DB->errno.']</b> '.self::$DB->error;
+			bt_theme::error('SQL Error', $error, false, 'SQL Error');
+		}
+		else {
+			echo 'SQL Error'.($file ? ' in '.$file.($line ? ', line '.$line : '') : '').'.'."\n\n".'['.self::$DB->errno.'] '.self::$DB->error;
+			die;
+		}
 		die;
 	}
 

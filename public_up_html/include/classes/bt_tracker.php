@@ -81,7 +81,7 @@ class bt_tracker {
 		$key = 'clients::'.sha1($peer_identity).':::'.sha1($user_agent);
 		bt_memcache::connect();
 		$cache = bt_memcache::get($key);
-		if ($cache === false) {
+		if ($cache === bt_memcache::NO_RESULT) {
 			bt_sql::connect();
 			$pid = bt_sql::esc($peer_identity);
 			$usa = bt_sql::esc($user_agent);

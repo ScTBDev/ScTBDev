@@ -28,7 +28,7 @@ require_once(CLASS_PATH.'bt_dns.php');
 
 class bt_bans {
 	public static $cc_bans = array('A1','A2','IL','PL','RO');
-	public static $relakks_ranges = array('83.233.168.0/23','83.233.180.0/22');
+	public static $bypass_cc_bans_ranges = array('83.233.168.0/23','83.233.180.0/22');
 
 	private static function keys($ip, &$key) {
         $hip = bt_ip::ip2hex6($ip);
@@ -72,10 +72,10 @@ class bt_bans {
 			return true;
 
 		$ban = bt_memcache::get($key);
-		if ($ban === false) {
+		if ($ban === bt_memcache::NO_RESULT) {
 			if (!empty(self::$cc_bans)) {
 				$geoip = bt_geoip::lookup_ip($ip);
-				if ($geoip && in_array($geoip['country_code'], self::$cc_bans) && !bt_ip::verify_ip(self::$relakks_ranges, $ip)) {
+				if ($geoip && in_array($geoip['country_code'], self::$cc_bans) && !bt_ip::verify_ip(self::$bypass_cc_bans_ranges, $ip)) {
 					$reason = 'Banned country code ('.$geoip['country_code'].')';
 					self::add($ip, $reason);
 					return true;

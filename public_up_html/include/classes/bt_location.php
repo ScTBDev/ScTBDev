@@ -131,7 +131,7 @@ class bt_location {
 		bt_memcache::connect();
 
 		$timezones = bt_memcache::get(self::TIMEZONE_KEY);
-		if ($timezones === false) {
+		if ($timezones === bt_memcache::NO_RESULT) {
 			$timezones = array();
 			$tzs = DateTimeZone::listIdentifiers(DateTimeZone::ALL);
 			foreach ($tzs as $tz)
@@ -150,7 +150,7 @@ class bt_location {
 
 		bt_memcache::connect();
 		$countries = bt_memcache::get(self::COUNTRY_KEY);
-		if ($countries === false) {
+		if ($countries === bt_memcache::NO_RESULT) {
 			$countries = array(
 				'by_id'		=> array(),
 				'by_cc'		=> array(),

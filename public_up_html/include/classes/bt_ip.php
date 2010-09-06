@@ -28,8 +28,6 @@ class bt_ip {
 	const IP4		= 1;
 	const IP6		= 2;
 
-	const NOIP6		= "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
-
 	private static $ip_cache = array();
 
 	public static function ip2hex($ip) {
@@ -274,7 +272,7 @@ class bt_ip {
 
 		$key = 'valid_ip:'.sha1($ip);
 		$valid_ip = bt_memcache::get($key);
-		if ($valid_ip === false) {
+		if ($valid_ip === bt_memcache::NO_RESULT) {
 			$valid_ip = 1;
 			$addr = self::type($ip, $type);
 			if ($type === self::IP4) {
@@ -473,7 +471,7 @@ class bt_ip {
 		bt_memcache::connect();
 
 		$ip_port = bt_memcache::get($key);
-		if ($ip_port === false) {
+		if ($ip_port === bt_memcache::NO_RESULT) {
 			if (!preg_match('#^([0-9a-f:]+)$#i', $in, $matches) &&
 				!preg_match('#^\[([0-9a-f:]+)\](?::([0-9]{1,5}))?$#i', $in, $matches) &&
 				!preg_match('#^([0-9.]+)(?::([0-9]{1,5}))?$#', $in, $matches)) {
