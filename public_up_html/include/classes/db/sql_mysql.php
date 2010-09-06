@@ -30,7 +30,7 @@ class sql_database_mysql extends sql_database {
 		if ($this->db)
 			$this->close();
 
-		$flags - 0;
+		$flags = 0;
 		if ($this->_compress)
 			$flags |= MYSQL_CLIENT_COMPRESS;
 		if ($this->_ssl)
