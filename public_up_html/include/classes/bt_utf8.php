@@ -80,8 +80,39 @@ class bt_utf8 {
 		self::$trans_table = $trans;
 	}
 
+	// Returns NULL on error, true or false otherwise
+	public static function is_ascii($string) {
+		if (!is_string($string))
+			return NULL;
+
+		$valid = preg_match('#^[\x00-\x7F]*$#Ds', $string);
+
+		if ($valid === false)
+			return NULL;
+
+		return (bool)$valid;
+	}
+
+	// Returns NULL on error, true or false otherwise
 	public static function is_utf8($string) {
-		return (bool)preg_match('##Dsu', $string);
+		if (!is_string($string))
+			return NULL;
+
+		$valid = preg_match('##Dsu', $string);
+
+		if ($valid === false) {
+			$error = preg_last_error();
+			switch ($error) {
+				case PREG_BAD_UTF8_ERROR:
+				case PREG_BAD_UTF8_OFFSET_ERROR:
+					return false;
+
+			default:
+				return NULL;
+			}
+		}
+
+		return (bool)$valid;
 	}
 
 	public static function bin2utf8($string, $win1252 = true) {
