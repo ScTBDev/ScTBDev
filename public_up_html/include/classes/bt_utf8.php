@@ -21,12 +21,16 @@
 
 require_once(__DIR__.DIRECTORY_SEPARATOR.'class_config.php');
 require_once(CLASS_PATH.'bt_memcache.php');
+require_once(CLASS_PATH.'bt_string.php');
 
 bt_utf8::init();
 class bt_utf8 {
 	const TRANSKEY		= 'bt_utf8:::utf8_win_iso::translation_table';
-	const NBSP			= "\xC2\xA0";
-	const TRIM_CHARLIST	= "\x00..\x20\xC2\xA0";
+	const NBSP			= "\xC2\xA0";	// &nbsp; # Non-Breaking Space
+
+	//	Trim Char List:		Control Codes + Space Characters
+	//						0 - 20,			80 - A0, 			2000 - 200B,		202F,		2060,		3000,		FEFF
+	const TRIM_CHARLIST	= "\x00..\x20\xC2\x80..\xC2\xA0\xE2\x80\x80..\xE2\x80\x8B\xE2\x80\xAF\xE2\x81\xA0\xE3\x80\x80\xEF\xBB\xBF";
 
 	private static $trans_table = array();
 
@@ -77,7 +81,7 @@ class bt_utf8 {
 	}
 
 	public static function is_utf8($string) {
-		return (bool)preg_match('#^.*$#Dsu', $string);
+		return (bool)preg_match('##Dsu', $string);
 	}
 
 	public static function bin2utf8($string, $win1252 = true) {
@@ -165,6 +169,70 @@ class bt_utf8 {
 
 	public static function trim($str, $charlist = self::TRIM_CHARLIST) {
 		return self::ltrim(self::rtrim($str, $charlist), $charlist);
+	}
+
+	public static function unicode_to_utf8($unicodepoint, $allow_invalid = false) {
+		if (is_array($unicodepoint)) {
+			$chars = '';
+			foreach ($unicodepoint as $codepoint) {
+				$char = self::unicode_to_utf8($codepoint, $allow_invalid);
+				if ($char === false)
+					return false;
+				$chars .= $char;
+			}
+			return $chars;
+		}
+		if (!is_int($unicodepoint))
+			return false;
+
+		$unicodepoint = (int)$unicodepoint;
+		$unicode = $unicodepoint & 0x7FFFFFFF;
+		if ($unicode != $unicodepoint)
+			return false; // Not within the 31 bit limit of UTF-8
+
+		$char = '';
+		if ($unicode < 0x80)
+			$char = bt_string::$chr[$unicode];
+		elseif ($unicode < 0x800) {
+			$char = bt_string::$chr[(0xC0 | ($unicode >> 6))];
+			$char .= bt_string::$chr[(0x80 | ($unicode & 0x3F))];
+		}
+		elseif ($unicode < 0x10000) {
+			if (($unicode >= 0xD800 && $unicode <= 0xDFFF) && !$allow_invalid)
+				return false; // Surrogate Pairs
+
+			$char = bt_string::$chr[(0xE0 | ($unicode >> 12))];
+			$char .= bt_string::$chr[(0x80 | (($unicode >> 6) & 0x3F))];
+			$char .= bt_string::$chr[(0x80 | ($unicode & 0x3F))];
+		}
+		elseif ($unicode < 0x200000) {
+			if ($unicode > 0x10FFFF && !$allow_invalid)
+				return false; // Above max Unicode Code Points
+
+			$char = bt_string::$chr[(0xF0 | ($unicode >> 18))];
+			$char .= bt_string::$chr[(0x80 | (($unicode >> 12) & 0x3F))];
+			$char .= bt_string::$chr[(0x80 | (($unicode >> 6) & 0x3F))];
+			$char .= bt_string::$chr[(0x80 | ($unicode & 0x3F))];
+		}
+		elseif ($allow_invalid) {
+			if ($unicode < 0x4000000) {
+				$char = bt_string::$chr[(0xF8 | ($unicode >> 24))];
+				$char .= bt_string::$chr[(0x80 | (($unicode >> 18) & 0x3F))];
+				$char .= bt_string::$chr[(0x80 | (($unicode >> 12) & 0x3F))];
+				$char .= bt_string::$chr[(0x80 | (($unicode >> 6) & 0x3F))];
+				$char .= bt_string::$chr[(0x80 | ($unicode & 0x3F))];
+			}
+			else {
+				$char = bt_string::$chr[(0xFC | ($unicode >> 30))];
+				$char .= bt_string::$chr[(0x80 | (($unicode >> 24) & 0x3F))];
+				$char .= bt_string::$chr[(0x80 | (($unicode >> 18) & 0x3F))];
+				$char .= bt_string::$chr[(0x80 | (($unicode >> 12) & 0x3F))];
+				$char .= bt_string::$chr[(0x80 | (($unicode >> 6) & 0x3F))];
+				$char .= bt_string::$chr[(0x80 | ($unicode & 0x3F))];
+			}
+		}
+
+		return $char;
 	}
 }
 ?>
