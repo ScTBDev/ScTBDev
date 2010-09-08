@@ -470,6 +470,7 @@ function format_comment($text, $strip_html = true) {
 	$s = preg_replace('/(&[a-z]+;)(-?\))/i', '$1 $2', $s);
 
 	// Maintain spacing
+	$s = str_replace(bt_utf8::NBSP, ' ', $s);
 	$s = str_replace('  ', ' '.bt_utf8::NBSP, $s);
 
 	reset($smilies);
