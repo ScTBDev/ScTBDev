@@ -13,6 +13,7 @@ $functions = array(
 	'mb_convert_encoding'		=> 'convert_utf8',
 	'w3 preg_match'				=> 'w3_is_utf8',
 	'modified w3 preg_match'	=> 'modified_w3_is_utf8',
+	'bt_utf8::utf8_to_unicode'	=> 'decode_utf8',
 );
 
 function is_utf8($string) {
@@ -101,6 +102,14 @@ function modified_w3_is_utf8($string) {
 	return (bool)$valid;
 }
 
+function decode_utf8($string) {
+	$valid = bt_utf8::utf8_to_unicode($string, false, true);
+	if ($valid === false)
+		return false;
+	else
+		return true;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 $examples = array(
@@ -142,7 +151,7 @@ $examples = array(
 	'Valid 6 Byte Sequence (but above Unicode codepoints)'	=> array(false, "\xfc\xa1\xa1\xa1\xa1\xa1"),
 
 	'Invalid Sequence Identifier'							=> array(false, "\xa0\xa1"),
-	'Invalid Sequence (not defined in UTF-8 spec)'			=> array(false, "\xfe"),
+	'Invalid Sequence (not defined in UTF-8 spec)'			=> array(false, "\xfe\xff"),
 );
 
 ////////////////////////////////////////////////////////////////////////////////
