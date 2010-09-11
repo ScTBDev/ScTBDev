@@ -29,8 +29,8 @@ class bt_utf8 {
 	const NBSP			= "\xC2\xA0";	// &nbsp; # Non-Breaking Space
 
 	//	Trim Char List:		Control Codes + Space Characters
-	//						0 - 20,			80 - A0, 			2000 - 200B,		202F,		205F,		2060,		3000,		FEFF
-	const TRIM_CHARLIST	= "\x00..\x20\xC2\x80..\xC2\xA0\xE2\x80\x80..\xE2\x80\x8B\xE2\x80\xAF\xE2\x81\x9F\xE2\x81\xA0\xE3\x80\x80\xEF\xBB\xBF";
+	//						0 - 20,		7F - A0, 			2000 - 200B,		202F,		205F,		2060,		3000,		FEFF
+	const TRIM_CHARLIST	= "\x00..\x20\x7F..\xC2\xA0\xE2\x80\x80..\xE2\x80\x8B\xE2\x80\xAF\xE2\x81\x9F\xE2\x81\xA0\xE3\x80\x80\xEF\xBB\xBF";
 
 	private static $trans_table = array();
 
