@@ -78,7 +78,7 @@ class sql_database_mysqli extends sql_database {
 			$result = @$this->db->query($sql);
 		else {
 			$query = @$this->db->real_query($sql);
-			$result = $query ? @$this->db->use_result() : false;			
+			$result = $query ? @$this->db->use_result() : false;
 		}
 		$this->query_time += (microtime(true) - $nowtime);
 
@@ -111,17 +111,21 @@ class sql_database_mysqli extends sql_database {
 
 	public function set_charset($charset, $collation) {
 		$char_set = $this->db->set_charset($charset);
-		if (!$char_set)
+		if (!$char_set) {
 			trigger_error('Unable to set character set to "'.$charset.'" in '.__METHOD__.
 				($this->errno ? ': '.$this->errno.' ('.$this->error.')' : ''), E_USER_WARNING);
+			return false;
+		}
 		else {
 			$this->character_set_name = $this->db->character_set_name();
 			if ($collation) {
 				$collation = $this->character_set_name.'_'.$collation;
 				$collate = $this->query('SET NAMES '.$this->character_set_name.' COLLATE '.$this->db->real_escape_string($collation));
-				if (!$collate)
+				if (!$collate) {
 					trigger_error('Unable to set character set collation to "'.$collation.'" in '.__METHOD__.
 						($this->errno ? ': '.$this->errno.' ('.$this->error.')' : ''), E_USER_WARNING);
+					return false;
+				}
 			}
 		}
 

@@ -173,7 +173,7 @@ BADIP;
 			$updateuser[] = 'realip = '.bt_sql::binary_esc($realip);
 
 		if ($user['last_access'] < (bt_vars::$timestamp - 300))
-			$updateuser[] = 'last_access = '.bt_vars::$timestamp
+			$updateuser[] = 'last_access = '.bt_vars::$timestamp;
 
 		unset($user['ip'], $user['realip'], $user['last_access']);
 

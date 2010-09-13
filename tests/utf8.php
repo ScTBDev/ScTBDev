@@ -13,28 +13,10 @@ $functions = array(
 	'mb_convert_encoding'		=> 'convert_utf8',
 	'w3 preg_match'				=> 'w3_is_utf8',
 	'modified w3 preg_match'	=> 'modified_w3_is_utf8',
-	'bt_utf8::utf8_to_unicode'	=> 'decode_utf8',
 );
 
 function is_utf8($string) {
-	if (!is_string($string))
-		return NULL;
-
-	$valid = preg_match('##Dsu', $string);
-
-	if ($valid === false) {
-		$error = preg_last_error();
-		switch ($error) {
-			case PREG_BAD_UTF8_ERROR:
-			case PREG_BAD_UTF8_OFFSET_ERROR:
-				return false;
-
-			default:
-				return NULL;
-		}
-	}
-
-	return (bool)$valid;
+	return bt_utf8::is_utf8($string);
 }
 
 function check_utf8($string) {
@@ -103,12 +85,12 @@ function modified_w3_is_utf8($string) {
 }
 
 function decode_utf8($string) {
-	$valid = bt_utf8::utf8_to_unicode($string, false, true);
-	if ($valid === false)
-		return false;
-	else
-		return true;
+	return bt_utf8::utf8_to_unicode($string, true);
 }
+
+//function valid_utf8($string) {
+//	return bt_utf8::valid_utf8($string);
+//}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -152,6 +134,12 @@ $examples = array(
 
 	'Invalid Sequence Identifier'							=> array(false, "\xa0\xa1"),
 	'Invalid Sequence (not defined in UTF-8 spec)'			=> array(false, "\xfe\xff"),
+
+	'Prematurely ended 2 Byte Sequence'						=> array(false, "\xc2"),
+	'Prematurely ended 3 Byte Sequence'						=> array(false, "\xe2\x83"),
+	'Prematurely ended 4 Byte Sequence'						=> array(false, "\xf0\x90\x8d"),
+	'Prematurely ended 5 Byte Sequence'						=> array(false, "\xf8\xa1\xa1\xa1"),
+	'Prematurely ended 6 Byte Sequence'						=> array(false, "\xfc\xa1\xa1\xa1\xa1"),
 );
 
 ////////////////////////////////////////////////////////////////////////////////

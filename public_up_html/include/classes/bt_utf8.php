@@ -29,12 +29,14 @@ class bt_utf8 {
 	const NBSP			= "\xC2\xA0";	// &nbsp; # Non-Breaking Space
 
 	//	Trim Char List:		Control Codes + Space Characters
-	//						0 - 20,		7F - A0, 			2000 - 200B,		202F,		205F,		2060,		3000,		FEFF
-	const TRIM_CHARLIST	= "\x00..\x20\x7F..\xC2\xA0\xE2\x80\x80..\xE2\x80\x8B\xE2\x80\xAF\xE2\x81\x9F\xE2\x81\xA0\xE3\x80\x80\xEF\xBB\xBF";
+	//						0 - 20,		7F - A0, 			2000 - 200D,		202F,		205F,		2060,		3000,		FEFF
+	const TRIM_CHARLIST	= "\x00..\x20\x7F..\xC2\xA0\xE2\x80\x80..\xE2\x80\x8D\xE2\x80\xAF\xE2\x81\x9F\xE2\x81\xA0\xE3\x80\x80\xEF\xBB\xBF";
 
 	private static $trans_table = array();
+	private static $utf8validator = false;
 
 	public static function init() {
+		self::$utf8validator = (bool)extension_loaded('utf8validator');
 		mb_internal_encoding('UTF-8');
 		mb_language('uni');
 		mb_regex_encoding('UTF-8');
@@ -94,25 +96,30 @@ class bt_utf8 {
 	}
 
 	// Returns NULL on error, true or false otherwise
-	public static function is_utf8($string) {
-		if (!is_string($string))
-			return NULL;
-
-		$valid = preg_match('##Dsu', $string);
-
-		if ($valid === false) {
-			$error = preg_last_error();
-			switch ($error) {
-				case PREG_BAD_UTF8_ERROR:
-				case PREG_BAD_UTF8_OFFSET_ERROR:
-					return false;
-
-			default:
+	public static function is_utf8($string, &$strlen = 0) {
+		if (self::$utf8validator)
+			return utf8validator($string, $strlen);
+		else {
+			if (!is_string($string))
 				return NULL;
-			}
-		}
 
-		return (bool)$valid;
+			$valid = preg_match('##Dsu', $string);
+
+			if ($valid === false) {
+				$error = preg_last_error();
+				switch ($error) {
+					case PREG_BAD_UTF8_ERROR:
+					case PREG_BAD_UTF8_OFFSET_ERROR:
+						return false;
+
+				default:
+					return NULL;
+				}
+			}
+
+			$strlen = self::strlen($string);
+			return (bool)$valid;
+		}
 	}
 
 	public static function bin2utf8($string, $win1252 = true) {
@@ -225,7 +232,7 @@ class bt_utf8 {
 		if (!is_int($unicodepoint))
 			return false;
 
-		$unicode = $unicodepoint & 0x7FFFFFFF;
+		$unicode = $unicodepoint & ($allow_invalid ? 0x7FFFFFFF : 0x1FFFFF);
 		if ($unicode != $unicodepoint)
 			return false; // Not within the 31 bit limit of UTF-8 or 21 bit limit of Unicode
 
@@ -277,14 +284,14 @@ class bt_utf8 {
 		return $char;
 	}
 
-	public static function utf8_to_unicode($utf8, $allow_invalid = false, $just_check = false) {	
+	public static function utf8_to_unicode($utf8, &$strlen = 0) {	
 		$ords =& bt_string::$ord;
 		if (!is_string($utf8))
 			return false;
 
 		$unicodes = array();
 		$utf8_len = strlen($utf8);
-		$need_bytes = $unicode = $min = 0;
+		$need_bytes = $unicode = $min = $strlen = 0;
 
 		$shift = array(0, 6, 12, 18, 24, 30);
 		$x80 = ~0x80; $xC0 = ~0xC0; $xE0 = ~0xE0; $xF0 = ~0xF0; $xF8 = ~0xF8; $xFC = ~0xFC;
@@ -292,72 +299,56 @@ class bt_utf8 {
 		for ($i = 0; $i < $utf8_len; $i++) {
 			$ord = $ords[$utf8[$i]];
 			if ($ord < 0x80) {
-				if ($need_bytes)
-					return false;
-
 				$min = 0;
 				$unicode = $ord;
 			}
-			elseif ($ord < 0xC0) {
-				if (!$need_bytes)
-					return false;
-
-				$need_bytes--;
-				$unicode |= ($ord & $x80) << $shift[$need_bytes];
-			}
-			elseif ($need_bytes)
-				return false;
-			elseif ($ord < 0xE0) {
-				$min = 0x80;
-				$need_bytes = 1;
-				$unicode = ($ord & $xC0) << 6;
-			}
-			elseif ($ord < 0xF0) {
-				$min = 0x800;
-				$need_bytes = 2;
-				$unicode = ($ord & $xE0) << 12;
-			}
-			elseif ($ord < 0xF8) {
+			elseif ($ord > 0xF4)
+				return false;	// Above max Unicode Code Points
+			elseif ($ord > 0xEF) {
 				$min = 0x10000;
 				$need_bytes = 3;
 				$unicode = ($ord & $xF0) << 18;
 			}
-			elseif (!$allow_invalid)
-				return false;
-			elseif ($ord < 0xFC) {
-				$min = 0x200000;
-				$need_bytes = 4;
-				$unicode = ($ord & $xF8) << 24;
+			elseif ($ord > 0xDF) {
+				$min = 0x800;
+				$need_bytes = 2;
+				$unicode = ($ord & $xE0) << 12;
 			}
-			elseif ($ord < 0xFE) {
-				$min = 0x4000000;
-				$need_bytes = 5;
-				$unicode = ($ord & $xFC) << 30;
+			elseif ($ord > 0xBF) {
+				$min = 0x80;
+				$need_bytes = 1;
+				$unicode = ($ord & $xC0) << 6;
 			}
 			else
-				return false;
+				return false;	// Continuation byte
 
-			if (!$need_bytes) {
-				if (!$allow_invalid) {
-					if ($unicode < $min)
-						return false; // Overlong
-					elseif ($unicode > 0xD7FF && $unicode < 0xE000)
-						return false; // Surrogate Pair
-					elseif ($unicode > 0x10FFFF)
-						return false; // Above max Unicode Code Points
-				}
+			while ($need_bytes) {
+				$need_bytes--; $i++;
+				if ($i == $utf8_len)
+					return false;
 
+				$ord = $ords[$utf8[$i]];
+				if ($ord < 0x80 || $ord > 0xBF)
+					return false;
 
-				if (!$just_check)
-					$unicodes[] = $unicode;
+				$unicode |= ($ord & $x80) << $shift[$need_bytes];
 			}
+
+
+			if ($unicode < $min)
+				return false; // Overlong
+			elseif ($unicode > 0xD7FF && $unicode < 0xE000)
+				return false; // Surrogate Pair
+			elseif ($unicode > 0x10FFFF)
+				return false; // Above max Unicode Code Points
+
+
+			$unicodes[] = $unicode;
+			$strlen++;
 		}
 
-		if ($need_bytes)
-			return false;
-
-		if ($just_check)
-			return true;
+		if (!isset($unicodes[1]))
+			return $unicodes[0];
 
 		return $unicodes;
 	}

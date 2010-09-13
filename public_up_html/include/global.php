@@ -281,7 +281,7 @@ function get_row_count($table, $suffix = '') {
 	if ($suffix)
 		$suffix = ' '.$suffix;
 	($r = bt_sql::query('SELECT COUNT(*) FROM '.bt_sql::escape($table).$suffix)) or bt_sql::err(__FILE__,__LINE__);
-	($a = $r->fetch_row()) or bt_sql::err(__FILE__,__LINE__)
+	($a = $r->fetch_row()) or bt_sql::err(__FILE__,__LINE__);
 	$r->free();
 	return $a[0];
 }

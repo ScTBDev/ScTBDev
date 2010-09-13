@@ -23,6 +23,7 @@ require_once(__DIR__.DIRECTORY_SEPARATOR.'class_config.php');
 require_once(CLASS_PATH.'bt_string.php');
 require_once(CLASS_PATH.'bt_security.php');
 require_once(CLASS_PATH.'bt_utf8.php');
+require_once(CLASS_PATH.'bt_memcache.php');
 
 class bt_sql {
 	private static $connected = false;
@@ -61,9 +62,24 @@ class bt_sql {
 				$error = self::$DB->error;
 				return false;
 			}
-
 			self::$connected = true;
-			self::$DB->set_charset('utf8', 'unicode_ci');
+			$key = 'bt_sql:::charsets::utf8mb4';
+			$utf8mb4 = bt_memcache::get($key);
+			if ($utf8mb4 === bt_memcache::NO_RESULT) {
+				$cs = self::$DB->query('SHOW CHARACTER SET WHERE Charset = "utf8mb4"');
+				if ($cs->num_rows)
+					$utf8mb4 = 1;
+				else
+					$utf8mb4 = 0;
+				$cs->free();
+
+				bt_memcache::add($key, $utf8mb4, 3600);
+			}
+			
+			if ($utf8mb4)
+				self::$DB->set_charset('utf8mb4', 'unicode_ci');
+			else
+				self::$DB->set_charset('utf8', 'unicode_ci');
 		}
 
 		self::$errno 				=& self::$DB->errno;

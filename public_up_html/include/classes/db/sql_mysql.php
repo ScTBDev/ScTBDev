@@ -124,17 +124,21 @@ class sql_database_mysql extends sql_database {
 	public function set_charset($charset, $collation = false) {
 		$char_set = mysql_set_charset($charset, $this->db);
 		$this->set_error();
-		if (!$char_set)
+		if (!$char_set) {
 			trigger_error('Unable to set character set to "'.$charset.'" in '.__METHOD__.
 				($this->errno ? ': '.$this->errno.' ('.$this->error.')' : ''), E_USER_WARNING);
+			return false;
+		}
 		else {
 			$this->character_set_name = mysql_client_encoding($this->db);
 			if ($collation) {
 				$collation = $this->character_set_name.'_'.$collation;
 				$collate = $this->query('SET NAMES '.$this->character_set_name.' COLLATE '.mysql_real_escape_string($collation, $this->db));
-				if (!$collate)
+				if (!$collate) {
 					trigger_error('Unable to set character set collation to "'.$collation.'" in '.__METHOD__.
 						($this->errno ? ': '.$this->errno.' ('.$this->error.')' : ''), E_USER_WARNING);
+					return false;
+				}
 			}
 		}
 
