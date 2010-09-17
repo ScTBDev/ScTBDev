@@ -539,8 +539,8 @@ else {
 		// Peer Caching
 		$ext_ip = bt_vars::$packed_ip;
 
-		$compactcache = $ip4 ? $ip4.pack('n', $port4) : NULL;
-		$compact6cache = $ip6 ? $ip6.pack('n', $port6) : NULL;
+		$compactcache = $ip4 ? $ipaddr_4.pack('n', $port4) : NULL;
+		$compact6cache = $ip6 ? $ipaddr_6.pack('n', $port6) : NULL;
 
 		if ($snatched && $snatched['clientid'] != $clientid)
 			$updatesnatched[] = 'clientid = '.$clientid;
