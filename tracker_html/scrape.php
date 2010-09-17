@@ -19,6 +19,8 @@
  *	along with ScTBDev.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const SCRAPE_ERR = 'd5:filesdee';
+
 require_once(__DIR__.DIRECTORY_SEPARATOR.'include'.DIRECTORY_SEPARATOR.'tdefines.php');
 
 
@@ -52,7 +54,6 @@ foreach ($q as $p)
 
 /////////////////////////////////////////
 header('Content-Type: text/plain');
-define('SCRAPE_ERR', 'd5:filesdee');
 
 require_once(TINCL_PATH.'announce_funcs.php');
 

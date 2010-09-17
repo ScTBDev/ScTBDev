@@ -64,54 +64,57 @@ if (portblacklisted($port))
 $select_bits = $selectnot_bits = $set_bits = $clr_bits = 0;
 
 // Validate all info
-$ip = bt_vars::$ip;
-$realip = bt_vars::$realip;
+$ip = bt_vars::$packed6_ip;
+$realip = bt_vars::$packed6_realip;
+$ip2 = $ip_4 = $ip_6 = $ipaddr_4 = $ipaddr_6 = $port4 = $port6 = NULL;
 
 if (bt_vars::$ip_type === bt_ip::IP4) {
-	$ip4 = bt_vars::$long_ip;
 	$ip_4 = bt_vars::$ip;
+	$ipaddr_4 = bt_vars::$packed_ip;
 	$port4 = $port;
 
 	if ($ipv6) {
-		$addr = bt_ip::ip_port($ipv6, $ip_6, $port6, $type);
-		if ($addr) {
-			if ($type === bt_ip::IP6) {
-				if (!$port6)
+		$addr6 = bt_ip::ip_port($ipv6, $ip_6, $port6, $ip2_type, $addr);
+		if ($addr6) {
+			if ($ip2_type === bt_ip::IP6) {
+				if (!$port6 || portblacklisted($port6))
 					$port6 = $port4;
 
-				$ip6 = $addr;
-			}
-			else {
-				$ip_6 = '';
-				$port6 = 0;
+				$ip2 = $addr6;
+				$ipaddr_6 = $addr;
 			}
 		}
 	}
 }
 elseif (bt_vars::$ip_type === bt_ip::IP6) {
-	$ip6 = bt_vars::$packed_ip;
+	$ip_6 = bt_vars::$ip;
+	$ipaddr_6 = bt_vars::$packed_ip;
 	$port6 = $port;
 
 	if ($ipv4) {
-		$long = bt_ip::ip_port($ipv4, $ip_4, $port4, $type);
-		if ($long) {
-			if ($type === bt_ip::IP4) {
-				if (!$port4)
+		$addr6 = bt_ip::ip_port($ipv4, $ip_4, $port4, $ip2_type, $addr);
+		if ($addr6) {
+			if ($ip2_type === bt_ip::IP4) {
+				if (!$port4 || portblacklisted($port4))
 					$port4 = $port6;
 
-				$ip4 = $long;
-			}
-			else {
-				$ip_4 = '';
-				$port4 = 0;
+				$ip2 = $addr6;
+				$ipaddr_4 = $addr;
 			}
 		}
 	}
+	elseif (bt_vars::$ip2) {
+		if (bt_ip::valid_ip(bt_vars::$ip2)) {
+			$ip_4 = bt_vars::$ip2;
+			$ipaddr_4 = bt_ip::type($ip_4, $ip2_type);
+			$ip2 = bt_ip::ip2addr6($ip_4);
+			$port4 = $port6;
+		}
+	}
 }
-if (bt_vars::$realip_type === bt_ip::IP4)
-	$realip4 = bt_vars::$long_realip;
-elseif (bt_vars::$realip_type === bt_ip::IP6)
-	$realip6 = bt_vars::$packed_realip;
+
+$ip4 = bt_vars::$ip_type === bt_ip::IP4 ? $ip : ($ip2 ? $ip2 : NULL);
+$ip6 = bt_vars::$ip_type === bt_ip::IP6 ? $ip : ($ip2 ? $ip2 : NULL);
 
 
 $hinfo_hash = bt_string::str2hex($info_hash);
@@ -134,9 +137,8 @@ $seeder = $left == 0;
 if ($seeder)
 	$selectnot_bits |= bt_options::PEER_SEEDER;
 
-$updatetorrent = array();
-$updateuser = array();
-$updatesnatched = array();
+$updatetorrent = $updateuser = $updatesnatched = array();
+$user_set_bits = $user_clr_bits = 0;
 
 if (!preg_match('/^[0-9a-f]{32}$/iD', $passkey))
 	bt_tracker::err('passkey not valid, please redownload your torrent file');
@@ -188,8 +190,6 @@ if ($res->num_rows) {
 	$snatched['total_time']	= 0 + $snatched['total_time'];
 	$snatched['uploaded']	= 0 + $snatched['uploaded'];
 	$snatched['downloaded']	= 0 + $snatched['downloaded'];
-	$snatched['ip']			= 0 + $snatched['ip'];
-	$snatched['realip']		= 0 + $snatched['realip'];
 	$snatched['clientid']	= 0 + $snatched['clientid'];
 }
 
@@ -212,10 +212,12 @@ if ($self) {
 	$self['downloaded']		= 0 + $self['downloaded'];
 	$self['to_go']			= 0 + $self['to_go'];
 	$self['last_action']	= 0 + $self['last_action'];
-	$self['ip']				= 0 + $self['ip'];
-	$self['realip']			= 0 + $self['realip'];
-	$self['port']			= 0 + $self['port'];
-	$self['port6']			= 0 + $self['port6'];
+
+	if ($self['port'] !== NULL)
+		$self['port']		= 0 + $self['port'];
+	if ($self['port6'] !== NULL)
+		$self['port6']		= 0 + $self['port6'];
+
 	$self['clientid']		= 0 + $self['clientid'];
 	$self['flags']			= (int)$self['flags'];
 
@@ -233,7 +235,7 @@ if ($self) {
 	$updatepeer = array();
 }
 
-$ext_ip = false;
+$ext_ip = NULL;
 
 // Banned clients - Not included in main source yet
 #require_once(TINCL_PATH.'client_bans.php');
@@ -242,21 +244,19 @@ $ext_ip = false;
 
 if ($user['class'] < UC_STAFF) {
 	if ($snatched) {
-		if ($ip4 && $snatched['ip'] != $ip4)
-			$updatesnatched[] = 'ip = '.$ip4;
-		if ($realip4 && $snatched['realip'] != $realip4)
-			$updatesnatched[] = 'realip = '.$realip4;
+		if ($snatched['ip'] !== $ip)
+			$updatesnatched[] = 'ip = '.bt_sql::binary_esc($ip);
+		if ($snatched['realip'] !== $realip)
+			$updatesnatched[] = 'realip = '.bt_sql::binary_esc($realip);
 
-		if ($ip6 && $snatched['ip6'] != $ip6)
-			$updatesnatched[] = 'ip6 = '.bt_sql::esc($ip6);
-		if ($realip6 && $snatched['realip6'] != $realip6)
-			$updatesnatched[] = 'realip6 = '.bt_sql::esc($realip6);
+		if ($ip2 && $snatched['ip2'] !== $ip2)
+			$updatesnatched[] = 'ip2 = '.bt_sql::binary_esc($ip2);
 	}
 }
 
 if (!$self) {
 	if (bt_config::$conf['maxips']) {
-		$ipq = bt_sql::query('SELECT COUNT(DISTINCT ip, ip6) FROM peers WHERE userid = '.$userid.' AND !(ip = '.$ip4.' OR ip6 = '.bt_sql::esc($ip6).')');
+		$ipq = bt_sql::query('SELECT COUNT(DISTINCT realip) FROM peers WHERE userid = '.$userid.' AND realip != '.bt_sql::binary_esc($realip));
 		$ipn = $ipq->fetch_row();
 		$ipq->free();
 
@@ -359,31 +359,42 @@ else {
 		if ($self['last_action'] != $cur_time)
 			$updatepeer[]= 'last_action = '.$cur_time;
 
-		if ($self['ip'] != $ip4 || $self['port'] != $port4) {
-			$updatepeer[] = 'ip = '.$ip4;
+		if ($self['ip'] != $ip) {
+			$updatepeer[] = 'ip = '.bt_sql::$ip;
+			$ext_ip = bt_vars::$packed_ip;
+			if (bt_vars::$ip_type === bt_ip::IP4) {
+				$ext_ip = $ipaddr_4;
+				$compactcache = $ipaddr_4.pack('n', $port4);
+				$updatepeer[] = 'compact = '.bt_sql::binary_esc($compactcache);
+			}
+			else {
+				$ext_ip = $ipaddr_6;
+				$compact6cache = $ipaddr_6.pack('n', $port6);
+				$updatepeer[] = 'compact6 = '.bt_sql::binary_esc($compact6cache);
+			}
+		}
+
+		if ($self['ip2'] != $ip2) {
+			$updatepeer[] = 'ip2 = '.bt_sql::binary_esc($ip2);
+			if ($ip2) {
+				if ($ip2_type === bt_ip::IP6) {
+					$compact6cache = $ipaddr_6.pack('n', $port6);
+					$updatepeer[] = 'compact6 = '.bt_sql::binary_esc($compact6cache);
+				}
+				else {
+					$compactcache = $ipaddr_4.pack('n', $port4);
+					$updatepeer[] = 'compact = '.bt_sql::binary_esc($compactcache);
+				}
+			}
+		}
+
+		if ($self['port'] != $port4)
 			$updatepeer[] = 'port = '.$port4;
-			if (bt_vars::$ip_type === bt_ip::IP4)
-				$ext_ip = bt_vars::$packed_ip;
-
-			$compactcache = $ip4 ? pack('Nn', $ip4, $port4) : '';
-			$updatepeer[] = 'compact = '.bt_sql::esc($compactcache);
-		}
-
-		if ($self['ip6'] != $ip6 || $self['port6'] != $port6) {
-			$updatepeer[] = 'ip6 = '.bt_sql::esc($ip6);
+		if ($self['port6'] != $port6)
 			$updatepeer[] = 'port6 = '.$port6;
-			if (bt_vars::$ip_type === bt_ip::IP6)
-				$ext_ip = bt_vars::$packed_ip;
 
-			$compact6cache = $ip6 ? $ip6.pack('n', $port6) : '';
-			$updatepeer[] = 'compact6 = '.bt_sql::esc($compact6cache);
-		}
-
-		if ($self['realip'] != $realip4)
-			$updatepeer[] = 'realip = '.$realip4;
-
-		if ($self['realip6'] != $realip6)
-			$updatepeer[] = 'realip6 = '.bt_sql::esc($realip6);
+		if ($self['realip'] != $realip)
+			$updatepeer[] = 'realip = '.bt_sql::binary_esc($realip4);
 
 		if ($self['clientid'] != $clientid)
 			$updatepeer[] = 'clientid = '.$clientid;
@@ -452,15 +463,16 @@ else {
 				if (bt_memcache::add($connkey, bt_tracker::CONN_CHECK, 15)) {
 					// Is this peer connectable?
 					$sockres = probe_port($ip_4, $port4);
+					$where4 = '(ip = '.bt_sql::binary_esc($ip4).' OR ip2 = '.bt_sql::binary_esc($ip4).') AND port = '.$port4.' AND (flags & '.bt_options::PEER_PROBED4.') = 0';
 
 					if (!$sockres) {
 						$connectable4 = bt_tracker::CONN_NO;
-						bt_sql::query('UPDATE peers SET flags = ((flags | '.bt_options::PEER_PROBED4.') & ~'.bt_options::PEER_CONN4.') WHERE ip = '.$ip4.' AND port = '.$port4.' AND (flags & '.bt_options::PEER_PROBED4.') = 0');
+						bt_sql::query('UPDATE peers SET flags = ((flags | '.bt_options::PEER_PROBED4.') & ~'.bt_options::PEER_CONN4.') WHERE '.$where4);
 					}
 					else {
 						fclose($sockres);
 						$connectable4 = bt_tracker::CONN_YES;
-						bt_sql::query('UPDATE peers SET flags = (flags | '.(bt_options::PEER_PROBED4 | bt_options::PEER_CONN4).') WHERE ip = '.$ip4.' AND port = '.$port4.' AND (flags & '.bt_options::PEER_PROBED4.') = 0');
+						bt_sql::query('UPDATE peers SET flags = (flags | '.(bt_options::PEER_PROBED4 | bt_options::PEER_CONN4).') WHERE '.$where4);
 					}
 
 					bt_memcache::set($connkey, $connectable4, ($connectable4 === bt_tracker::CONN_NO ? 900 : 21600));
@@ -479,15 +491,16 @@ else {
 				if (bt_memcache::add($connkey, bt_tracker::CONN_CHECK, 15)) {
 					// Is this peer connectable?
 					$sockres = probe_port($ip_6, $port6);
+					$where6 = '(ip = '.bt_sql::binary_esc($ip6).' OR ip2 = '.bt_sql::binary_esc($ip6).') AND port6 = '.$port6.' AND (flags & '.bt_options::PEER_PROBED6.') = 0';
 
 					if (!$sockres) {
 						$connectable6 = bt_tracker::CONN_NO;
-						bt_sql::query('UPDATE peers SET flags = ((flags | '.bt_options::PEER_PROBED6.') & ~'.bt_options::PEER_CONN6.') WHERE ip6 = '.bt_sql::esc($ip6).' AND port6 = '.$port6.' AND (flags & '.bt_options::PEER_PROBED6.') = 0');
+						bt_sql::query('UPDATE peers SET flags = ((flags | '.bt_options::PEER_PROBED6.') & ~'.bt_options::PEER_CONN6.') WHERE '.$where6);
 					}
 					else {
 						fclose($sockres);
 						$connectable6 = bt_tracker::CONN_YES;
-						bt_sql::query('UPDATE peers SET flags = (flags | '.(bt_options::PEER_PROBED6 | bt_options::PEER_CONN6).') WHERE ip6 = '.bt_sql::esc($ip6).' AND port6 = '.$port6.' AND (flags & '.bt_options::PEER_PROBED6.') = 0');
+						bt_sql::query('UPDATE peers SET flags = (flags | '.(bt_options::PEER_PROBED6 | bt_options::PEER_CONN6).') WHERE '.$where6);
 					}
 
 					bt_memcache::set($connkey, $connectable6, ($connectable6 === bt_tracker::CONN_NO ? 900 : 21600));
@@ -499,10 +512,17 @@ else {
 				$connectable6 = $conncache;
 		}
 
-		if ($connectable4 !== bt_tracker::CONN_CHECK)
+		if ($connectable4 !== bt_tracker::CONN_CHECK) {
+			if (!($user['flags'] & bt_options::USER_PROBED))
+				$user_set_bits |= bt_options::USER_PROBED;
+
 			$set_bits |= bt_options::PEER_PROBED4;
-		if ($connectable6 !== bt_tracker::CONN_CHECK)
+		}
+		if ($connectable6 !== bt_tracker::CONN_CHECK) {
+			if (!($user['flags'] & bt_options::USER_PROBED))
+				$user_set_bits |= bt_options::USER_PROBED;
 			$set_bits |= bt_options::PEER_PROBED6;
+		}
 
 		if ($connectable4 === bt_tracker::CONN_YES)
 			$set_bits |= bt_options::PEER_CONN4;
@@ -511,28 +531,28 @@ else {
 
 
 		if ($connectable4 === bt_tracker::CONN_YES || $connectable6 === bt_tracker::CONN_YES)
-			$updateuser[] = 'connectable = "yes"';
+			$user_set_bits |= bt_options::USER_CONNECTABLE;
 		elseif ($connectable4 === bt_tracker::CONN_NO && $connectable6 === bt_tracker::CONN_NO)
-			$updateuser[] = 'connectable = "no"';
+			$user_clr_bits |= bt_options::USER_CONNECTABLE;
 
 
 		// Peer Caching
 		$ext_ip = bt_vars::$packed_ip;
 
-		$compactcache = $ip4 ? pack('Nn', $ip4, $port4) : '';
-		$compact6cache = $ip6 ? $ip6.pack('n', $port6) : '';
+		$compactcache = $ip4 ? $ip4.pack('n', $port4) : NULL;
+		$compact6cache = $ip6 ? $ip6.pack('n', $port6) : NULL;
 
 		if ($snatched && $snatched['clientid'] != $clientid)
 			$updatesnatched[] = 'clientid = '.$clientid;
 
 
 		// Add new peer to table
-		$ret = bt_sql::query('INSERT INTO peers (torrent, peer_id, ip, realip, ip6, realip6, port, port6, uploaded, downloaded, '.
+		$ret = bt_sql::query('INSERT INTO peers (torrent, peer_id, ip, ip2, realip, port, port6, uploaded, downloaded, '.
 			'to_go, started, last_action, userid, clientid, client, uploadoffset, downloadoffset, flags, compact, compact6) '.
-			'VALUES ('.$torrentid.', '.bt_sql::esc($peer_id).', '.$ip4.', '.$realip4.', '.bt_sql::esc($ip6).', '.
-			bt_sql::esc($realip6).', '.$port4.', '.$port6.', '.$uploaded.', '.$downloaded.', '.$left.', '.bt_vars::$timestamp.', '.
-			bt_vars::$timestamp.', '.$userid.', '.$clientid.', '.bt_sql::esc($client).', '.$uploaded.', '.$downloaded.', '.
-			$set_bits.', '.bt_sql::esc($compactcache).', '.bt_sql::esc($compact6cache).')');
+			'VALUES ('.$torrentid.', '.bt_sql::esc($peer_id).', '.bt_sql::binary_escape($ip).', '.bt_sql::binary_escape($ip2).', '.
+			bt_sql::binary_escape($realip).', '.$port4.', '.$port6.', '.$uploaded.', '.$downloaded.', '.$left.', '.
+			bt_vars::$timestamp.', '.bt_vars::$timestamp.', '.$userid.', '.$clientid.', '.bt_sql::esc($client).', '.$uploaded.', '.
+			$downloaded.', '.$set_bits.', '.bt_sql::esc($compactcache).', '.bt_sql::esc($compact6cache).')');
 
 		if (bt_sql::$affected_rows) {
 			if ($seeder) {
@@ -550,6 +570,12 @@ else {
 		}
 	}
 }
+
+
+if ($user_set_bits)
+	$updateuser[] = 'flags = (flags | '.$user_set_bits.')';
+if ($user_clr_bits)
+	$updateuser[] = 'flags = (flags & ~'.$user_clr_bits.')';
 
 // Update all the stats if they need updating
 if (count($updatetorrent))

@@ -465,7 +465,7 @@ class bt_ip {
 		return bt_vars::$realip;
 	}
 
-	public static function ip_port($in, &$ip, &$port, &$type) {
+	public static function ip_port($in, &$ip, &$port, &$type, &$addr) {
 		$key = 'bt_ip::ip_port:::'.sha1($in);
 
 		bt_memcache::connect();
@@ -480,11 +480,12 @@ class bt_ip {
 			}
 
 			$tip = $matches[1];
-			$addr = self::type($tip, $ttype);
-			if (!$addr) {
+			$taddr = self::type($tip, $ttype);
+			if (!$taddr) {
 				bt_memcache::add($key, 0, 86400);
 				return false;
 			}
+			$taddr6 = self::ip2addr6($tip);
 
 			$tport = 0;
 			if (isset($matches[2])) {
@@ -501,15 +502,17 @@ class bt_ip {
 				return false;
 			}
 
-			$ip_port = array($tip, $tport, $ttype, ($ttype === bt_ip::IP6 ? $addr : ip2long($tip)));
+			
+
+			$ip_port = array($tip, $tport, $ttype, $taddr, $taddr6);
 			bt_memcache::add($key, $ip_port, 86400);
 		}
 		elseif (!$ip_port)
 			return false;
 
-		list($ip, $port, $type, $return) = $ip_port;
+		list($ip, $port, $type, $addr, $sddr6) = $ip_port;
 
-		return $return;
+		return $addr6;
 	}
 };
 ?>
