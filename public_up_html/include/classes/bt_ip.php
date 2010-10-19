@@ -280,7 +280,7 @@ class bt_ip {
 
 				// reserved/unroutable IANA IPv4 addresses
 				// http://www.iana.org/assignments/ipv4-address-space
-				// As of 2010-08-05
+				// As of 2010-10-17
 
 				$reserved_ips = array (
 					array(0x0			, 0xffffff),	// 0.0.0.0		- 0.255.255.255		0 - IANA - Local Identification [RFC1122]
@@ -315,13 +315,10 @@ class bt_ip {
 					array(0x21000000	, 0x22ffffff),	// 33.0.0.0		- 34.255.255.255	33 - Defense Logistics Agency Systems Automation Center
 														//									34 - Halliburton Company
 
-					array(0x24000000	, 0x25ffffff),	// 36.0.0.0		- 37.255.255.255	36 - IANA
-														//									37 - IANA
+					array(0x25000000	, 0x25ffffff),	// 37.0.0.0		- 37.255.255.255	37 - IANA
 
 					array(0x27000000	, 0x28ffffff),	// 39.0.0.0		- 40.255.255.255	39 - IANA
 														//									40 - Eli Lilly and Company
-
-					array(0x2a000000	, 0x2affffff),	// 42.0.0.0		- 42.255.255.255	42 - IANA
 
 					array(0x2f000000	, 0x30ffffff),	// 47.0.0.0		- 48.255.255.255	47 - Bell-Northern Research
 														//									48 - Prudential Securities Inc.
