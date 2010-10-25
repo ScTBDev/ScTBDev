@@ -29,6 +29,7 @@ class bt_string {
 	public static $ord = array();
 	public static $b2c = array();
 	public static $c2b = array();
+	public static $cmp_bits = array(0x00, 0x80, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC, 0xFE);
 
 	private static $glob_search = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]';
 	private static $glob_replace = 'abcdefghijklmnopqrstuvwxyz{|}';
@@ -44,7 +45,7 @@ class bt_string {
 
 		if (!is_array($chars)) {
 			$chrs = $ords = array();
-			for ($i = 0; $i <= 255; $i++) {
+			for ($i = 0; $i <= 0xFF; $i++) {
 				$char = chr($i);
 				$bin = sprintf('%08b', $i);
 				$chrs[$i] = $char;
@@ -121,14 +122,35 @@ class bt_string {
 		return (bool)(preg_match($mask, $string));
 	}
 
-	public static function bincmp($str1, $str2, $bits) {
-		if (!is_int($bits) || !is_string($str1) || !is_string($str2) || $bits < 1)
+	public static function bincmp($str1, $str2, $len) {
+		if (!is_int($len) || !is_string($str1) || !is_string($str2))
 			return false;
 
-		$bin1 = self::str2bin($str1);
-		$bin2 = self::str2bin($str2);
+		if ($len === 0 || $str1 === $str2)
+			return 0;
 
-		return strncmp($bin1, $bin2, $bits);
+		$extra_len = $len % 8;
+		$base_len = $len - $extra_len;
+		$base_length = $base_len / 8;
+
+		if ($base_len > 0) {
+			$basecmp = strncmp($str1, $str2, $base_length);
+			if ($basecmp)
+				return $basecmp;
+		}
+		if ($extra_len === 0)
+			return 0;
+
+		$ord1 = self::$ord[$str1[$base_length]];
+		$ord2 = self::$ord[$str2[$base_length]];
+		$bit = self::$cmp_bits[$extra_len];
+
+		if (($ord1 & $bit) === ($ord2 & $bit))
+			return 0;
+		elseif ($ord1 < $ord2)
+			return -1;
+		else
+			return 1;
 	}
 
 	public static function is_hex($str) {
