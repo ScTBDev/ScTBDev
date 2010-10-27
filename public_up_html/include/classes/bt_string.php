@@ -29,7 +29,8 @@ class bt_string {
 	public static $ord = array();
 	public static $b2c = array();
 	public static $c2b = array();
-	public static $cmp_bits = array(0x00, 0x80, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC, 0xFE);
+	public static $clr_bits = array(0x00, 0x80, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC, 0xFE);
+	public static $set_bits = array(0xFF, 0x7F, 0x3F, 0x1F, 0x0F, 0x07, 0x03, 0x01);
 
 	private static $glob_search = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]';
 	private static $glob_replace = 'abcdefghijklmnopqrstuvwxyz{|}';
@@ -143,7 +144,7 @@ class bt_string {
 
 		$ord1 = self::$ord[$str1[$base_length]];
 		$ord2 = self::$ord[$str2[$base_length]];
-		$bit = self::$cmp_bits[$extra_len];
+		$bit = self::$clr_bits[$extra_len];
 
 		if (($ord1 & $bit) === ($ord2 & $bit))
 			return 0;
@@ -151,6 +152,39 @@ class bt_string {
 			return -1;
 		else
 			return 1;
+	}
+
+	public static function bin_range($string, &$min, &$max, $len) {
+        if (!is_int($len) || !is_string($string))
+            return false;
+
+        $strlen = strlen($string);
+        $bitlen = $strlen * 8;
+
+        if ($len < 0 || $len > $bitlen)
+            return false;
+
+        $extra_len = $len % 8;
+        $base_len = $len - $extra_len;
+        $base_length = $base_len / 8;
+
+        if ($base_len > 0)
+            $min = $max = substr($string, 0, $base_length);
+        else
+            $min = $max = '';
+
+		if ($extra_len > 0) {
+			$ord = self::$ord[$string[$base_length]];
+			$clr_bit = self::$clr_bits[$extra_len];
+			$set_bit = self::$set_bits[$extra_len];
+
+			$min .= self::$chr[($ord & $clr_bit)];
+			$max .= self::$chr[($ord | $set_bit)];
+		}
+
+		$min = str_pad($min, $strlen, "\x00", STR_PAD_RIGHT);
+		$max = str_pad($max, $strlen, "\xFF", STR_PAD_RIGHT);
+		return true;
 	}
 
 	public static function is_hex($str) {

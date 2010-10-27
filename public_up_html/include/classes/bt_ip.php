@@ -98,7 +98,8 @@ class bt_ip {
 		if ($len === 4)
 			$type = self::IP4;
 		elseif ($len === 16) {
-			if (!strncmp($addr, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff", 12)) {
+			if (!strncmp($addr, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff", 12) ||
+				!strncmp($addr, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff\x00", 12) {
 				$addr = $addr[12].$addr[13].$addr[14].$addr[15];
 				$type = self::IP4;
 			}
@@ -219,7 +220,7 @@ class bt_ip {
 			return false;
 	}
 
-	public static function netmask_range($ip, $netmask, &$min, &$max) {
+	public static function netmask_range($ip, $netmask, &$min, &$max, $raw = false) {
 		$addr = self::type($ip, $type);
 		if ($type === self::IP4) {
 			$long_ip = ip2long($ip);
@@ -230,6 +231,12 @@ class bt_ip {
 
 			$min = $long_ip & $mask;
 			$max = $min ^ ~$mask & 0xffffffff;
+
+			if (!$raw) {
+				$min = long2ip($min);
+				$max = long2ip($max);
+			}
+
 			return true;
 		}
 		elseif ($type === self::IP6) {
@@ -238,13 +245,15 @@ class bt_ip {
 			if ($mask === false)
 				return false;
 
-			$bits = 128 - $mask;
-			$binip = bt_string::str2bin($addr);
-			$net_bits = substr($binip, 0, $mask);
-			$min_addr = bt_string::bin2str($net_bits.str_repeat('0', $bits));
-			$max_addr = bt_string::bin2str($net_bits.str_repeat('1', $bits));
-			$min = self::addr2ip($min_addr);
-			$max = self::addr2ip($max_addr);
+			$range = bt_string::bin_range($addr, $min, $max, $mask);
+			if ($range === false)
+				return false;
+
+			if (!$raw) {
+				$min = self::addr2ip($min);
+				$max = self::addr2ip($max);
+			}
+
 			return true;
 		}
 		else
