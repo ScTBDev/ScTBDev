@@ -560,28 +560,6 @@ function get_until_time($ts)
   return "< 1m";
 }
 
-function get_user_name($id)
-{
- $id = 0 + $id;
- if ($id == 0)
-   {
-    $user = "System";
-   }
- else
-   {
-    $res = mysql_query("SELECT username FROM users WHERE id=$id") or sqlerr();
-    if (mysql_num_rows($res))
-      {
-       $arr = mysql_fetch_assoc($res);
-       $user = $arr["username"];
-      }
-    else
-      {
-       $user = "Not Found";
-      }
-   }
- return $user;
-}
 function get_class_color($class)
   {
    switch ($class)
@@ -707,51 +685,47 @@ function format_log($text) {
 	return $s;
 }
 
-function write_log($text, $type = 'INFO')
-  {
-   $text = sqlesc($text);
-   switch($type)
-     {
-      case 'INFO':
-        $type = 0;
-        break;
-      case 'EDIT':
-        $type = 1;
-        break;
-      case 'DELE':
-        $type = 2;
-        break;
-      case 'UPLD':
-        $type = 3;
-        break;
-      default:
-        $type = 0;
-        break;
-     }
-   mysql_query('INSERT INTO `sitelog` (`added`, `type`, `txt`) VALUES("'.time().'", "'.$type.'", '.$text.')') or sqlerr(__FILE__, __LINE__);
-  }
+function write_log($text, $type = 'INFO') {
+	$text = bt_sql::esc($text);
+	switch($type) {
+		case 'INFO':
+			$type = 0;
+			break;
+		case 'EDIT':
+			$type = 1;
+			break;
+		case 'DELE':
+			$type = 2;
+			break;
+		case 'UPLD':
+			$type = 3;
+			break;
+		default:
+			$type = 0;
+		break;
+	}
+	bt_sql::query('INSERT INTO sitelog (added, type, txt) VALUES('.time().', '.$type.', '.$text.')') or bt_sql::err(__FILE__, __LINE__);
+}
 
-function write_staff_log($text, $type = 'INFO')
-  {
-   $text = sqlesc($text);
-   switch($type)
-     {
-      case 'INFO':
-        $type = 0;
-        break;
-      case 'EDIT':
-        $type = 1;
-        break;
-      case 'BAN':
-        $type = 2;
-        break;
-      case 'UBAN':
-        $type = 3;
-        break;
-      default:
-        $type = 0;
-        break;
-     }
-   mysql_query('INSERT INTO `stafflog` (`added`, `type`, `txt`) VALUES("'.time().'", "'.$type.'", '.$text.')') or sqlerr(__FILE__, __LINE__);
-  }
+function write_staff_log($text, $type = 'INFO') {
+	$text = sqlesc($text);
+	switch($type) {
+		case 'INFO':
+			$type = 0;
+			break;
+		case 'EDIT':
+			$type = 1;
+			break;
+		case 'BAN':
+			$type = 2;
+			break;
+		case 'UBAN':
+			$type = 3;
+			break;
+		default:
+			$type = 0;
+			break;
+		}
+	bt_sql::query('INSERT INTO stafflog (added, type, txt) VALUES('.time().', '.$type.', '.$text.')') or bt_sql::err(__FILE__, __LINE__);
+}
 ?>

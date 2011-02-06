@@ -99,7 +99,7 @@ class bt_ip {
 			$type = self::IP4;
 		elseif ($len === 16) {
 			if (!strncmp($addr, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff", 12) ||
-				!strncmp($addr, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff\x00", 12) {
+				!strncmp($addr, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff\x00", 12)) {
 				$addr = $addr[12].$addr[13].$addr[14].$addr[15];
 				$type = self::IP4;
 			}
@@ -289,30 +289,28 @@ class bt_ip {
 
 				// reserved/unroutable IANA IPv4 addresses
 				// http://www.iana.org/assignments/ipv4-address-space
-				// As of 2010-10-17
+				// As of 2011-02-03
 
 				$reserved_ips = array (
-					array(0x0			, 0xffffff),	// 0.0.0.0		- 0.255.255.255		0 - IANA - Local Identification [RFC1122]
-					array(0x3000000		, 0x3ffffff),	// 3.0.0.0		- 3.255.255.255		3 - General Electric Company
+					array(0x00000000	, 0x00ffffff),	// 0.0.0.0		- 0.255.255.255		0 - IANA - Local Identification [RFC1122]
+					array(0x03000000	, 0x03ffffff),	// 3.0.0.0		- 3.255.255.255		3 - General Electric Company
 
-					array(0x5000000		, 0x7ffffff),	// 5.0.0.0		- 7.255.255.255		5 - IANA
-														//									6 - Army Information Systems Center
+					array(0x06000000	, 0x07ffffff),	// 6.0.0.0		- 7.255.255.255		6 - Army Information Systems Center
 														//									7 - DoD Information Systems Agency Network
 
-					array(0x9000000		, 0xbffffff),	// 9.0.0.0		- 11.255.255.255	9 - IBM
+					array(0x09000000	, 0x0bffffff),	// 9.0.0.0		- 11.255.255.255	9 - IBM
 														//									10 - IANA - Private Use [RFC1918]
 														//									11 - DoD Intel Information Systems
 
-					array(0xd000000		, 0xdffffff),	// 13.0.0.0		- 13.255.255.255	13 - Xerox Corporation
-					array(0xf000000		, 0x11ffffff),	// 15.0.0.0		- 17.255.255.255	15 - Hewlett-Packard Company
+					array(0x0d000000	, 0x0dffffff),	// 13.0.0.0		- 13.255.255.255	13 - Xerox Corporation
+					array(0x0f000000	, 0x11ffffff),	// 15.0.0.0		- 17.255.255.255	15 - Hewlett-Packard Company
 														//									16 - Digital Equipment Corporation
 														//									17 - Apple Computer Inc.
 
-					array(0x13000000	, 0x17ffffff),	// 19.0.0.0		- 23.255.255.255	19 - Ford Motor Company
+					array(0x13000000	, 0x16ffffff),	// 19.0.0.0		- 22.255.255.255	19 - Ford Motor Company
 														//									20 - Computer Sciences Corporation
 														//									21 - DoD Defense Data Network
 														//									22 - Defense Information Systems Agency
-														//									23 - IANA
 
 					array(0x19000000	, 0x1affffff),	// 25.0.0.0		- 26.255.255.255	25 - UK Ministry of Defence
 														//									26 - Defense Information Systems Agency
@@ -324,10 +322,7 @@ class bt_ip {
 					array(0x21000000	, 0x22ffffff),	// 33.0.0.0		- 34.255.255.255	33 - Defense Logistics Agency Systems Automation Center
 														//									34 - Halliburton Company
 
-					array(0x25000000	, 0x25ffffff),	// 37.0.0.0		- 37.255.255.255	37 - IANA
-
-					array(0x27000000	, 0x28ffffff),	// 39.0.0.0		- 40.255.255.255	39 - IANA
-														//									40 - Eli Lilly and Company
+					array(0x28000000	, 0x28ffffff),	// 40.0.0.0		- 40.255.255.255	40 - Eli Lilly and Company
 
 					array(0x2f000000	, 0x30ffffff),	// 47.0.0.0		- 48.255.255.255	47 - Bell-Northern Research
 														//									48 - Prudential Securities Inc.
@@ -341,22 +336,10 @@ class bt_ip {
 														//									56 - US Postal Service
 														//									57 - SITA
 
-					array(0x64000000	, 0x64ffffff),	// 100.0.0.0	- 106.255.255.255	100 - IANA
-
-					array(0x66000000	, 0x6affffff),	//									102 - IANA
-														//									103 - IANA
-														//									104 - IANA
-														//									105 - IANA
-														//									106 - IANA
-
 					array(0x7f000000	, 0x7fffffff),	// 127.0.0.0	- 127.255.255.255	127 - IANA - Loopback [RFC1122]
 
 					array(0xa9fe0000	, 0xa9feffff),	// 169.254.0.0	- 169.254.255.255	IANA - Link Local [RFC3927]
 					array(0xac100000	, 0xac1fffff),	// 172.16.0.0	- 172.31.255.255	IANA - Private Use [RFC1918]
-
-					array(0xb3000000	, 0xb3ffffff),	// 179.0.0.0	- 179.255.255.255	179 - IANA
-
-					array(0xb9000000	, 0xb9ffffff),	// 185.0.0.0	- 185.255.255.255	185 - IANA
 
 					array(0xc0000000	, 0xc00000ff),	// 192.0.0.0	- 192.0.0.255		IANA - IETF protocol assignments [RFC5735]
 					array(0xc0000200	, 0xc00002ff),	// 192.0.2.0	- 192.0.2.255		IANA - TEST-NET-1 [RFC5737]
