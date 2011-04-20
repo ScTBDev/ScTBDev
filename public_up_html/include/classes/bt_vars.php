@@ -29,13 +29,11 @@ class bt_vars {
 	public static $ip = '';
 	public static $ip2 = NULL;
 	public static $packed_ip = '';
-	public static $packed6_ip = '';
 	public static $ip_type = 0;
 
 	public static $realip = '';
 	public static $realip2 = NULL;
 	public static $packed_realip = '';
-	public static $packed6_realip = '';
 	public static $realip_type = 0;
 
 	public static $timestamp = 0;
@@ -51,13 +49,11 @@ class bt_vars {
 		if (isset($_SERVER['REMOTE_ADDR'])) {
 			self::$realip			= $_SERVER['REMOTE_ADDR'];
 			self::$packed_realip	= bt_ip::type(self::$realip, self::$realip_type, self::$realip2);
-			self::$packed6_realip	= bt_ip::ip2addr6(self::$realip);
 			if (!self::$packed_realip)
 				die('IP Address Error');
 
 			self::$ip				= bt_ip::get_ip();
 			self::$packed_ip		= bt_ip::type(self::$ip, self::$ip_type, self::$ip2);
-			self::$packed6_ip		= bt_ip::ip2addr6(self::$ip);
 
 			self::$geoip			= bt_geoip::lookup_ip(self::$realip);
 

@@ -31,7 +31,7 @@ class bt_bans {
 	public static $bypass_cc_bans_ranges = array('83.233.168.0/23','83.233.180.0/22');
 
 	private static function keys($ip, &$key) {
-        $hip = bt_ip::ip2hex6($ip);
+        $hip = bt_ip::ip2hex($ip);
 		if (!$hip)
 			return false;
 
@@ -60,11 +60,11 @@ class bt_bans {
 	}
 
 	public static function check($ip, $dnsbl = false, $addgood = true, &$reason = '') {
-		if (!bt_ip::type($ip, $type)) {
+		$packed_ip = bt_ip::type($ip, $type);
+		if (!$packed_ip) {
 			$reason = 'Invalid IP';
 			return true;
 		}
-		$packed_ip = bt_ip::ip2addr6($ip);
 
 		bt_memcache::connect();
 
@@ -83,7 +83,8 @@ class bt_bans {
 			}
 
 			bt_sql::connect();
-			$banq = bt_sql::query('SELECT comment FROM bans WHERE '.bt_sql::binary_esc($packed_ip).' BETWEEN first AND last LIMIT 1');
+			$banq = bt_sql::query('SELECT comment FROM bans WHERE LENGTH(first) = '.($type === bt_ip::IP6 ? '16' : '4').' '.
+					bt_sql::binary_esc($packed_ip).' BETWEEN first AND last LIMIT 1');
 			if ($banq->num_rows) {
 				$comment = $banq->fetch_row();
 				$banq->free();

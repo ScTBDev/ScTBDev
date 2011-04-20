@@ -67,6 +67,16 @@ class bt_ip {
 		return $addr;
 	}
 
+	public static function addr2addr6($addr) {
+		$len = strlen($addr);
+		if ($len === 16)
+			return $addr;
+		elseif ($len === 4)
+			return "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff".$addr;
+		else
+			return false;
+	}
+
 	public static function ip2addr6($ip) {
 		$addr = self::type($ip, $type);
 
@@ -98,40 +108,40 @@ class bt_ip {
 		if ($len === 4)
 			$type = self::IP4;
 		elseif ($len === 16) {
-			if (!strncmp($addr, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff", 12) ||
-				!strncmp($addr, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff\x00", 12)) {
-				$addr = $addr[12].$addr[13].$addr[14].$addr[15];
-				$type = self::IP4;
-			}
-			elseif (!strncmp($addr, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", 12)) {
-				if (!bt_string::bincmp($addr, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", 127))
-					$type = self::IP6;
-				else {
-					$addr = $addr[12].$addr[13].$addr[14].$addr[15];
+			$first12 = $addr[0].$addr[1].$addr[2].$addr[3].$addr[4].$addr[5].$addr[6].$addr[7].$addr[8].$addr[9].$addr[10].$addr[11];
+			$last4 = $addr[12].$addr[13].$addr[14].$addr[15];
+			switch ($first12) {
+				case "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff":
+				case "\x00\x00\x00\x00\x00\x00\x00\x00\x00\xff\xff\x00":
+				case "\x00\x64\xff\x9b\x00\x00\x00\x00\x00\x00\x00\x00":
+					$addr = $last4;
 					$type = self::IP4;
-				}
-			}
-			else {
-				$type = self::IP6;
-
-				if (!strncmp($addr, "\x20\x02", 2)) {
-					// 6to4
-					$ip4 = $addr[2].$addr[3].$addr[4].$addr[5];
-					$ip4 = @inet_ntop($ip4);
-					if ($ip4)
-						$ip2 = $ip4;
-				}
-				elseif (!strncmp($addr, "\x20\x01\x00\x00", 4)) {
-					// Teredo
-					$ip4 = $addr[12].$addr[13].$addr[14].$addr[15];
-					$ip4 = @inet_ntop($ip4);
-					if ($ip4) {
-						$ip4 = ip2long($ip4);
-						$ip4 = ($ip4 ^ 0xffffffff) & 0xffffffff;
-						$ip4 = long2ip($ip4);
-						$ip2 = $ip4;
+					break;
+				case "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00":
+					if (!bt_string::bincmp($addr, "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", 127))
+						$type = self::IP6;
+					else {
+						$addr = $last4;
+						$type = self::IP4;
 					}
-				}
+					break;
+				default:
+					$type = self::IP6;
+					if ($addr[0].$addr[1] === "\x20\x02") {
+						// 6to4
+						$ip4 = $addr[2].$addr[3].$addr[4].$addr[5];
+						$ip4 = @inet_ntop($ip4);
+						if ($ip4)
+							$ip2 = $ip4;
+					}
+					elseif ($addr[0].$addr[1].$addr[2].$addr[3] === "\x20\x01\x00\x00") {
+						// Teredo
+						$ip4 = $last4;
+						$ip4 = @unpack('N', $ip4);
+						if ($ip4)
+							$ip2 = long2ip(~$ip4[1]);	// Flip the bits
+					}
+					break;
 			}
 		}
 		else
@@ -499,7 +509,7 @@ class bt_ip {
 		elseif (!$ip_port)
 			return false;
 
-		list($ip, $port, $type, $addr, $sddr6) = $ip_port;
+		list($ip, $port, $type, $addr, $addr6) = $ip_port;
 
 		return $addr6;
 	}

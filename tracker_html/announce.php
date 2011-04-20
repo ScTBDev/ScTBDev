@@ -48,7 +48,7 @@ foreach(array('info_hash','peer_id','port','uploaded','downloaded','left','passk
 }
 
 foreach (array('info_hash','peer_id') as $x) {
-	if (strlen($GLOBALS[$x]) != 20)
+	if (strlen($$x) != 20)
 		bt_tracker::err('invalid '.$x.' (' . strlen($GLOBALS[$x]) . ' - ' . urlencode($GLOBALS[$x]) . ')');
 }
 

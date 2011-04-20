@@ -21,7 +21,7 @@
 
 const REQUIRED_PHP = 50300, REQUIRED_PHP_VERSION = '5.3.0';
 
-if (!defined('PHP_VERSION_ID') || PHP_VERSION_ID < REQUIRED_PHP)
+if (PHP_VERSION_ID < REQUIRED_PHP)
 	die('PHP '.REQUIRED_PHP_VERSION.' or higher is required.');
 
 if (PHP_INT_SIZE < 8)

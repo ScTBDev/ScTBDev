@@ -88,7 +88,6 @@ class bt_utf8 {
 			return NULL;
 
 		$valid = preg_match('#^[\x00-\x7F]*$#Ds', $string);
-
 		if ($valid === false)
 			return NULL;
 
@@ -214,143 +213,11 @@ class bt_utf8 {
 	}
 
 	public static function ucfirst($str) {
-	}
+		$len = self::strlen($str);
+		if (!$len)
+			return '';
 
-	public static function unicode_to_utf8($unicodepoint, $allow_invalid = false) {
-		$chr =& bt_string::$chr;
-
-		if (is_array($unicodepoint)) {
-			$chars = '';
-			foreach ($unicodepoint as $codepoint) {
-				$char = self::unicode_to_utf8($codepoint, $allow_invalid);
-				if ($char === false)
-					return false;
-				$chars .= $char;
-			}
-			return $chars;
-		}
-		if (!is_int($unicodepoint))
-			return false;
-
-		$unicode = $unicodepoint & ($allow_invalid ? 0x7FFFFFFF : 0x1FFFFF);
-		if ($unicode != $unicodepoint)
-			return false; // Not within the 31 bit limit of UTF-8 or 21 bit limit of Unicode
-
-		$char = '';
-		if ($unicode < 0x80)
-			$char = $chr[$unicode];
-		elseif ($unicode < 0x800) {
-			$char = $chr[0xC0 | $unicode >> 6];
-			$char .= $chr[0x80 | $unicode & 0x3F];
-		}
-		elseif ($unicode < 0x10000) {
-			if (($unicode > 0xD7FF && $unicode < 0xE000) && !$allow_invalid)
-				return false; // Surrogate Pairs
-
-			$char = $chr[0xE0 | $unicode >> 12];
-			$char .= $chr[0x80 | $unicode >> 6 & 0x3F];
-			$char .= $chr[0x80 | $unicode & 0x3F];
-		}
-		elseif ($unicode < 0x110000) {
-			$char = $chr[0xF0 | $unicode >> 18];
-			$char .= $chr[0x80 | $unicode >> 12 & 0x3F];
-			$char .= $chr[0x80 | $unicode >> 6 & 0x3F];
-			$char .= $chr[0x80 | $unicode & 0x3F];
-		}
-		elseif (!$allow_invalid)
-			return false;
-		elseif ($unicode < 0x200000) {
-			$char = $chr[0xF0 | $unicode >> 18];
-			$char .= $chr[0x80 | $unicode >> 12 & 0x3F];
-			$char .= $chr[0x80 | $unicode >> 6 & 0x3F];
-			$char .= $chr[0x80 | $unicode & 0x3F];
-		}
-		elseif ($unicode < 0x4000000) {
-			$char = $chr[0xF8 | $unicode >> 24];
-			$char .= $chr[0x80 | $unicode >> 18 & 0x3F];
-			$char .= $chr[0x80 | $unicode >> 12 & 0x3F];
-			$char .= $chr[0x80 | $unicode >> 6 & 0x3F];
-			$char .= $chr[0x80 | $unicode & 0x3F];
-		}
-		else {
-			$char = $chr[0xFC | $unicode >> 30];
-			$char .= $chr[0x80 | $unicode >> 24 & 0x3F];
-			$char .= $chr[0x80 | $unicode >> 18 & 0x3F];
-			$char .= $chr[0x80 | $unicode >> 12 & 0x3F];
-			$char .= $chr[0x80 | $unicode >> 6 & 0x3F];
-			$char .= $chr[0x80 | $unicode & 0x3F];
-		}
-
-		return $char;
-	}
-
-	public static function utf8_to_unicode($utf8, &$strlen = 0) {	
-		$ords =& bt_string::$ord;
-		if (!is_string($utf8))
-			return false;
-
-		$unicodes = array();
-		$utf8_len = strlen($utf8);
-		$need_bytes = $unicode = $min = $strlen = 0;
-
-		$shift = array(0, 6, 12, 18, 24, 30);
-		$x80 = ~0x80; $xC0 = ~0xC0; $xE0 = ~0xE0; $xF0 = ~0xF0; $xF8 = ~0xF8; $xFC = ~0xFC;
-
-		for ($i = 0; $i < $utf8_len; $i++) {
-			$ord = $ords[$utf8[$i]];
-			if ($ord < 0x80) {
-				$min = 0;
-				$unicode = $ord;
-			}
-			elseif ($ord > 0xF4)
-				return false;	// Above max Unicode Code Points
-			elseif ($ord > 0xEF) {
-				$min = 0x10000;
-				$need_bytes = 3;
-				$unicode = ($ord & $xF0) << 18;
-			}
-			elseif ($ord > 0xDF) {
-				$min = 0x800;
-				$need_bytes = 2;
-				$unicode = ($ord & $xE0) << 12;
-			}
-			elseif ($ord > 0xBF) {
-				$min = 0x80;
-				$need_bytes = 1;
-				$unicode = ($ord & $xC0) << 6;
-			}
-			else
-				return false;	// Continuation byte
-
-			while ($need_bytes) {
-				$need_bytes--; $i++;
-				if ($i == $utf8_len)
-					return false;
-
-				$ord = $ords[$utf8[$i]];
-				if ($ord < 0x80 || $ord > 0xBF)
-					return false;
-
-				$unicode |= ($ord & $x80) << $shift[$need_bytes];
-			}
-
-
-			if ($unicode < $min)
-				return false; // Overlong
-			elseif ($unicode > 0xD7FF && $unicode < 0xE000)
-				return false; // Surrogate Pair
-			elseif ($unicode > 0x10FFFF)
-				return false; // Above max Unicode Code Points
-
-
-			$unicodes[] = $unicode;
-			$strlen++;
-		}
-
-		if (!isset($unicodes[1]))
-			return $unicodes[0];
-
-		return $unicodes;
+		return mb_strtoupper(mb_substr($str, 0, 1, 'UTF-8'), 'UTF-8').mb_substr($str, 1, $len, 'UTF-8');
 	}
 }
 ?>

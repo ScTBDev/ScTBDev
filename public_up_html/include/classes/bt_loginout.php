@@ -163,8 +163,8 @@ BADIP;
 		define('USER_CLASS', $user['class']);
 
 		$hideip = ($user['flags'] & bt_options::USER_PROTECT) || $user['class'] >= UC_VIP;
-		$ip = $hideip ? NULL : bt_vars::$packed6_ip;
-		$realip = $hideip ? NULL : bt_vars::$packed6_realip;
+		$ip = $hideip ? NULL : bt_vars::$packed_ip;
+		$realip = $hideip ? NULL : bt_vars::$packed_realip;
 
 		if ($user['ip'] !== $ip)
 			$updateuser[] = 'ip = '.bt_sql::binary_esc($ip);
@@ -258,11 +258,11 @@ BADIP;
 
 			if ($session['ip'] !== bt_vars::$ip) {
 				$newsession['ip'] = bt_vars::$ip;
-				$updates[] = 'ip = '.bt_sql::binary_esc(bt_vars::$packed6_ip);
+				$updates[] = 'ip = '.bt_sql::binary_esc(bt_vars::$packed_ip);
 			}
 			if ($session['realip'] !== bt_vars::$realip) {
 				$newsession['realip'] = bt_vars::$realip;
-				$updates[] = 'realip = '.bt_sql::binary_esc(bt_vars::$packed6_realip);
+				$updates[] = 'realip = '.bt_sql::binary_esc(bt_vars::$packed_realip);
 			}
 		}
 
@@ -305,8 +305,8 @@ BADIP;
 		);
 		bt_memcache::add(self::SESSION_KEY_PREFIX.$session_id, $session, self::TTL_TIME);
 		bt_sql::query('INSERT INTO sessions (id, user, ip, realip, time, lastaction, maxage, maxidle, flags) '.
-			'VALUES('.bt_sql::esc($session_id).', '.$id.', '.bt_sql::binary_esc(bt_vars::$packed6_ip).', '.
-			bt_sql::binary_esc(bt_vars::$packed6_realip).', '.bt_vars::$timestamp.', '.bt_vars::$timestamp.', '.$maxage.', '.
+			'VALUES('.bt_sql::esc($session_id).', '.$id.', '.bt_sql::binary_esc(bt_vars::$packed_ip).', '.
+			bt_sql::binary_esc(bt_vars::$packed_realip).', '.bt_vars::$timestamp.', '.bt_vars::$timestamp.', '.$maxage.', '.
 			$maxidle.', '.$options.')') or bt_sql::err(__FILE__, __LINE__);
 
 		if (!bt_sql::$affected_rows)

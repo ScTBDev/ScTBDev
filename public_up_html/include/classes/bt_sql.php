@@ -142,7 +142,7 @@ class bt_sql {
 			trigger_error('Not connected to SQL server in '.__METHOD__, E_USER_ERROR);
 			return false;
 		}
-		return str_replace(array('%', '_'), array('\%','\_'), self::$DB->escape_string($string));
+		return str_replace(array('%', '_'), array('\\%','\\_'), self::$DB->escape_string($string));
 	}
 
 	public static function err($file = '', $line = 0, $html = true) {
