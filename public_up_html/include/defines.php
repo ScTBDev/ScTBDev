@@ -36,9 +36,7 @@ if (ini_get('register_long_arrays') || ini_get('register_globals') || ini_get('s
 if (ini_get('mbstring.func_overload') || ini_get('mbstring.encoding_translation'))
 	die('PHP is configured incorrectly. Turn off mbstring.func_overload and mbstring.encoding_translation, mult-byte function overloading, ScTBDev is fully multi-byte aware.');
 
-if (!defined('PHP_INT_MIN'))
-	define('PHP_INT_MIN', ~PHP_INT_MAX);
-
+define('PHP_INT_MIN', ~PHP_INT_MAX);
 define('_START_MICROTIME_', microtime(true));
 
 // Site Paths
@@ -48,6 +46,7 @@ define('INCL_PATH', ROOT_PATH.'include'.DIRECTORY_SEPARATOR);
 define('CLASS_PATH', INCL_PATH.'classes'.DIRECTORY_SEPARATOR);
 define('DBM_PATH', CLASS_PATH.'db'.DIRECTORY_SEPARATOR);
 define('SCRTS_PATH', BASE_PATH.'includes'.DIRECTORY_SEPARATOR);
+define('SQLITE_PATH',  BASE_PATH.'db'.DIRECTORY_SEPARATOR);
 
 // Tracker Paths
 define('TROOT_PATH', BASE_PATH.'tracker_html'.DIRECTORY_SEPARATOR);

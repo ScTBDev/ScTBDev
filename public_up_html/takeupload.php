@@ -102,7 +102,7 @@ if (!isset($dict['info']))
 	bark('invalid torrent, info dictionary does not exist');
 
 $info = &$dict['info'];
-$infohash = sha1(bencdec::encode($info));
+$infohash = sha1(bencdec::encode($info), true);
 $hinfohash = bt_string::str2hex($infohash);
 
 if (bencdec::get_type($info) != 'dictionary')

@@ -109,7 +109,7 @@ class bt_sql {
 			return self::binary_esc($string);
 		}
 		
-		return '"'.self::$DB->escape_string($string).'"';
+		return '\''.self::$DB->escape_string($string).'\'';
 	}
 
 	public static function escape($string) {
@@ -130,11 +130,11 @@ class bt_sql {
 		if ($string === NULL)
 			return 'NULL';
 
-		return 'UNHEX("'.bt_string::str2hex($string).'")';
+		return 'UNHEX(\''.bt_string::str2hex($string).'\')';
 	}
 
 	public static function wildcard_esc($string) {
-		return '"'.self::wildcard_escape($string).'"';
+		return '\''.self::wildcard_escape($string).'\'';
 	}
 
 	public static function wildcard_escape($string) {

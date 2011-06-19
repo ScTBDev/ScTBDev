@@ -141,9 +141,18 @@ class bt_nfo {
 			imagestring($img, $font, 0, (8 * $line), $string, $txtcolor);
 
 		// Save the PNG file
-		imagepng($img, $destfile, 9, PNG_NO_FILTER);
-		chmod($destfile, 0644);
+		if ($destfile) {
+			$png = imagepng($img, $destfile, 9, PNG_NO_FILTER);
+			chmod($destfile, 0644);
+		}
+		else {
+			ob_start();
+			imagepng($img, NULL, 9, PNG_NO_FILTER);
+			$png = ob_get_contents();
+			ob_end_clean();
+		}
 		imagedestroy($img);
+		return $png;
 	}
 
 	public static function nfo_name($nfo, $theme = NULL) {
