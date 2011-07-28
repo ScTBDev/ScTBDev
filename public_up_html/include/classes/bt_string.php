@@ -88,10 +88,16 @@ class bt_string {
 	}
 
 	public static function str2hex($string) {
+		if ($string === NULL)
+			return NULL;
+
 		return bin2hex($string);
 	}
 
 	public static function hex2str($hex) {
+		if ($hex === NULL)
+			return NULL;
+
 		return pack('H*', $hex);
 	}
 

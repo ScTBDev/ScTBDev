@@ -108,18 +108,14 @@ class bt_user {
 		if (isset($user['irc_time']))
 			$user['irc_time'] = (int)$user['irc_time'];
 
-		if (isset($user['ip'])) {
-			if ($user['ip'] !== NULL) {
-				if (strlen($user['ip']) === 32 && bt_string::is_hex($user['ip']))
-					$user['ip'] = bt_string::hex2str($user['ip']);
-			}
+		if (isset($user['ip_hex'])) {
+			$user['ip'] = bt_string::hex2str($user['ip_hex']);
+			unset($user['ip_hex']);
 		}
 
-		if (isset($user['realip'])) {
-			if ($user['realip'] !== NULL) {
-				if (strlen($user['realip']) === 32 && bt_string::is_hex($user['realip']))
-					$user['realip'] = bt_string::hex2str($user['ip']);
-			}
+		if (isset($user['realip_hex'])) {
+			$user['realip'] = bt_string::hex2str($user['realip_hex']);
+			unset($user['realip_hex']);
 		}
 
 		if (isset($user['flags_signed'])) {
