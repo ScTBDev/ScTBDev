@@ -1,11 +1,22 @@
--- phpMyAdmin SQL Dump
--- version 3.3.8
--- http://www.phpmyadmin.net
---
--- Host: localhost
--- Generation Time: Jul 28, 2011 at 12:52 AM
--- Server version: MariaDB-5.2.7
--- PHP Version: 5.3.6
+/*
+ *  ScTBDev - A bittorrent tracker source based on SceneTorrents.org
+ *  Copyright (C) 2005-2010 ScTBDev.ca
+ *
+ *  This file is part of ScTBDev.
+ *
+ *  ScTBDev is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  ScTBDev is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with ScTBDev.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO,NO_UNSIGNED_SUBTRACTION";
 
@@ -733,7 +744,7 @@ CREATE TABLE IF NOT EXISTS `invites` (
   `inviteid` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
   `email` varchar(128) COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `inviteid` (`inviteid`) USING HASH,
+  UNIQUE KEY `inviteid` (`inviteid`),
   KEY `userid` (`userid`),
   KEY `added` (`added`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -1295,7 +1306,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   KEY `deadtime` (`added`,`last_login`),
   KEY `invitedby` (`invitedby`),
   KEY `added` (`added`),
-  KEY `country` (`country`) USING HASH,
+  KEY `country` (`country`),
   KEY `ip` (`ip`(7)),
   KEY `realip` (`realip`(7))
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC;
