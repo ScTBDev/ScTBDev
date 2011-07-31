@@ -1,7 +1,7 @@
 <?php
 /*
  *  ScTBDev - A bittorrent tracker source based on SceneTorrents.org
- *  Copyright (C) 2005-2010 ScTBDev.ca
+ *  Copyright (C) 2005-2011 ScTBDev.ca
  *
  *  This file is part of ScTBDev.
  *
